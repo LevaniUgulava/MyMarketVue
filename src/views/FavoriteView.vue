@@ -1,21 +1,29 @@
-<template>
+
+  <template>
     <div class="main-content">
       <Message v-if="emitdata" closable class="message">{{ emitdata }}</Message>
       <Message v-if="emitlikemessage" closable class="message" severity="error">{{ emitlikemessage }}</Message>
       <Message v-if="emitcartmessage" closable class="message" severity="error">{{ emitcartmessage }}</Message>
 
+
+        <div v-if="products.length>0">
       <div class="products-wrapper">
         <ProductCardComponent
-          v-for="(item, index) in products"
-          :key="index"
+          v-for="(item) in products"
+          :key="item.id"
           :initialproduct="item"
           @show-comments="showCommentsModal(item.id)"
           @cart-updated="handleCartUpdated"
           @liked-message="handleunauthorizedlike"
           @cart-message="handleunauthorizedcart"
-
         />
       </div>
+        </div>
+    <div v-else class="no-products-message">
+  <p>Don't have liked products</p>
+</div>
+      
+
 
       <Bootstrap5Pagination :data="pagination" @pagination-change-page="changePage" />
     </div>
@@ -37,7 +45,7 @@ import { Bootstrap5Pagination } from 'laravel-vue-pagination';
 import axios from 'axios';
 
 export default {
-  name: 'HomeView',
+  name: 'FavoriteView',
   components: {
     ProductCardComponent,
     CommentModal,
@@ -54,7 +62,6 @@ export default {
       maincategories: [],
       selectedmainCategory: null,
       selectedCategory: null,
-      selectedsubCategory:null,
       emitdata: null,
       emitlikemessage: null,
       emitcartmessage: null,
@@ -84,56 +91,27 @@ export default {
       }
     },
     '$route.query': {
-      handler: 'fetchProducts',
+      handler: 'fetchfavorite',
       immediate: true,
     },
   },
   methods: {
-     
-    async fetchProducts() {
-      const queryParams = new URLSearchParams(this.$route.query);
-      const page = parseInt(queryParams.get('page')) || 1;
-      this.searchname = queryParams.get('searchname') || '';
-      this.selectedmainCategory = queryParams.get('maincategory') || '';
-      this.selectedCategory = queryParams.get('category') || '';
-      this.selectedsubCategory = queryParams.get('subcategory') || ''; // Ensure this is set
-
+   async fetchfavorite(){
       const token=localStorage.getItem('token');
-      
-      try {
-      
-        const response = await axios.get('http://127.0.0.1:8000/api/display', {
-// const response = await axios.get('http://7.tcp.eu.ngrok.io:10601/display', {
+        try{
+        const response= await axios.get('http://127.0.0.1:8000/api/likeproduct',{
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }     
+            });
+            this.products=response.data.data;
+            console.log(this.products);
 
-          headers:{
-            'Authorization':`Bearer ${token}`
-          },
-          params: {
-            searchname: this.searchname,
-            maincategory: this.selectedmainCategory,
-            category: this.selectedCategory,
-            subcategory: this.selectedsubCategory,
-            page: page,
-          },
-        });
-
-        this.products = response.data.data;
-        
-        this.pagination = {
-          current_page: response.data.meta.current_page,
-          last_page: response.data.meta.last_page,
-          per_page: response.data.meta.per_page,
-          total: response.data.meta.total,
-          links: response.data.links,
-        };
-
-      } catch (error) {
-        console.error('Error fetching products:', error);
-      }
-      console.log(this.products)
+        }catch(error){
+            console.log(error)
+        }
     },
-   
-    async showCommentsModal(id) {
+      async showCommentsModal(id) {
       try {
         const { data } = await axios.get(`http://127.0.0.1:8000/api/products/${id}/display`);
         this.selectedProductComments = data;
@@ -143,6 +121,8 @@ export default {
         console.error('Error fetching comments:', error);
       }
     },
+   
+    
     async refreshComments(productId) {
       try {
         const { data } = await axios.get(`http://127.0.0.1:8000/api/products/${productId}/display`);
@@ -159,8 +139,6 @@ export default {
     },
   
     handleCartUpdated(cartData) {
-          console.log('Cart updated:', cartData.message);
-
       this.emitdata = cartData.message;
     },
     handleunauthorizedlike(likedmessage) {
@@ -174,8 +152,11 @@ export default {
     },
 
   },
+    
 
-
+  mounted() {
+    this.fetchfavorite();
+  },
 };
 </script>
 <style >
@@ -250,11 +231,10 @@ export default {
   color: white;
 }
 
-@media (min-width: 390px) and (max-width: 574px) {
+@media (max-width:490px){
   .products-wrapper{
       grid-template-columns: repeat(2, 1fr); /* 5 equal-width columns */
       margin-top: 20px;
-
   }
 }
 

@@ -11,11 +11,10 @@
           <th>Description</th>
           <th>Price</th>
           <th>Discount</th>
-          <th>Discount Price</th>
-          <th>Main Category</th>
+          <th>DiscountPrice</th>
+          <th>MainCategory</th>
           <th>Category</th>
           <th>Subcategory</th>
-          <th>Number</th>
           <th>Image</th>
         </tr>
       </thead>
@@ -28,10 +27,9 @@
           <td>{{ product.price }} <i class="fa-solid fa-lari-sign"></i></td>
           <td>{{ product.discount }} %</td>
           <td>{{ product.discountprice }} <i class="fa-solid fa-lari-sign"></i></td>
-          <td>{{ product.MainCategory }}</td>
+          <td>{{ product.MainCategory}}</td>
           <td>{{ product.Category }}</td>
           <td>{{ product.SubCategory }}</td>
-          <td>{{ product.Contacts[0] }}</td>
           <td>
             <img :src="product.image_urls" class="img">
           </td>
@@ -81,6 +79,8 @@ export default {
             total: response.data.meta.total,
             links: response.data.links 
           };
+
+          console.log(response.data)
         } else {
           console.error('Unexpected API response structure:', response.data);
         }
@@ -128,7 +128,7 @@ export default {
 <style>
 table {
   border-collapse: collapse;
-  width: 80%;
+  width: 100%;
   margin: 20px auto;
   font-size: 0.9em;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);

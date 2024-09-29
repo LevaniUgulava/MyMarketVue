@@ -3,8 +3,40 @@ import { createWebHistory, createRouter } from "vue-router";
 const routes = [
   {
     path: "/",
-    name: "Home",
-    component: () => import("@/views/HomeView.vue"),
+    component: () => import("@/views/MainlayoutView.vue"),
+    children: [
+      {
+        path: "",
+        name: "Home",
+        component: () => import("@/views/HomeView.vue"),
+      },
+      {
+        path: "cart",
+        name: "Cart",
+        component: () => import("@/views/CartView.vue"),
+      },
+      {
+        path: "/profile",
+        name: "Profile",
+        component: () => import("@/views/ProfileView.vue"),
+      },
+      {
+        path: "/product/:id",
+        name: "single",
+        component: () => import("@/views/SingleProductView.vue"),
+        props: true,
+      },
+      {
+        path: "/favorites",
+        name: "favorite",
+        component: () => import("@/views/FavoriteView.vue"),
+      },
+      {
+        path: "/orders",
+        name: "orders",
+        component: () => import("@/views/OrderView.vue"),
+      },
+    ],
   },
   {
     path: "/login",
@@ -16,21 +48,7 @@ const routes = [
     name: "Register",
     component: () => import("@/views/RegisterView.vue"),
   },
-  {
-    path: "/profile",
-    name: "Profile",
-    component: () => import("@/views/ProfileView.vue"),
-  },
-  {
-    path: "/profile/update",
-    name: "ProfileUpdate",
-    component: () => import("@/views/ProfileUpdView.vue"),
-  },
-  {
-    path: "/cart",
-    name: "cart",
-    component: () => import("@/views/CartView.vue"),
-  },
+
   {
     path: "/admin",
     name: "Admin",
@@ -51,24 +69,10 @@ const routes = [
           import("@/components/Admin/CreateProductComponent.vue"),
       },
       {
-        path: "maincategory",
-        name: "Adminmaincategory",
-        component: () =>
-          import(
-            "@/components/Admin/maincategory/AddMainCategoryComponent.vue"
-          ),
-      },
-      {
         path: "category",
         name: "Admincategory",
         component: () =>
-          import("@/components/Admin/category/AddCategoryComponent.vue"),
-      },
-      {
-        path: "subcategory",
-        name: "Adminsubcategory",
-        component: () =>
-          import("@/components/Admin/subcategory/AddSubCategoryComponent.vue"),
+          import("@/components/Admin/ManageCategoryComponent.vue"),
       },
       {
         path: "roles",

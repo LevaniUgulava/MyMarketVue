@@ -1,209 +1,207 @@
-<template lang="">
-    <div>
-        
-<div class="container rounded bg-white mt-5 mb-5">
-    <div class="row">
-      <h1 v-if="localsavebtn">Update Profile</h1>
-        <div class="col-md-3 border-right">
-            <div class="d-flex flex-column align-items-center text-center p-3 py-5"><img class="rounded-circle mt-5" width="150px" src="https://st3.depositphotos.com/15648834/17930/v/600/depositphotos_179308454-stock-illustration-unknown-person-silhouette-glasses-profile.jpg"></div>
+<template>
+  <div class="profile-container">
+    <div class="profile-card">
+      <div class="profile-header">
+        <h4>User Profile</h4>
+     
+        <div class="form-group">
+          <label class="labels">Name</label>
+          <input 
+            v-model="name" 
+            type="text" 
+            class="form-control" 
+            placeholder="Enter your name" 
+          />
         </div>
-        <div class="col-md-5 border-right">
-            <div class="p-3 py-5">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="text-right">Profile Settings</h4>
-                </div>
-                <div class="row mt-2">
-                    <div class="col-md-6"><label class="labels">Name</label><br>
-                    <input type="text" class="form-control" placeholder="name" v-model="localName">
-                    </div>
-                    <br>
-                    <div class="col-md-6"><label class="labels">Email</label><br>
-                    <input type="text" class="form-control" v-model="localEmail" placeholder="Email">
-                    </div>
-                </div>
-               
-                <div class="mt-5 text-center">
-              <button class="btn btn-primary profile-button" v-if="localsavebtn" @click="saveProfile" type="button">Save Profile</button>
-              <router-link class="btn btn-primary profile-button" style="text-decoration:none" v-else to="/profile/update">Move to Update</router-link>
-            </div>
-            </div>
+        <div class="form-group">
+          <label class="labels">Email</label>
+          <input 
+            v-model="email" 
+            type="email" 
+            class="form-control" 
+            placeholder="Enter your email" 
+          />
         </div>
-       
+        <div class="form-group">
+          <label class="labels">Bio</label>
+          <textarea 
+            v-model="bio" 
+            class="form-control" 
+            placeholder="Tell something about yourself"
+          ></textarea>
+        </div>
+      </div>
+      <div class="profile-footer">
+        <button 
+          @click="updateprofile" 
+          class="profile-button"
+        >
+          Save Profile
+        </button>
+      </div>
     </div>
-</div>
-</div>
-
-
+  </div>
 </template>
+
 <script>
+import axios from 'axios';
 export default {
+  name: "ProfileComponent",
+
+  data() {
+    return {
+     name:null,
+     email:null,
   
-    name:"ProfileComponent",
-     props: {
-        initialName: {
-            type: String,
-            required: true
-        },
-        initialEmail: {
-            type: String,
-            required: true
-        },
-        initialsavebtn:{
-            type:Boolean,
-            required: true
-        }
 
-    },
-    data() {
-        return {
-            localName: this.initialName,
-            localEmail: this.initialEmail,
-            localsavebtn:this.initialsavebtn
-        };
-    },
-      methods: {
-        saveProfile() {
-            this.$emit('save-profile', { name: this.localName, email: this.localEmail });
-        }
+    };
+  },
+
+  methods: {
+   async getprofile() {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    console.log("Error: Token not found");
+    return; 
+  }
+
+  try {
+    const response = await axios.get("http://127.0.0.1:8000/api/profile", {
+      headers: {
+        Authorization: `Bearer ${token}`  
       }
-   
+    });
+    this.name=response.data.user.name;  
+    this.email=response.data.user.email;  
 
-    
+  } catch (error) {
+    console.error("Error fetching profile:", error);  
+  }
+},
+
+async updateprofile(){
+const token = localStorage.getItem("token");
+
+  if (!token) {
+    console.log("Error: Token not found");
+    return; 
+  }
+
+  try {
+    const response = await axios.post("http://127.0.0.1:8000/api/profile/update",{name:this.name,email:this.email}, {
+      headers: {
+        Authorization: `Bearer ${token}`  
+      }
+    });
+    console.log(response)
+
+  } catch (error) {
+    console.error("Error fetching profile:", error);  
+  }
+
 }
+  },
+    mounted() {
+    this.getprofile();
+    }
+};
 </script>
+
 <style scoped>
-body {
-  background: rgb(99, 39, 120);
-  margin: 0;
-  padding: 0;
-  font-family: Arial, sans-serif;
+.profile-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
-.container {
-  max-width: 900px;
-  margin: auto;
+.profile-card {
+  background-color: white;
   padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  width: 100%;
 }
 
-.form-control {
-  box-shadow: none;
-  width: 500px;
-  height: 50px;
-  border: 1px solid black ;
-  border-radius: 5px;
+.profile-header {
+  text-align: center;
+  margin-bottom: 20px;
 }
 
-.form-control:focus {
-  box-shadow: none;
-  border-color: #BA68C8;
+.profile-header h4 {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
 }
 
-.profile-button {
-  background: rgb(99, 39, 120);
-  box-shadow: none;
-  border: none;
-  color: white;
-  padding: 10px 20px;
-  border-radius: 5px;
-  font-size: 16px;
+.profile-body {
+  margin-bottom: 20px;
 }
 
-.profile-button:hover {
-  background: #682773;
+.img-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
 }
 
-.profile-button:focus {
-  background: #682773;
-  box-shadow: none;
+.img-container img {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  border: 2px solid #ddd;
 }
 
-.profile-button:active {
-  background: #682773;
-  box-shadow: none;
-}
-
-.back:hover {
-  color: #682773;
-  cursor: pointer;
+.form-group {
+  margin-bottom: 15px;
 }
 
 .labels {
   font-size: 14px;
   font-weight: bold;
-  color: #333;
+  color: #555;
+  display: block;
+  margin-bottom: 5px;
 }
 
-
-h4 {
-  font-size: 24px;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 20px;
+.form-control {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-shadow: none;
+  font-size: 14px;
 }
 
-.img-container {
-  margin-top: 50px;
+.form-control:focus {
+  border-color: #4caf50;
 }
 
-.img-container img {
-  border-radius: 50%;
-  margin-top: 20px;
+textarea.form-control {
+  height: 100px;
 }
 
-.text-black-50 {
-  color: rgba(0, 0, 0, 0.5);
-}
-
-.font-weight-bold {
-  font-weight: bold;
-}
-
-.border-right {
-  border-right: 1px solid #ddd;
-}
-
-.d-flex {
-  display: flex;
-}
-
-.align-items-center {
-  align-items: center;
-}
-
-.text-center {
+.profile-footer {
   text-align: center;
 }
 
-.mt-5 {
-  margin-top: 3rem;
+.profile-button {
+  background-color: #4caf50;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
 }
 
-.mb-5 {
-  margin-bottom: 3rem;
+.profile-button:disabled {
+  background-color: #ddd;
+  cursor: not-allowed;
 }
 
-.p-3 {
-  padding: 1rem;
-}
-
-.py-5 {
-  padding-top: 3rem;
-  padding-bottom: 3rem;
-}
-
-.mt-2 {
-  margin-top: 1rem;
-}
-
-.mt-3 {
-  margin-top: 1.5rem;
-}
-
-.mb-3 {
-  margin-bottom: 1rem;
-}
-
-.justify-content-between {
-  justify-content: space-between;
+.profile-button:hover:not(:disabled) {
+  background-color: #45a049;
 }
 </style>

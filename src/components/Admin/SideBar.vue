@@ -18,19 +18,7 @@
           </ul>
          </li>
 
-
-
-
-        <li>
-          <button @click="toggleDropdowncategory" class="dropdown">
-            Manage Category <i class="fa-solid fa-caret-down"></i>
-          </button>
-          <ul v-if="isOpencategory" class="dropdown-menu">
-            <li v-for="item in itemscategory" :key="item" @click="selectItem(item)">
-              {{ item }}
-            </li>
-          </ul>
-        </li>
+        <li><a href="category">Manage Categories</a></li>
 
         <li><a href="roles" v-if="isadmin">Manage roles</a></li>
         <li><a href="#other">Other</a></li>
@@ -45,7 +33,6 @@ export default {
   data() {
     return {
       isOpencategory: false,
-      itemscategory: ["Maincategory", "Category","SubCategory"],
       isOpenproduct:false,
       itemsproduct:["Create","Discount","Actions"],
       isadmin : localStorage.getItem('roles') == 'admin' ? true : false
@@ -57,17 +44,7 @@ export default {
       this.isOpencategory = !this.isOpencategory;
     },
 
-    async selectItem(item) {
-      if (item === "Maincategory") {
-        this.$router.push("/admin/maincategory");
-      } 
-      else if(item === "Category"){
-        this.$router.push("/admin/category");
-      }
-       else if(item === "SubCategory"){
-        this.$router.push("/admin/subcategory");
-      }
-    },
+ 
 
     toggleDropproduct(){
       this.isOpenproduct=!this.isOpenproduct

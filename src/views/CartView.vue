@@ -1,22 +1,26 @@
-<template lang="">
-    <div>
-        <HeaderComponentVue/>
+<template>
+<div class="cart-container">
+      <CartComponent />
+      </div>
 
-        <CartComponent/>
-        
-    </div>
 </template>
+
 <script>
-import HeaderComponentVue from '@/components/HeaderComponent.vue'
 import CartComponent from '@/components/CartComponent.vue'
 export default {
     name:'CartView',
     components:{
-        HeaderComponentVue,
-        CartComponent
+        CartComponent,
     }
 }
 </script>
 <style scoped>
-    
+.cart-container{
+    background-color: #f2f4f6;
+    margin-top: 6%;
+    border-radius: 10px;     
+    padding: 10px;            
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); 
+    transition: transform 0.3s, box-shadow 0.3s;
+    }
 </style>

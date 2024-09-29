@@ -6,17 +6,10 @@
   <div class="header sticky-header">
     <h1>Website Header</h1>
     <nav>
-      <ul class="main-nav">
-        <li><router-link to="/"><i class="fa-solid fa-house"></i></router-link></li>
-        <li><router-link to="/cart"><i class="fa-solid fa-cart-shopping"></i></router-link></li>
-        <li><a href="#">Services</a></li>
-      </ul>
+    
       <div class="search-container">
-        <input v-model="searchname" placeholder="Search...">
-        <select v-model="selectedCategory" class="category-dropdown">
-          <option selected value="">Select category...</option>
-          <option v-for="category in maincategories" :key="category.id" :value="category.id">{{ category.name }}</option>
-        </select>
+        <input class="searchname" v-model="searchname" placeholder="Search...">
+        <button class="catbtn" @click="openModal"><i class="fa-solid fa-bars"></i></button>
         <button @click="performSearch" class="srchbtn"><i class="fa-solid fa-magnifying-glass"></i></button>
       </div>
       <div class="user-section">
@@ -31,14 +24,23 @@
         </div>
       </div>
     </nav>
+
+<CategoryModal 
+:isModalVisible="isModalVisible"
+ @close-modal="closeModal"
+ @search-category="searchCategory"
+ />
   </div>
 </template>
 
 <script>
 import axios from 'axios';
-
+import CategoryModal from './CategoryModal.vue'
 export default {
   name: 'HeaderComponent',
+  components:{
+    CategoryModal
+  },
   props: {
     maincategories: {
       type: Array,
@@ -52,6 +54,9 @@ export default {
       displayName: 'Login',
       searchname: '',
       selectedCategory: '',
+      selectedsubCategory:'',
+      isModalVisible: false,
+
     };
   },
   computed: {
@@ -66,6 +71,12 @@ export default {
     }
   },
   methods: {
+    openModal(){
+       this.isModalVisible= true
+    },
+      closeModal(){
+       this.isModalVisible= false
+    },
     toggleDropdown() {
       this.isOpen = !this.isOpen;
     },
@@ -91,14 +102,29 @@ export default {
         }
       }
     },
-    performSearch() {
-      this.$emit('search', { searchname: this.searchname, maincategory: this.selectedCategory });
+performSearch() {
+      this.$router.push({
+        path: '/',
+        query: {
+          searchname: this.searchname,        
+          maincategory: this.selectedmainCategory, 
+          category: this.selectedCategory,
+          subcategory: this.selectedsubCategory, // Corrected here
+          page: 1                             
+        }
+      });
+},
+    searchCategory(data) {
+      this.selectedmainCategory = data.maincategory; 
+      this.selectedCategory=data.category;
+      this.selectedsubCategory=data.subcategory;
+
     },
   },
 };
 </script>
 
-<style scoped>
+<style>
 .sticky-header {
   position: sticky;
   top: 0;
@@ -106,6 +132,7 @@ export default {
   z-index: 1000;
   background-color: #f8f8f8;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  min-height: 60px; /* Adjust this value to your header height */
 }
 
 .header {
@@ -186,6 +213,11 @@ h1 {
   width: 35px;
   height: 38px;
 }
+.catbtn {
+  margin: 10px;
+  width: 35px;
+  height: 38px;
+}
 
 .search-container {
   display: flex;
@@ -194,18 +226,104 @@ h1 {
 
 .search-container input {
   padding: 10px;
+  margin: 10px;
   font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  width: 300px;
+  width: 400px;
 }
 
-.category-dropdown {
-  padding: 10px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  margin-left: 10px;
-  margin-right: 10px;
+/* Adjust for smaller devices (e.g., iPhone 13 Pro) */
+@media (max-width: 390px) {
+  h1 {
+    font-size: 0.8rem; /* Smaller font size for the title */
+  }
+  
+  .search-container {
+    width: 60%; /* Make search input more flexible */
+    margin-left: 5%; /* Add some margin */
+  }
+
+  .search-container input {
+    width: 100%; /* Adjust the width to take full space */
+    font-size: 0.8rem; /* Adjust font size */
+  }
+
+  .srchbtn,
+  .catbtn {
+    width: 30px; /* Smaller button size */
+    height: 32px; 
+  }
+
+  .user-section {
+    margin-left: auto;
+  }
+  
+  nav {
+    flex-wrap: wrap; /* Allow wrapping if needed */
+    justify-content: space-between;
+    padding: 5px;
+  }
 }
+
+/* Adjust for medium devices */
+@media (min-width: 391px) and (max-width: 575px) {
+  h1 {
+    font-size: 1rem;
+  }
+
+  .search-container {
+    width: 80%; /* Adjust search container width */
+    margin: 0 auto; /* Center the search container */
+  }
+
+  .search-container input {
+    width: 100%; /* Full width of the container */
+    font-size: 0.9rem; /* Adjust font size */
+  }
+
+  .srchbtn,
+  .catbtn {
+    width: 35px;
+    height: 38px;
+  }
+
+  .user-section {
+    margin-left: auto;
+  }
+
+  nav {
+    padding: 5px;
+  }
+}
+
+/* Adjust for larger mobile devices */
+@media (min-width: 576px) and (max-width: 767px) {
+  h1 {
+    font-size: 1.2rem; 
+  }
+
+  .search-container {
+    width: 50%; 
+    margin-left: 5%;
+    display: flex;
+    align-items: center;
+  }
+
+  .user-section {
+    margin-left: auto; 
+    display: flex;
+    align-items: center;
+  }
+
+  nav {
+    display: flex;
+    justify-content: space-between; 
+    align-items: center; 
+    width: 100%; 
+    padding: 0 10px; 
+  }
+}
+
+
 </style>
