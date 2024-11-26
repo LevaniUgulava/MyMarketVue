@@ -1,54 +1,59 @@
 <template>
   <div class="layout-container">
+    <!-- Header and Sidebar remain as they are -->
     <div class="fixed-wrapper">
-      <HeaderComponentVue class="header"  @search="handleSearch" />
+      <HeaderComponentVue class="header" @search="handleSearch" />
       <HomeSideBarVue class="sidebar" />
+
+
     </div>
 
-    <div class="main-content">
-      <!-- router-view will load the dynamic component based on the route -->
+   <div class="main-content">
       <router-view />
     </div>
+    <FooterComponentVue class="footer" />
+
   </div>
 </template>
 
 <script>
 import HeaderComponentVue from '@/components/HeaderComponent.vue';
 import HomeSideBarVue from '@/components/HomeSideBar.vue';
+import FooterComponentVue from '@/components/FooterComponent.vue';
 
 export default {
   name: 'MainLayout',
   components: {
     HeaderComponentVue,
     HomeSideBarVue,
-
+    FooterComponentVue,
   },
-
-  methods:{
- handleSearch(searchData) {
+  methods: {
+    handleSearch(searchData) {
       console.log(searchData.searchname);
-
       this.$router.push({
         path: '/',
-        query: { searchname: searchData.searchname, page: 1 }, 
-    })
-  }
-  }
+        query: { searchname: searchData.searchname, page: 1 },
+      });
+    },
+  },
 };
 </script>
 
 <style scoped>
+/* Layout Container */
 .layout-container {
   display: flex;
-  height: 100vh;
+  flex-direction: column;
+  min-height: 100vh;
   width: 100%;
-  overflow: hidden;
 }
 
+/* Fixed Header and Sidebar */
 .fixed-wrapper {
   display: flex;
   flex-direction: column;
-  width: 250px; /* Adjust sidebar width */
+  width: 250px;
   position: fixed;
   top: 0;
   left: 0;
@@ -57,68 +62,66 @@ export default {
 }
 
 .header {
-  width: calc(100% - 250px); /* Ensure header spans the rest of the screen */
+  width: calc(100% - 250px); 
   position: fixed;
   top: 0;
-  left: 250px; /* Align with the sidebar */
-  z-index: 200; /* Make sure the header is above the sidebar */
-  height: 60px; /* Set a fixed height for the header */
+  left: 250px;
+  height: 60px;
   background-color: #f8f8f8;
+  z-index: 200;
 }
 
 .sidebar {
   padding: 10px;
   overflow-y: auto;
+  height: calc(100vh - 60px); /* Full height minus header */
 }
 
+/* Main Content Area */
 .main-content {
-  width: calc(100% - 250px); /* Ensure content fits within remaining space */
+  flex-grow: 1;
+  width: calc(100% - 250px);
   margin-left: 250px;
+  margin-top: 60px; /* Offset for header height */
   padding: 10px;
   overflow-y: auto;
-  box-sizing: border-box; /* Ensure padding is included in the width calculation */
+  box-sizing: border-box;
+  min-height: calc(100vh - 60px); /* Ensures footer is pushed if content is short */
+  overflow-y: auto;
 }
+
+/* Footer */
+.footer {
+  width: calc(100% - 250px);
+  margin-left: 250px;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  font-size: 0.9em;
+  padding: 15px 0;
+  position: relative;
+}
+
+
+/* Responsive adjustments */
 @media (max-width: 390px) {
+  .fixed-wrapper {
+    width: 100px;
+  }
   .sidebar {
-    width: 100px; /* Further reduce sidebar width */
+    width: 100px;
     padding: 5px;
   }
-
-  .fixed-wrapper {
-    width: 100px; /* Adjust fixed-wrapper to match sidebar */
-  }
-
   .main-content {
-    margin-left: 100px; 
-    width: calc(100% - 100px); /* Adjust content width */
+    margin-left: 100px;
+    width: calc(100% - 100px);
   }
+}
 
-  .sidebar ul li a,
-  .sidebar ul li button {
-    padding: 5px; /* Further adjust padding */
-    font-size: 0.8rem; /* Further reduce font size */
-  }
-
-  /* Hide text and show icons only */
-  .sidebar ul li a i {
-    margin-right: 0;
-  }
-  
-  .sidebar ul li a {
-    display: flex;
-    justify-content: center; /* Center the icons */
-    align-items: center;
-  }
-
-  .sidebar ul li a span {
-    display: none; /* Hide the text */
-  }
-  }
-/* Media query for smaller screens (mobile devices) */
 @media (max-width: 575px) {
   .main-content {
     margin-top: 5%;
-    width: calc(100% - 100px); /* Adjusted width */
+    width: calc(100% - 100px);
     margin-left: 100px;
     padding: 5px;
     overflow-y: auto;
@@ -126,17 +129,15 @@ export default {
   }
 }
 
-/* Media query for tablets */
 @media (min-width: 576px) and (max-width: 767px) {
   .main-content {
     margin-top: 5%;
-    width: calc(100% - 100px); /* Adjusted width */
+    width: calc(100% - 120px);
     margin-left: 120px;
     padding: 5px;
     overflow-y: auto;
     box-sizing: border-box;
   }
 }
-
 
 </style>

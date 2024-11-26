@@ -1,19 +1,25 @@
 <template>
   <div class="comment-modal">
     <div class="modal-content">
-      <button class="close-btn" @click="closeModal">Close</button>
+      <button class="close-btn" @click="closeModal">✕</button>
       <h2>{{ product.name }}'s Comments</h2>
+      
       <div class="comments-container">
-        <ul>
+        <ul v-if="comments.length > 0">
           <li v-for="comment in comments" :key="comment.pivot.created_at" class="comment-item">
-            <strong>{{ comment.name }}</strong>
+            <div class="comment-header">
+              <strong>{{ comment.name }}</strong>
+              <span class="comment-time">{{ new Date(comment.pivot.created_at).toLocaleString() }}</span>
+            </div>
             <p>{{ comment.pivot.comment }}</p>
           </li>
         </ul>
+        <p v-else class="no-comments-message">No comments yet. Be the first to comment!</p>
       </div>
+
       <form v-if="checkuser()" @submit.prevent="submitComment(product.id)" class="comment-form">
-        <input v-model="newComment" name="comment" type="text" placeholder="Add a comment" />
-        <button type="submit">Comment</button>
+        <input v-model="newComment" name="comment" type="text" placeholder="Add your comment..." />
+        <button type="submit">Post Comment</button>
       </form>
     </div>
   </div>
@@ -39,27 +45,23 @@ export default {
     };
   },
   methods: {
-    checkuser(){
-      const token=localStorage.getItem('token');
-      if(token){
-        return true;
-      }
-      return false;
+    checkuser() {
+      const token = localStorage.getItem('token');
+      return !!token;
     },
-    
     closeModal() {
       this.$emit('close');
     },
     async submitComment(id) {
       const token = localStorage.getItem('token');
       try {
-        await axios.post(`http://127.0.0.1:8000/api/products/${id}/comment`, { comment: this.newComment }, {
+        await axios.post(`products/${id}/comment`, { comment: this.newComment }, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         });
         this.newComment = '';
-        this.$emit('comment-submitted', id); 
+        this.$emit('comment-submitted', id);
       } catch (error) {
         console.error('Error submitting comment:', error);
       }
@@ -71,11 +73,8 @@ export default {
 <style scoped>
 .comment-modal {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); 
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -84,70 +83,104 @@ export default {
 
 .modal-content {
   position: relative;
-  background-color: white;
-  padding: 20px;
+  background-color: #fff;
+  padding: 24px;
   border-radius: 10px;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-  width: 80%;
+  box-shadow: 0px 12px 24px rgba(0, 0, 0, 0.15);
   max-width: 600px;
+  width: 90%;
   display: flex;
   flex-direction: column;
+  gap: 20px;
+  transition: transform 0.3s ease;
 }
 
 .close-btn {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 12px;
+  right: 12px;
+  font-size: 1.5rem;
+  background: transparent;
   border: none;
-  background-color: transparent;
   cursor: pointer;
-  font-size: 20px;
-  color: #555;
+  color: #999;
+  transition: color 0.2s ease;
+}
+
+.close-btn:hover {
+  color: #333;
 }
 
 h2 {
-  margin-top: 0;
   text-align: center;
   color: #333;
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 0;
 }
 
 .comments-container {
   max-height: 300px;
   overflow-y: auto;
-  margin-top: 20px;
-  border: 1px solid #eee;
-  padding: 10px;
-  border-radius: 5px;
-  background-color: #f9f9f9;
+  padding: 12px;
+  border-radius: 8px;
+  background-color: #f8f8f8;
+  border: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.no-comments-message {
+  color: #888;
+  font-size: 1rem;
+  text-align: center;
+  margin: 0;
+  font-style: italic;
 }
 
 ul {
   list-style: none;
   padding: 0;
   margin: 0;
+  width: 100%;
 }
 
 .comment-item {
   margin-bottom: 15px;
-  padding: 10px;
-  border-bottom: 1px solid #eee;
+  padding: 8px 0;
+  border-bottom: 1px solid #e0e0e0;
 }
 
-.comment-item strong {
-  display: block;
-  font-weight: bold;
+.comment-item:last-child {
+  border-bottom: none;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
   color: #555;
-  margin-bottom: 5px;
+  margin-bottom: 4px;
+}
+
+.comment-time {
+  font-size: 0.85rem;
+  color: #888;
 }
 
 .comment-item p {
   margin: 0;
-  color: #666;
+  color: #444;
+  line-height: 1.5;
 }
 
 .comment-form {
   display: flex;
-  margin-top: 20px;
+  gap: 10px;
+  margin-top: 10px;
+  align-items: center;
 }
 
 .comment-form input {
@@ -155,8 +188,14 @@ ul {
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
-  margin-right: 10px;
-  font-size: 14px;
+  font-size: 0.95rem;
+  color: #333;
+  transition: border-color 0.3s ease;
+}
+
+.comment-form input:focus {
+  border-color: #007bff;
+  outline: none;
 }
 
 .comment-form button {
@@ -165,11 +204,14 @@ ul {
   border: none;
   border-radius: 5px;
   color: white;
-  font-size: 14px;
+  font-size: 0.95rem;
+  font-weight: 500;
   cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .comment-form button:hover {
   background-color: #0056b3;
+  transform: translateY(-1px);
 }
 </style>

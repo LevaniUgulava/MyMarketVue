@@ -4,35 +4,51 @@
      <carousel :items-to-show="1">
         <slide v-for="(image, index) in initialproduct.image_urls" :key="index">
           <img :src="image" alt="Product Image" class="img" />
+         <button class="likebtn" @click="toggleLike(initialproduct.id)">
+            <i :class="isLiked ? 'fa-solid fa-heart fa-2x' : 'fa-regular fa-heart fa-2x'"></i>
+          </button>
         </slide>
         <template #addons>
           <navigation />
           <pagination />
         </template>
       </carousel>
+       
 
       <h3>{{ initialproduct.name }}</h3>
       <span class="subtext">See More</span>
-      <p class="price" v-if="initialproduct.discount === 0">
-        {{ initialproduct.price }} <i class="fa-solid fa-lari-sign"></i>
-      </p>
-      <p class="price" v-else>
-        {{ initialproduct.discountprice }} <i class="fa-solid fa-lari-sign"></i>
-        <span class="discount-square">-{{ initialproduct.discount }}%</span>
-      </p>
+ <p class="price" v-if="initialproduct.discount === 0 && (!initialproduct.discountstatus || initialproduct.discountstatus.discount === 0)">
+  {{ initialproduct.discountprice }} <i class="fa-solid fa-lari-sign"></i>
+</p>
+<p class="price" v-else>
+  {{ initialproduct.discountprice }} <i class="fa-solid fa-lari-sign"></i>
+  <span
+    class="discount-square"
+    :class="{
+      'status-discount': initialproduct.discountstatus && initialproduct.discountstatus.discount > 0,
+      'default-discount': (!initialproduct.discountstatus || initialproduct.discountstatus.discount === 0) && initialproduct.discount > 0
+    }"
+  >
+    -{{ initialproduct.discountstatus && initialproduct.discountstatus.discount > 0 
+      ? initialproduct.discountstatus.discount 
+      : initialproduct.discount }}%
+  </span>
+</p>
+
+
+
       <p class="desc">{{ truncate(initialproduct.description) }}</p>
 
       <div class="button-group">
-        <div class="button-wrapper">
-          <button class="likebtn" @click="toggleLike(initialproduct.id)">
-            <i :class="isLiked ? 'fa-solid fa-heart fa-2x' : 'fa-regular fa-heart fa-2x'"></i>
-            <span>{{ likecount }}</span>
-          </button>
-          <span v-if="isLiked" class="subtext">Unlike</span>
-          <span v-else class="subtext">Like</span>
 
-
+          <div class="button-wrapper">
+            <div class="rate">
+          {{ initialproduct.Rate }}
         </div>
+      </div>
+
+
+   
         <div class="button-wrapper">
           <button class="commentbtn" @click="showComments">
             <i class="fa-regular fa-comment fa-2x"></i>
@@ -85,6 +101,8 @@ export default {
       likecount: 0,
       commentcount: 0,
       isLiked:this.initialproduct.isLiked,
+      existsizes:[],
+      randomSize:''
 
     };
   },
@@ -107,14 +125,24 @@ export default {
     },
     async addToCart(id) {
       const token = localStorage.getItem('token');
+
+      this.initialproduct.size.forEach(element => {
+          this.existsizes=element.size;
+      });
+      if (this.existsizes && this.existsizes.length > 0) {
+        const randomIndex = Math.floor(Math.random() * this.existsizes.length);
+        this.randomSize = this.existsizes[randomIndex];
+      }
+
+      console.log(this.existsizes);
       if (!token) {
         this.$emit('cart-message', 'Not authorized');
         return;
       }
       try {
         const response = await axios.post(
-          `http://127.0.0.1:8000/api/addcart/${id}`,
-          {},
+          `addcart/${id}`,
+          {size:this.randomSize},
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -142,7 +170,7 @@ export default {
           return;
         }
         await axios.post(
-          `http://127.0.0.1:8000/api/like/${id}`,
+          `like/${id}`,
           {},
           {
             headers: {
@@ -151,7 +179,6 @@ export default {
           }
         );
         this.isLiked=true;
-        this.updateCounts(id);
       } catch (error) {
         console.log(error);
       }
@@ -164,7 +191,7 @@ export default {
           return;
         }
         await axios.post(
-          `http://127.0.0.1:8000/api/unlike/${id}`,
+          `unlike/${id}`,
           {},
           {
             headers: {
@@ -174,14 +201,13 @@ export default {
         );
         this.isLiked=false;
 
-        this.updateCounts(id);
       } catch (error) {
         console.log(error);
       }
     },
     async updateCounts(id) {
       try {
-        const countResponse = await axios.get(`http://127.0.0.1:8000/api/count/${id}`);
+        const countResponse = await axios.get(`count/${id}`);
         this.likecount = countResponse.data.countlike;
         this.commentcount = countResponse.data.countcomment;
       } catch (error) {
@@ -198,13 +224,27 @@ export default {
   },
 };
 </script>
-
 <style scoped>
+.rate {
+  font-size: 0.9rem; 
+  border-radius: 3px; 
+  width: 100%; 
+  padding: 5px; 
+  text-align: center; 
+  background-color: #f9f9f9; 
+  color: #333; /* Text color */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+  transition: background-color 0.3s ease; 
+}
+.rate:hover {
+  background-color: #e0e0e0; 
+}
+
 .card-container {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-around;
-  margin-top: 30px;
+  margin-top: 2%;
 }
 
 .card {
@@ -218,18 +258,44 @@ export default {
   border-radius: 20px;
 }
 
+.img-container {
+  position: relative;
+}
+
+.img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+}
+
+.likebtn {
+  position: absolute;
+  bottom: 10px;  /* Positioning it in the bottom-right corner */
+  right: 10px;   /* Positioning it in the bottom-right corner */
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.likebtn i {
+  color: red;
+}
+
 .price {
   color: grey;
   font-size: 1rem;
 }
-.desc{
+
+.desc {
   font-size: 1rem;
 }
 
 .button-group {
   display: flex;
   justify-content: space-around;
-  
   align-items: center;
   padding: 5px;
 }
@@ -240,7 +306,7 @@ export default {
 
 button {
   border: none;
-  background-color: white;
+  background-color: #ffffff00;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -270,21 +336,8 @@ button i {
   transition: opacity 0.2s;
 }
 
-
 .button-wrapper:hover .subtext {
   opacity: 1;
-}
-
-.img {
-  height: 150px;
-  width: 100%;
-  object-fit: cover;
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-}
-
-.likebtn i {
-  color: red;
 }
 
 .commentbtn i {
@@ -303,13 +356,22 @@ button i {
 
 .discount-square {
   display: inline-block;
-  background-color: #f00;
   color: #fff;
   padding: 3px 7px;
   border-radius: 4px;
   margin-left: 10px;
   font-weight: bold;
   font-size: 14px;
+}
+
+/* Red for default discount */
+.default-discount {
+  background-color: #f00;
+}
+
+/* Gold for status-based discount */
+.status-discount {
+  background-color: gold;
 }
 
 .singlepage {
@@ -319,124 +381,89 @@ button i {
   margin-bottom: 20px;
 }
 
-
-
+/* Responsive styles */
 @media (min-width: 390px) and (max-width: 574px) {
   .card {
-    width: 120px; /* Adjust card width */
+    width: 120px;
   }
-  .subtext{
+  .subtext {
     display: none;
   }
   .price {
     color: grey;
-    font-size: 0.5rem; /* Smaller font size */
+    font-size: 0.5rem;
   }
-
   .desc {
-    font-size: 0.5rem; /* Smaller font size */
+    font-size: 0.5rem;
   }
-
   .discount-square {
-    padding: 1px 3px; 
-    margin-left: 3px; 
-    font-size: 0.5rem; /* Adjust font size */
+    padding: 1px 3px;
+    margin-left: 3px;
+    font-size: 0.5rem;
   }
-  
   h3 {
-    font-size: 0.6rem; /* Adjust header font size */
+    font-size: 0.6rem;
   }
-
   .img {
-    height: 100%; 
+    height: 100%;
     object-fit: cover;
     border-top-left-radius: 20px;
     border-top-right-radius: 20px;
   }
-
   .button-group {
-    padding: 2px; /* Reduce padding */
+    padding: 2px;
   }
-
   .button-wrapper {
-    margin: 1px; /* Reduce margin between buttons */
+    margin: 1px;
   }
-
   button {
-    font-size: 0.5rem; /* Reduce button font size */
-    padding: 1px 2px; /* Adjust padding */
+    font-size: 0.5rem;
+    padding: 1px 2px;
   }
-
   button i {
-    font-size: 1rem; /* Adjust icon size */
+    font-size: 1rem;
   }
-
 }
 
-/* Adjust for larger mobile devices */
 @media (min-width: 576px) and (max-width: 767px) {
   .card {
-    width: 220px; /* Adjust card width */
+    width: 220px;
   }
-
   .price {
     color: grey;
-    font-size: 1rem; /* Default font size */
+    font-size: 1rem;
   }
-
   .desc {
-    font-size: 1rem; /* Default font size */
+    font-size: 1rem;
   }
-
   .discount-square {
-    padding: 4px 6px; 
-    margin-left: 5px; 
-    font-size: 0.8rem; 
+    padding: 4px 6px;
+    margin-left: 5px;
+    font-size: 0.8rem;
   }
-  
   h3 {
-    font-size: 1.2rem; /* Adjust header font size */
+    font-size: 1.2rem;
   }
-
   .img {
-    height: 50%; 
-    width: 100%; 
+    height: 50%;
+    width: 100%;
     object-fit: cover;
   }
-
   .button-group {
-    padding: 10px; /* Adjust padding */
+    padding: 10px;
   }
-
   .button-wrapper {
-    margin: 5px; /* Adjust margin */
+    margin: 5px;
   }
-
   button {
-    font-size: 0.9rem; 
+    font-size: 0.9rem;
     padding: 4px 6px;
   }
-
   button i {
-    font-size: 1.5rem; 
+    font-size: 1.5rem;
   }
 }
-
-
 </style>
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

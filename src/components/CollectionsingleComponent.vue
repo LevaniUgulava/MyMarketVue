@@ -1,13 +1,14 @@
 <template>
-  <div class="main-content">
+  <div>
     <Message v-if="emitdata" closable class="message">{{ emitdata }}</Message>
     <Message v-if="emitlikemessage" closable class="message" severity="error">{{ emitlikemessage }}</Message>
     <Message v-if="emitcartmessage" closable class="message" severity="error">{{ emitcartmessage }}</Message>
-
-               <div v-if="isLoading">
+ 
+    <div v-if="isLoading">
       <div class="loading-spinner"></div>
       <div class="loading-text">Loading...</div>
     </div>
+<h1>{{collection}}</h1>
 
     <div v-if="products.length > 0 && !isLoading">
       <div class="products-wrapper">
@@ -23,13 +24,8 @@
       </div>
     </div>
 
-    <!-- No products message -->
-    <div v-else-if="!isLoading" class="no-products-message">
-      <p><i class="fas fa-heart-broken"></i>{{$t("favorite.message")}}</p>
-      <a href="/" class="explore-link">{{$t("favorite.btn")}}</a>
-    </div>
+  
 
-    <!-- Pagination -->
     <Bootstrap5Pagination :data="pagination" @pagination-change-page="changePage" />
   </div>
 
@@ -58,6 +54,7 @@ export default {
     Message,
     Bootstrap5Pagination,
   },
+  props:["id"],
   data() {
     return {
       products: [],
@@ -68,7 +65,8 @@ export default {
       emitlikemessage: null,
       emitcartmessage: null,
       pagination: {},
-      isLoading:true
+      isLoading:true,
+      collection:null
     };
   },
   watch: {
@@ -95,21 +93,25 @@ export default {
     },
    '$route.query': {
       handler() {
-            this.fetchfavorite();
+            this.getcollection();
     },
       immediate: false,
    },
     },
   methods: {
-    async fetchfavorite() {
+    async getcollection() {
       const token = localStorage.getItem('token');
       try {
-        const response = await axios.get('likeproduct', {
+        const response = await axios.get(`product/${this.id}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
         });
-        this.products = response.data.data;
+        this.products = response.data.collection.products;
+        this.collection=response.data.collection.title;
+        // this.pagination = response.data.pagination;
+        console.log(response);
+
         this.isLoading=false;
       } catch (error) {
         console.log(error);
@@ -153,7 +155,7 @@ export default {
   },
   mounted() {
       setTimeout(() => {
-        this.fetchfavorite();
+        this.getcollection();
       }, 500);
   },
 };

@@ -1,0 +1,76 @@
+export default {
+  header: {
+    splaceholder: "Search...",
+    filter: "Filter",
+    user: {
+      profile: "Profile",
+      logout: "Logout",
+      login: "Login",
+    },
+  },
+  homesidebar: {
+    home: "Home",
+    cart: "Cart",
+    favorite: "Favorite",
+    orders: "Orders",
+  },
+  homemain: {
+    all: "All Products",
+    discount: "Discount Products",
+    rate: "High Rate Products",
+    seeall: "See All",
+  },
+  profile: {
+    user: {
+      userdetail: "User Details:",
+      name: "Name:",
+      email: "Email:",
+      save: "save {msg}",
+      passchange: "Password Change:",
+      currentpass: "Current Password{msg}",
+      newpass: "New Password{msg}",
+      password: "password",
+    },
+  },
+
+  cart: {
+    shoppingcart: "Shopping Cart",
+    backtoshop: "Back to shop",
+    summary: "Summary",
+    shipping: "Shipping",
+    shippinplaceholder: "Enter shipping details",
+    promocode: "Promocode",
+    promocodeplaceholder: "Enter promocode",
+    checkout: "Checkout",
+  },
+  favorite: {
+    message: "You haven't liked any products yet",
+    btn: "Explore Products",
+  },
+  orders: {
+    message: "You haven't placed any orders yet",
+    btn: "Start Shopping",
+  },
+  search: {
+    title: "Search by Categories",
+    maincategory: "General Category",
+    category: "Sub Category",
+    subcategory: "Specific Category",
+    findprice: "Find By Price",
+    select: "Select",
+    from: "From",
+    to: "To",
+    save: "Save",
+  },
+  order: {
+    size: "Size",
+    discount: "Discount",
+    quantity: "Quantity",
+    total: "Total",
+    status: "Status",
+    paid: "Paid",
+    order: "Order",
+    pending: "Pending Orders",
+    completed: "Completed Orders",
+  },
+};

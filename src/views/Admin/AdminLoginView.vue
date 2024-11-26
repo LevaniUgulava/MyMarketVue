@@ -23,7 +23,7 @@ data() {
     methods:{
      async login(){
         try{
-            const response = await axios.post('http://127.0.0.1:8000/api/admin/login',{
+            const response = await axios.post('admin/login',{
                 email:this.email,
                 password:this.password
             });

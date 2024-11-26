@@ -1,6 +1,8 @@
 <template>
   <div>
-    <Message v-if="message" closable class="message">{{ message.message }}</Message>
+    <Message :message="message" @close="message=''"  :backgroundColor="'rgba(76, 175, 80, 0.25)'" 
+  :textColor="'#004d40'" />
+     <Message :message="errormessage" @close="errormessage=''" />
     <div class="product-container">
       <div class="product-content">
         <carousel :items-to-show="1" class="product-carousel">
@@ -15,12 +17,27 @@
 
         <div class="product-info">
           <h1 class="product-name">{{ singleproduct.name }}</h1>
-          <div class="product-pricing">
-            <span v-if="singleproduct.discount" class="price">{{ singleproduct.discountprice }} <i class="fa-solid fa-lari-sign"></i></span>
-            <span v-else class="price">{{ singleproduct.price }} <i class="fa-solid fa-lari-sign"></i></span>
-            <span v-if="singleproduct.discount" class="discount-price">{{ singleproduct.price }} <i class="fa-solid fa-lari-sign"></i></span>
-            <span v-if="singleproduct.discount" class="discount-square">-{{ singleproduct.discount }}%</span>
-          </div>
+
+
+<p class="price" v-if="singleproduct.discount === 0 && (!singleproduct.discountstatus || singleproduct.discountstatus.discount === 0)">
+  {{ singleproduct.discountprice }} <i class="fa-solid fa-lari-sign"></i>
+</p>
+<p class="price" v-else>
+  {{ singleproduct.discountprice }} <i class="fa-solid fa-lari-sign"></i>
+  <span
+    class="discount-square"
+    :class="{
+      'status-discount': singleproduct.discountstatus && singleproduct.discountstatus.discount > 0,
+      'default-discount': (!singleproduct.discountstatus || singleproduct.discountstatus.discount === 0) && singleproduct.discount > 0
+    }"
+  >
+    -{{ singleproduct.discountstatus && singleproduct.discountstatus.discount > 0 
+      ? singleproduct.discountstatus.discount 
+      : singleproduct.discount }}%
+  </span>
+</p>
+
+
           <p class="product-description">{{ singleproduct.description }}</p>
 
 <div class="size-container">
@@ -38,12 +55,17 @@
 
 
 
-<h5 v-if="quantity">on the stock:{{ quantity}}</h5>
+<h5 v-if="quantity">on the stock:{{ quantity }}</h5>
           <button class="addbtn" @click="addToCart()" >Add To Cart</button>
 
         </div>
         <a href="/" class="back">Back to shop</a>
       </div>
+      <StarRatingComponent 
+      :rate="rate" 
+      :singleid="this.singleproduct.id"
+      :getproduct="getproduct"
+      />
       
     </div>
   </div>
@@ -53,8 +75,8 @@
 import axios from 'axios';
 import 'vue3-carousel/dist/carousel.css';
 import { Carousel, Slide, Pagination, Navigation } from 'vue3-carousel';
-import Message from 'primevue/message';
-
+import StarRatingComponent from "@/components/StarRatingComponent.vue"
+import Message from '@/components/Message/MessageComponent.vue';
 
 export default {
   props: ['id'],
@@ -62,6 +84,7 @@ export default {
     Carousel,
     Slide,
     Message,
+    StarRatingComponent,
     Pagination,
     Navigation,
   },
@@ -71,8 +94,10 @@ export default {
       getsizes:[],
       availablesize:[],
       message:null,
+      errormessage:null,
       quantity:null,
-      size:null
+      size:null,
+      rate:0
     };
   },
     watch: {
@@ -96,11 +121,18 @@ export default {
   }
 },
     async getproduct() {
+      const token = localStorage.getItem('token');
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/api/display/${this.id}`);
+        const response = await axios.get(`display/${this.id}`,{
+          headers:{
+            'Authorization':`Bearer ${token}`
+          }
+        });
+
         this.singleproduct = response.data.data[0];
-        console.log(this.singleproduct.size);
-    this.availablesize = this.singleproduct.size.map(element => element.size);
+        this.rate=response.data.data[0].MyRate;
+        console.log(this.rate);
+        this.availablesize = this.singleproduct.size.map(element => element.size);
 
       } catch (error) {
         console.log(error);
@@ -110,11 +142,11 @@ export default {
     async addToCart() {
       const token = localStorage.getItem('token');
       if (!token) {
-       this.message='Not authorized';
+       this.errormessage='Not authorized';
       }
       try {
          const response=await axios.post(
-          `http://127.0.0.1:8000/api/addcart/${this.id}`,
+          `addcart/${this.id}`,
           {size:this.size},
           {
             headers: {
@@ -122,7 +154,7 @@ export default {
             },
           }
         );
-        this.message = response.data
+        this.message = response.data.message
         console.log(response.data)
       } catch (error) {
         console.log(error);
@@ -130,9 +162,8 @@ export default {
     },
     async Getsize(){
       try{
-        const response=await axios.get('http://127.0.0.1:8000/api/getSizes');
+        const response=await axios.get('getSizes');
         this.getsizes=response.data.sizes;
-        // console.log(response.data);
 
       }catch(error){
          console.log(error);
@@ -176,7 +207,7 @@ export default {
 .product-container {
   width: 100%;
   margin: 20px auto;
-  margin-top: 4%;
+  margin-top: 2%;
   padding: 20px;
   background-color: #f9f9f9;
   border-radius: 15px;
@@ -243,13 +274,22 @@ export default {
 }
 .discount-square {
   display: inline-block;
-  background-color: #f00;
   color: #fff;
-  padding: 5px 10px;
+  padding: 3px 7px;
   border-radius: 4px;
   margin-left: 10px;
   font-weight: bold;
-  font-size: 14px;
+  font-size: 15px;
+}
+
+/* Red for default discount */
+.default-discount {
+  background-color: #f00;
+}
+
+/* Gold for status-based discount */
+.status-discount {
+  background-color: gold;
 }
 .size-container {
   display: flex;
@@ -268,8 +308,6 @@ export default {
 .size-item:hover {
   background-color: #e0e0e0;
 }
-.message{
-  margin-top: 5%;
-}
+
 
 </style>

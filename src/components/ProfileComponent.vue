@@ -1,43 +1,44 @@
 <template>
   <div class="profile-container">
-    <div class="profile-card">
-      <div class="profile-header">
-        <h4>User Profile</h4>
-     
-        <div class="form-group">
-          <label class="labels">Name</label>
-          <input 
-            v-model="name" 
-            type="text" 
-            class="form-control" 
-            placeholder="Enter your name" 
-          />
+    <h1>{{$t("profile.user.userdetail")}}</h1>
+    <div class="content">
+      <div class="left-sections">
+        <div class="section">
+          <h3>{{$t("profile.user.userdetail")}}</h3>
+          <div class="input-profile">
+            <label>{{$t("profile.user.name")}}</label>
+            <input name="name" type="text" placeholder="Name..." v-model="name">
+            <label>{{$t("profile.user.email")}}</label>
+            <input name="email" type="email" placeholder="Email..." v-model="email">
+          </div>
+          <button class="btn">{{$t("profile.user.save", { msg: $t("header.user.profile") })}}</button>
         </div>
-        <div class="form-group">
-          <label class="labels">Email</label>
-          <input 
-            v-model="email" 
-            type="email" 
-            class="form-control" 
-            placeholder="Enter your email" 
-          />
-        </div>
-        <div class="form-group">
-          <label class="labels">Bio</label>
-          <textarea 
-            v-model="bio" 
-            class="form-control" 
-            placeholder="Tell something about yourself"
-          ></textarea>
+
+        <div class="section">
+          <h3>{{$t("profile.user.passchange")}}</h3>
+          <div class="input-profile">
+            <label>{{$t("profile.user.currentpass", { msg: ":" })}}</label>
+            <input name="currentpassword" type="password" :placeholder="$t('profile.user.currentpass', { msg: '...' })" v-model="currentpassword">
+            <label>{{$t("profile.user.newpass", { msg: ":" })}}</label>
+            <input name="newpassword" type="password" :placeholder="$t('profile.user.newpass', { msg: '...' })" v-model="newpassword">
+          </div>
+          <button class="btn">{{$t("profile.user.save", { msg: $t("profile.user.password") })}}</button>
         </div>
       </div>
-      <div class="profile-footer">
-        <button 
-          @click="updateprofile" 
-          class="profile-button"
-        >
-          Save Profile
-        </button>
+
+      <div class="section1">
+
+         <div class="section">
+         <div class="side-section">
+    <h3>Side Section</h3>
+    <p>This section will be placed side by side with the two sections.</p>
+    <button @click="resend">Send Verification Email</button>
+  </div>
+        </div>
+       <div class="section">
+ 
+         <UserStatusComponentVue/>
+        </div>
       </div>
     </div>
   </div>
@@ -45,163 +46,204 @@
 
 <script>
 import axios from 'axios';
+import UserStatusComponentVue from './UserStatusComponent.vue';
 export default {
   name: "ProfileComponent",
-
+  components:{
+    UserStatusComponentVue
+  },
   data() {
     return {
-     name:null,
-     email:null,
-  
-
+      name: null,
+      email: null,
+      currentpassword: null,
+      newpassword: null
     };
   },
-
   methods: {
-   async getprofile() {
-  const token = localStorage.getItem("token");
+    async getprofile() {
+      const token = localStorage.getItem("token");
 
-  if (!token) {
-    console.log("Error: Token not found");
-    return; 
-  }
-
-  try {
-    const response = await axios.get("http://127.0.0.1:8000/api/profile", {
-      headers: {
-        Authorization: `Bearer ${token}`  
+      if (!token) {
+        console.log("Error: Token not found");
+        return;
       }
-    });
-    this.name=response.data.user.name;  
-    this.email=response.data.user.email;  
 
-  } catch (error) {
-    console.error("Error fetching profile:", error);  
-  }
-},
-
-async updateprofile(){
-const token = localStorage.getItem("token");
-
-  if (!token) {
-    console.log("Error: Token not found");
-    return; 
-  }
-
-  try {
-    const response = await axios.post("http://127.0.0.1:8000/api/profile/update",{name:this.name,email:this.email}, {
-      headers: {
-        Authorization: `Bearer ${token}`  
+      try {
+        const response = await axios.get("profile", {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        this.name = response.data.user.name;
+        this.email = response.data.user.email;
+      } catch (error) {
+        console.error("Error fetching profile:", error);
       }
-    });
-    console.log(response)
+    },
+    async resend() {
+      const token = localStorage.getItem("token");
 
-  } catch (error) {
-    console.error("Error fetching profile:", error);  
-  }
+      if (!token) {
+        console.log("Error: Token not found");
+        return;
+      }
 
-}
-  },
-    mounted() {
-    this.getprofile();
+      try {
+        const response = await axios.post('/resend/verification', {}, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        console.log(response);
+      } catch (error) {
+        console.log(error);
+      }
     }
+  },
+  mounted() {
+    this.getprofile();
+  }
 };
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Raleway:wght@400;500;700&display=swap');
+
 .profile-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
-
-.profile-card {
-  background-color: white;
+  margin-top: 4%;
   padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  max-width: 400px;
-  width: 100%;
+  border-radius: 8px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
+  font-family: 'Raleway', sans-serif;
 }
 
-.profile-header {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.profile-header h4 {
-  font-size: 24px;
-  font-weight: bold;
-  color: #333;
-}
-
-.profile-body {
-  margin-bottom: 20px;
-}
-
-.img-container {
+.content {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
+  margin-top: 3%;
+}
+
+.left-sections {
+  display: flex;
+  flex-direction: column;
+  width: 60%;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
   margin-bottom: 20px;
+  padding: 20px;
+  border-radius: 8px;
+  background-color: #f9f9fb;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
 }
 
-.img-container img {
-  width: 150px;
-  height: 150px;
-  border-radius: 50%;
-  border: 2px solid #ddd;
+.section:hover {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-3px);
 }
 
-.form-group {
-  margin-bottom: 15px;
+.section1 {
+  width: 35%;
+  margin-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.labels {
-  font-size: 14px;
-  font-weight: bold;
-  color: #555;
-  display: block;
-  margin-bottom: 5px;
-}
-
-.form-control {
+.input-profile input {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
+  margin-bottom: 15px;
   border: 1px solid #ddd;
-  border-radius: 5px;
-  box-shadow: none;
-  font-size: 14px;
+  border-radius: 6px;
+  transition: border-color 0.3s;
 }
 
-.form-control:focus {
-  border-color: #4caf50;
+.input-profile input:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.1);
 }
 
-textarea.form-control {
-  height: 100px;
-}
-
-.profile-footer {
-  text-align: center;
-}
-
-.profile-button {
-  background-color: #4caf50;
-  color: white;
-  padding: 10px 20px;
+.btn {
+  color: #ffffff;
+  background-color: #007bff;
   border: none;
-  border-radius: 5px;
+  border-radius: 6px;
+  width: fit-content;
+  padding: 10px 20px;
+  font-weight: 600;
   cursor: pointer;
-  font-size: 16px;
+  transition: background-color 0.3s, transform 0.3s;
 }
 
-.profile-button:disabled {
-  background-color: #ddd;
-  cursor: not-allowed;
+.btn:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px);
 }
 
-.profile-button:hover:not(:disabled) {
-  background-color: #45a049;
+.btn:active {
+  background-color: #004085;
+}
+
+.side-section {
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  text-align: center;
+  font-family: 'Raleway', sans-serif;
+}
+
+.side-section h3 {
+  font-size: 1.5rem;
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+.side-section p {
+  font-size: 1rem;
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.side-section button {
+  background: linear-gradient(135deg, #4facfe, #00f2fe);
+  border: none;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: bold;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.side-section button:hover {
+  background: linear-gradient(135deg, #00c6ff, #0072ff);
+  transform: translateY(-2px);
+}
+
+.side-section button:active {
+  transform: translateY(0);
+  background: linear-gradient(135deg, #0072ff, #0052cc);
+}
+
+@media (max-width: 768px) {
+  .content {
+    flex-direction: column;
+  }
+
+  .left-sections,
+  .section1 {
+    width: 100%;
+    margin: 0;
+  }
 }
 </style>

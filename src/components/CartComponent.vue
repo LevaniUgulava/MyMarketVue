@@ -1,6 +1,6 @@
 <template lang="">
   <div>
-    <h3>Shopping Cart</h3>
+    <h3>{{$t("cart.shoppingcart")}}</h3>
     <div class="card" v-for="(item, index) in mycarts" :key="index">
     <carousel :items-to-show="1" class="custom-carousel">
         <slide v-for="(image, index) in item.image_urls" :key="index">
@@ -19,7 +19,7 @@
             <span class="quantity">{{ item.quantity }}</span>
             <button class="quantitybtn" @click="updatequantity(item.id, 'increment',item.size)">+</button>
           </div>
-          <p>{{item.discountprice}}</p>
+          <p>{{item.price}}</p>
         <p>{{item.size}}</p>
            <span class="close" @click="deletecart(item.id,item.size)">&times;</span>
 
@@ -27,24 +27,24 @@
       </div>
     </div>
    <div class="back-to-shop">
-          <a href="/">&leftarrow; </a><span class="text-muted">Back to shop</span>
+          <a href="/">&leftarrow; </a><span class="text-muted">{{$t("cart.backtoshop")}}</span>
     </div>   
     <div class="checkout">
       <div>
-      <h3>Summary: {{allprice}}</h3>
+      <h3>{{$t("cart.summary")}}: {{allprice}}</h3>
       </div>
 
       <div class="checkout-item">
-        <label for="shipping">Shipping:</label>
-        <input type="text" id="shipping" placeholder="Enter shipping details" />
+        <label for="shipping">{{$t("cart.shipping")}}:</label>
+        <input type="text" id="shipping" :placeholder="$t('cart.shippinplaceholder')" />
       </div>
       <div class="checkout-item">
-        <label for="promocode">Promocode:</label>
-        <input type="text" id="promocode" placeholder="Enter promo code" />
+        <label for="promocode">{{$t("cart.promocode")}}:</label>
+        <input type="text" id="promocode" :placeholder="$t('cart.promocodeplaceholder')" />
       </div>
     </div>
   <div class="button-container">
-      <button class="checkbtn" @click="checkout">Checkout</button>
+      <button class="checkbtn" @click="checkout">{{$t("cart.checkout")}}</button>
     </div>  </div>
 </template>
 <script>
@@ -54,10 +54,12 @@ import { Carousel, Slide, Pagination, Navigation } from 'vue3-carousel'
 
 export default {
   name: 'ShoppingCart',
+ 
   data() {
     return {
       mycarts: [],
-      allprice: 0
+      allprice: 0,
+      verfifyerrormessage:'',
     };
   },
     components: {
@@ -67,21 +69,41 @@ export default {
     Navigation,
   },
   methods: {
-      async checkout(){
-        const token=localStorage.getItem('token');
-      try{
-        const response = await axios.get('http://127.0.0.1:8000/api/checkout',{
-            headers:{
-            'Authorization': `Bearer ${token}`
+  emitmessage() {
+  this.$emit('verfifyerrormessage', this.verfifyerrormessage);
+},
+async checkout() {
+    const token = localStorage.getItem('token');
+    try {
+        const response = await axios.get('checkout', {
+            headers: {
+                'Authorization': `Bearer ${token}`
             }
         });
-
-        console.log(response);
-
-      }catch(error){
-       console.log(error);
-      }
-      },
+        console.log(response.data); 
+    } catch (error) {
+        if (error.response) {
+            console.error('Error Response:', error.response.data);
+            if (error.response.status === 403) {
+                this.verfifyerrormessage=error.response.data.message; 
+                this.emitmessage(); 
+                
+  window.scrollTo({
+        top: 0,
+        behavior: 'smooth' // Adds a smooth scrolling animation
+    });
+            } else {
+                alert(`Error: ${error.response.status} - ${error.response.data.message}`);
+            }
+        } else if (error.request) {
+            console.error('No Response:', error.request);
+            alert('No response received. Please check your network.');
+        } else {
+            console.error('Error:', error.message);
+            alert('An error occurred: ' + error.message);
+        }
+    }
+},
 
     async getCart() {
       const token = localStorage.getItem('token');
@@ -91,13 +113,13 @@ export default {
       }
 
       try {
-        const response = await axios.get('http://127.0.0.1:8000/api/mycart', {
+        const response = await axios.get('mycart', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         });
 
-         console.log(response.data)
+         console.log(response.data.products)
         this.mycarts = response.data.products;
         this.allprice = response.data.totalPrice;
 
@@ -107,9 +129,10 @@ export default {
     },
 
     async updatequantity(id, action, size) {
+         console.log(size)
       const token = localStorage.getItem("token");
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/api/quantity/${id}/${action}`,{
+        const response = await axios.get(`quantity/${id}/${action}`,{
                 params: { size: size },
 
           headers: {
@@ -126,7 +149,7 @@ export default {
     async deletecart(id,size) {
       const token = localStorage.getItem("token");
       try {
-        const response = await axios.post(`http://127.0.0.1:8000/api/delete/${id}/cart`, {}, {
+        const response = await axios.post(`delete/${id}/cart`, {}, {
           params: { size: size },
           headers: {
             'Authorization': `Bearer ${token}`
@@ -149,10 +172,10 @@ export default {
 <style scoped>
 .card {
   display: flex;
-  background-color: rgb(255, 255, 255);
-  border-radius: 10px;
+  background-color: #fff;
+  border-radius: 12px;
   margin-top: 3%;
-  box-shadow: 2px 4px 10px 0 rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
   padding: 20px;
   width: 100%;
 }
@@ -163,83 +186,102 @@ export default {
   justify-content: space-between;
   width: 100%;
   align-items: center;
-  background-color:blue;
-  padding: 1vh; 
-  border: 1px solid #ddd; 
-  background-color: #f9f9f9; 
-  border-radius: 5px; 
-  margin: 1vh 0; 
-  gap: 1vh; 
+  background-color: #f0f2f5;
+  padding: 1rem; 
+  border: 1px solid #e0e0e0; 
+  border-radius: 8px; 
+  margin: 1rem 0; 
+  gap: 1rem; 
 }
 
-
 .checkout {
-  background-color: rgb(255, 255, 255);
-  border-radius: 10px;
+  background-color: #fff;
+  border-radius: 12px;
   margin-top: 3%;
   padding: 20px;
   width: 100%;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .checkout-item {
   display: flex;
   flex-direction: column;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .checkout-item label {
-  margin-bottom: 5px;
-  font-weight: bold;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #333;
 }
 
 .checkout-item input {
-  padding: 8px;
-  border-radius: 5px;
+  padding: 10px;
+  border-radius: 8px;
   border: 1px solid #ccc;
   width: 100%;
   box-sizing: border-box;
+  font-size: 0.9rem;
+  color: #555;
 }
+
 .button-container {
   display: flex;
   justify-content: center;
-  margin-top: 15px;
+  margin-top: 20px;
 }
 
 .checkbtn {
-  padding: 10px 20px;
-  background-color: black;
+  padding: 12px 24px;
+  background-color: #1e90ff;
   color: #fff;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
-  width: 40%;
-
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
 }
 
 .checkbtn:hover {
-  color: #ccc;
+  background-color: #1c7ed6;
+  color: #fff;
 }
+
 .back-to-shop {
   margin-top: 4rem;
+  font-size: 0.9rem;
+  color: #1e90ff;
 }
+
 .custom-carousel {
-    width: 15%; 
-    max-width: 400px;
-    margin-right: 20px;
+  width: 20%; 
+  max-width: 400px;
+  margin-right: 20px;
 }
 
 .img {
-    width: 50%;
-    height: auto;
-    border-radius: 8px;
-    object-fit: cover; 
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  object-fit: cover; 
 }
-.quantitybtn{
-  border:1px solid black;
-  border-radius:5px;
-  cursor:pointer;
+
+.quantitybtn {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
-.quantitybtn:hover{
-  background-color: rgba(255,255,255,255);
+
+.quantitybtn:hover {
+  background-color: #f0f2f5;
+  color: #333;
 }
+
+.quantity {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
 </style>

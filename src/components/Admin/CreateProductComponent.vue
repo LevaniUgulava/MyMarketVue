@@ -14,19 +14,19 @@
 
       <label>MainCategory</label>
       <select v-if="maincategories.length > 0" v-model="form.mainCategory">
-        <option value="" disabled selected>select...</option>
+        <option value="" selected>select...</option>
         <option v-for="category in maincategories" :key="category.id" :value="category.id">{{ category.name }}</option>
       </select><br>
 
       <label>Category</label>
       <select v-if="categories.length > 0" v-model="form.category">
-        <option value="" disabled selected>select...</option>
+        <option value=""  selected>select...</option>
         <option v-for="category in filteredcategory" :key="category.id" :value="category.id">{{ category.name }}</option>
       </select><br>
 
       <label>SubCategory</label>
       <select v-if="subcategories.length > 0" v-model="form.subCategory">
-        <option value="" disabled selected>select...</option>
+        <option value=""  selected>select...</option>
         <option v-for="category in filteredsubcategory" :key="category.id" :value="category.id">{{ category.name }}</option>
       </select><br>
 
@@ -109,7 +109,7 @@ export default {
   methods: {
     async maincategory() {
       try {
-        const response = await axios.get('http://127.0.0.1:8000/api/maincategory');
+        const response = await axios.get('maincategory');
         this.maincategories = response.data;
       } catch (error) {
         console.log(error);
@@ -117,7 +117,7 @@ export default {
     },
     async category() {
       try {
-        const response = await axios.get('http://127.0.0.1:8000/api/category');
+        const response = await axios.get('category');
         this.categories = response.data;
       } catch (error) {
         console.log(error);
@@ -125,7 +125,7 @@ export default {
     },
     async subcategory() {
       try {
-        const response = await axios.get('http://127.0.0.1:8000/api/subcategory');
+        const response = await axios.get('subcategory');
         this.subcategories = response.data;
       } catch (error) {
         console.log(error);
@@ -133,7 +133,7 @@ export default {
     },
     async Getsize() {
       try {
-        const response = await axios.get('http://127.0.0.1:8000/api/getSizes');
+        const response = await axios.get('getSizes');
         this.sizes = response.data.sizes;
         console.log(response.data.sizes);
       } catch (error) {
@@ -144,6 +144,7 @@ export default {
       this.form.image = event.target.files;
     },
     async createProduct() {
+      const token=localStorage.getItem('token');
       console.log('Form data before submission:', this.form);
       const formData = new FormData();
       formData.append('name', this.form.name);
@@ -165,9 +166,10 @@ export default {
       }
 
       try {
-        const response = await axios.post('http://127.0.0.1:8000/api/addproduct', formData, {
+        const response = await axios.post('addproduct', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
+            "Authorization": `Bearer ${token}`
           },
         });
         this.message = 'Product created successfully';

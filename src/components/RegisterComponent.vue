@@ -4,7 +4,7 @@
       <div class="register-content">
         <h2>Create an Account</h2>
         <p>Please register to create an account</p>
-        <router-link to='/login' class="loginlink">Login</router-link>
+        <router-link to='/ka/login' class="loginlink">Login</router-link>
         <form @submit.prevent="register" method="post" id="registerForm">
           <label for="name">Name:</label>
           <input v-model="name" type="text" name="name" id="name" required>
@@ -41,28 +41,17 @@ export default {
   methods: {
     async register() {
       try {
-        const response = await axios.post('http://127.0.0.1:8000/api/register', {
+        const response = await axios.post('register', {
           name: this.name,
           email: this.email,
           password: this.password
         });
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('name', this.name);
-        localStorage.setItem('roles', response.data.roles[0]);
-        localStorage.setItem('userid', response.data.id);
-        this.$router.push("/");
+        response
+        this.$router.push("/email/verification");
       } catch (error) {
         console.error(error);
       }
     },
-    facebookRegister() {
-      // Handle Facebook registration
-      console.log('Facebook registration');
-    },
-    googleRegister() {
-      // Handle Google registration
-      console.log('Google registration');
-    }
   }
 }
 </script>

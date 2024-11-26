@@ -1,5 +1,23 @@
 <template lang="">
     <div>
+    <div class="action-container">
+  
+      <div class="search-category">
+        <button @click="isModalVisible=true">Search by category</button>
+      </div>
+    <div class="searchbtn">
+    <input type="text" v-model="Searchname" placeholder="Search...">
+    <button @click="performSearch">Search</button>
+    </div>
+      </div>
+
+
+    <CategoryModalVue
+    :isModalVisible="isModalVisible"
+    @close-modal="closeModal"
+    @search-category="searchCategory"
+     />
+      
         <table>
             <tr>
                 <th>ID</th>
@@ -52,44 +70,111 @@
 <script>
 import axios from 'axios';
 import { Bootstrap5Pagination } from "laravel-vue-pagination";
-
+import CategoryModalVue from '../CategoryModal.vue';
 export default {
     name: "ActiveProductComponent",
      components: {
-    Bootstrap5Pagination
+    Bootstrap5Pagination,
+    CategoryModalVue
+
   },
     data() {
         return {
-            products: [],
-                  pagination: {},
+      products: [],
+      isModalVisible:false,
+      selectedProducts: [],
+      pagination: {},
+      message: '',
+      Searchname:'',
+      selectedmainCategory:null,
+      selectedCategory:null,
+      selectedsubCategory:null,
 
         }
     },
-    methods: {
-        
-        async fetchProductData(page=1) {
-            try {
-                const response = await axios.get(`http://127.0.0.1:8000/api/admindisplay?page=${page}`);
-                if (response.data && response.data.data) {
-                    this.products = response.data.data;
-            this.pagination = {
-                current_page: response.data.meta.current_page,
-                last_page: response.data.meta.last_page,
-                per_page: response.data.meta.per_page,
-                total: response.data.meta.total,
-                links: response.data.links 
+    watch: {
+    '$route.query': {
+      handler() {
+        this.fetchProductData();
+      },
+      immediate: true
+    }
+  },
+  methods: {
+       searchCategory(data) {
+      this.selectedmainCategory = data.maincategory; 
+      this.selectedCategory=data.category;
+      this.selectedsubCategory=data.subcategory;
+
+    },
+      openModal(){
+       this.isModalVisible= true
+    },
+      closeModal(){
+       this.isModalVisible= false
+    },
+      changePage(page) {
+      this.$router.push({ path: '/admin/actions', query: { ...this.$route.query, page } });
+    },
+performSearch() {
+  const currentQuery = { ...this.$route.query };
+      this.$router.push({
+        path: '/admin/actions',
+        query: {
+          ...currentQuery,
+          searchname: this.Searchname,        
+          maincategory: this.selectedmainCategory, 
+          category: this.selectedCategory,
+          subcategory: this.selectedsubCategory,
+          page: 1                             
+        }
+      });
+},
+    async fetchProductData() {
+      const token=localStorage.getItem('token');
+         const queryParams = new URLSearchParams(this.$route.query);
+    const page = parseInt(queryParams.get('page')) || 1;
+      try {
+        const response = await axios.get(`admindisplay`,{
+            headers: {
+        Authorization: `Bearer ${token}` 
+                 },
+         params:{
+              page:page,
+              searchname:this.Searchname,
+              maincategory: this.selectedmainCategory,
+            category: this.selectedCategory,
+            subcategory: this.selectedsubCategory,
+          }
+      
+        });
+        if (response.data && response.data.data) {
+          this.products = response.data.data;
+          this.pagination = {
+            current_page: response.data.meta.current_page,
+            last_page: response.data.meta.last_page,
+            per_page: response.data.meta.per_page,
+            total: response.data.meta.total,
+            links: response.data.links 
           };
-                    console.log(response.data);
-                } else {
-                    console.error('Unexpected API response structure:', response.data);
-                }
-            } catch (error) {
-                console.error('Error fetching product data:', error);
-            }
-        },
+
+          console.log(response.data)
+        } else {
+          console.error('Unexpected API response structure:', response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching product data:', error);
+      }
+    },
         async notactive(id) {
+                const token=localStorage.getItem('token');
+
             try {
-                const response = await axios.post(`http://127.0.0.1:8000/api/notactive/${id}`);
+                const response = await axios.post(`notactive/${id}`,{},{
+                   headers: {
+        Authorization: `Bearer ${token}` 
+                 },
+                });
                 const product = this.products.find(product => product.id === id);
                 if (product) {
                     product.active = false;
@@ -100,8 +185,14 @@ export default {
             }
         },
         async active(id) {
+                const token=localStorage.getItem('token');
+
             try {
-                const response = await axios.post(`http://127.0.0.1:8000/api/active/${id}`);
+                const response = await axios.post(`active/${id}`,{},{
+                   headers: {
+        Authorization: `Bearer ${token}` 
+                 },
+                });
                 const product = this.products.find(product => product.id === id);
                 if (product) {
                     product.active = true;
@@ -118,8 +209,48 @@ export default {
 }
 </script>
 
-<style >
+<style>
+.action-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
 
+.discountbtn,
+.searchbtn,
+.search-category {
+  display: flex;
+  align-items: center;
+}
+
+.discountbtn input,
+.searchbtn input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 200px; /* Adjust width as needed */
+}
+
+.discountbtn button,
+.searchbtn button,
+.search-category button {
+  margin-left: 8px;
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.discountbtn button:hover,
+.searchbtn button:hover,
+.search-category button:hover {
+  background-color: #0056b3;
+}
 table {
     border-collapse: collapse;
     width: 100%;

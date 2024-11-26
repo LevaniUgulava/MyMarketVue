@@ -1,7 +1,28 @@
 <template>
   <div>
+      <div class="action-container">
+    <div class="discountbtn">
     <input type="number" v-model="discountValue" placeholder="Enter discount value">
     <button @click="applyDiscount">Set</button>
+    </div>
+      <div class="search-category">
+        <button @click="isModalVisible=true">Search by category</button>
+      </div>
+    <div class="searchbtn">
+    <input type="text" v-model="Searchname" placeholder="Search...">
+    <button @click="performSearch">Search</button>
+    </div>
+      </div>
+
+
+    <CategoryModalVue
+    :isModalVisible="isModalVisible"
+    @close-modal="closeModal"
+    @search-category="searchCategory"
+     />
+      
+
+
     <table>
       <thead>
         <tr>
@@ -36,14 +57,11 @@
         </tr>
       </tbody>
     </table>
-    <div class="pagination-container">
-      <div class="pagination">
-        <Bootstrap5Pagination
-          :data="pagination"
-          @pagination-change-page="fetchProductData"
-        />   
-      </div>
-    </div>
+ 
+
+        <Bootstrap5Pagination :data="pagination" @pagination-change-page="changePage" />
+
+    
     
   </div>
 </template>
@@ -51,25 +69,83 @@
 <script>
 import axios from 'axios';
 import { Bootstrap5Pagination } from "laravel-vue-pagination";
-
+import CategoryModalVue from '../CategoryModal.vue';
 export default {
   name: "DiscountManageComponent",
   components: {
-    Bootstrap5Pagination
+    Bootstrap5Pagination,
+    CategoryModalVue
   },
   data() {
     return {
       products: [],
+      isModalVisible:false,
       selectedProducts: [],
       discountValue: null,
       pagination: {},
-      message: ''
+      message: '',
+      Searchname:'',
+      selectedmainCategory:null,
+      selectedCategory:null,
+      selectedsubCategory:null,
     };
   },
+    watch: {
+    '$route.query': {
+      handler() {
+        this.fetchProductData();
+      },
+      immediate: true
+    }
+  },
   methods: {
-    async fetchProductData(page = 1) {
+       searchCategory(data) {
+      this.selectedmainCategory = data.maincategory; 
+      this.selectedCategory=data.category;
+      this.selectedsubCategory=data.subcategory;
+
+    },
+      openModal(){
+       this.isModalVisible= true
+    },
+      closeModal(){
+       this.isModalVisible= false
+    },
+      changePage(page) {
+      this.$router.push({ path: '/admin/discount', query: { ...this.$route.query, page } });
+    },
+performSearch() {
+  const currentQuery = { ...this.$route.query };
+      this.$router.push({
+        path: '/admin/discount',
+        query: {
+          ...currentQuery,
+          searchname: this.Searchname,        
+          maincategory: this.selectedmainCategory, 
+          category: this.selectedCategory,
+          subcategory: this.selectedsubCategory,
+          page: 1                             
+        }
+      });
+},
+    async fetchProductData() {
+      const token=localStorage.getItem('token');
+         const queryParams = new URLSearchParams(this.$route.query);
+    const page = parseInt(queryParams.get('page')) || 1;
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/api/admindisplay?page=${page}`);
+        const response = await axios.get(`admindisplay`,{
+            headers: {
+        Authorization: `Bearer ${token}` 
+                 },
+         params:{
+              page:page,
+              searchname:this.Searchname,
+              maincategory: this.selectedmainCategory,
+            category: this.selectedCategory,
+            subcategory: this.selectedsubCategory,
+          }
+      
+        });
         if (response.data && response.data.data) {
           this.products = response.data.data;
           this.pagination = {
@@ -89,6 +165,8 @@ export default {
       }
     },
     async applyDiscount() {
+            const token=localStorage.getItem('token');
+
       if (this.selectedProducts.length === 0) {
         this.message = 'Please select at least one product.';
         return;
@@ -104,7 +182,11 @@ export default {
       };
       console.log('Payload:', JSON.stringify(payload, null, 2));
       try {
-        const response = await axios.post('http://127.0.0.1:8000/api/discount', payload);
+        const response = await axios.post('discount', payload,{
+               headers: {
+        Authorization: `Bearer ${token}` 
+                 }
+        });
         console.log('Discount applied:', response.data);
         this.message = 'Discount successfully applied!';
         this.fetchProductData();
@@ -119,74 +201,93 @@ export default {
       }
     }
   },
-  created() {
-    this.fetchProductData();
-  }
+
 }
 </script>
 
 <style>
+
+.action-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.discountbtn,
+.searchbtn,
+.search-category {
+  display: flex;
+  align-items: center;
+}
+
+.discountbtn input,
+.searchbtn input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 200px; /* Adjust width as needed */
+}
+
+.discountbtn button,
+.searchbtn button,
+.search-category button {
+  margin-left: 8px;
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.discountbtn button:hover,
+.searchbtn button:hover,
+.search-category button:hover {
+  background-color: #0056b3;
+}
+
 table {
-  border-collapse: collapse;
-  width: 100%;
-  margin: 20px auto;
-  font-size: 0.9em;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+    border-collapse: collapse;
+    width: 100%;
 }
 
 th, td {
-  padding: 8px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
 }
 
-th {
-  background-color: #808080;
-  color: #ffffff;
-  text-transform: uppercase;
-  font-weight: bold;
-}
-
-tr {
-  border-bottom: 1px solid #dddddd;
-}
-
-tr:nth-of-type(even) {
-  background-color: #f3f3f3;
-}
-
-tr:last-of-type {
-  border-bottom: 2px solid #808080;
-}
-
-tr:hover {
-  background-color: #f1f1f1;
-}
 
 .img {
-  width: 40px;
-  height: 40px;
-  object-fit: cover;
-  border-radius: 5px;
-  transition: transform 0.3s;
+    width: 40px;
+}
+.btnsuccess, .btnwarning {
+    border: none;
+    border-radius: 5px;
+    width: 30px;
+    height: 30px; /* Corrected to px */
+    cursor: pointer;
+    color: white;
 }
 
-.img:hover {
-  transform: scale(1.2);
+.btnsuccess {
+    background-color: #28a745;
 }
 
-.fa-lari-sign {
-  margin-left: 5px;
+.btnsuccess:hover {
+    background-color: #218838; /* Hover color for success button */
 }
 
-.message {
-  text-align: center;
-  margin-top: 20px;
-  font-size: 1em;
-  color: #ff0000;
+.btnwarning {
+    background-color: #ffc107;
 }
 
-/* Pagination Container */
+.btnwarning:hover {
+    background-color: #e0a800; /* Hover color for warning button */
+}
 .pagination {
   display: flex;
   list-style-type: none;

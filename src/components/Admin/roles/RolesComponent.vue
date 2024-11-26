@@ -1,59 +1,75 @@
 <template>
     <div class="roles-container">
         <div class="role-section">
-            <h2>Admins</h2>
-          <table v-if="Object.keys(admins).length > 0">
+            <h2 dragover.prevent @drop="drop(1)">Admins</h2>
+          <table v-if="admins.length > 0">
            <tr>
              <th>Name</th>
              <th>Email</th>
            </tr>
-           <tr v-for="(name , email) in admins" :key="email" >
-             <td>{{ name }}</td>
-             <td>{{ email }}</td>
+           <tr v-for="item in admins" :key="item.id"  draggable="true"
+              @dragstart="dragStart(item.id)"
+              @dragover.prevent
+              @drop="drop(item.pivot.role_id)">
+             <td>{{ item.name }}</td>
+             <td>{{ item.email }}</td>
           </tr>
  
-         </table>              </div>
+         </table>             
+          </div>
 
         <div class="role-section">
-            <h2>Operators</h2>
-        <table v-if="Object.keys(operators).length > 0">
+            <h2  @dragover.prevent @drop="drop(2)">Operators</h2>
+        <table v-if="operators.length > 0">
            <tr>
              <th>Name</th>
              <th>Email</th>
            </tr>
-           <tr v-for="(name , email) in operators" :key="email" >
-             <td>{{ name }}</td>
-             <td>{{ email }}</td>
+           <tr v-for="item in operators" :key="item.id"  draggable="true"
+              @dragstart="dragStart(item.id)"
+              @dragover.prevent
+              @drop="drop(item.pivot.role_id)">
+             <td>{{ item.name }}</td>
+             <td>{{ item.email }}</td>
           </tr>
  
          </table>      
            </div>
 
         <div class="role-section">
-            <h2>Editors</h2>
-               <table v-if="Object.keys(editors).length > 0">
+            <h2 @dragover.prevent @drop="drop(3)">Editors</h2>
+               <table v-if="editors.length > 0">
            <tr>
              <th>Name</th>
              <th>Email</th>
            </tr>
-           <tr v-for="(name , email) in editors" :key="email" >
-             <td>{{ name }}</td>
-             <td>{{ email }}</td>
+           <tr v-for="item in editors" :key="item.id"  draggable="true"
+              @dragstart="dragStart(item.id)"
+              @dragover.prevent
+              @drop="drop(item.pivot.role_id)">
+             <td>{{ item.name }}</td>
+             <td>{{ item.email }}</td>
           </tr>
  
          </table>
         </div>
 
         <div class="role-section">
-            <h2>Defaults</h2>
-            <table v-if="Object.keys(defaultRoles).length > 0">
+            <h2 @dragover.prevent @drop="drop(4)" >Defaults</h2>            
+            
+
+            <table v-if="defaultRoles.length > 0">
            <tr>
              <th>Name</th>
              <th>Email</th>
            </tr>
-           <tr v-for="(name , email) in defaultRoles" :key="email" >
-             <td>{{ name }}</td>
-             <td>{{ email }}</td>
+           <tr v-for="item in defaultRoles" :key="item.id"
+             draggable="true"
+              @dragstart="dragStart(item.id)"
+              @dragover.prevent
+              @drop="drop(item.pivot.role_id)">
+             <td>{{ item.name }}</td>
+             <td>{{ item.email }}</td>
           </tr>
  
          </table>
@@ -77,15 +93,43 @@ export default {
     },
 
     methods: {
+
+    dragStart(index) {
+      this.draggedIndex = index;
+    },
+    async drop(targetIndex) {
+      const token=localStorage.getItem('token');
+           try {
+            if (this.draggedIndex !== null && this.draggedIndex !== undefined) {
+                console.log('Dropped on item with index:', targetIndex);
+
+                await axios.post(`admin/roles/change/user/${this.draggedIndex}/role/${targetIndex}`,{},{
+                  headers:{
+                        'Authorization': `Bearer ${token}`
+                  }
+                });
+
+                this.draggedIndex = null;
+            } else {
+                console.error('No item was dragged.');
+            }
+        } catch (error) {
+            console.error('Error making API call:', error);
+        }
+        this.getroles();
+    },
+
         async getroles() {
             const token = localStorage.getItem('token');
+ 
 
             try {
-                const response = await axios.get('http://127.0.0.1:8000/api/admin/roles/', {
+                const response = await axios.get('admin/roles/', {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
                 });
+
 
                 this.admins = response.data.admin;
                 this.operators = response.data.operator;
@@ -104,7 +148,7 @@ export default {
 }
 </script>
 
-<style lang="css">
+<style scoped>
 .roles-container {
     display: flex;
     flex-wrap: wrap;
@@ -125,13 +169,17 @@ export default {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.role-section h2 {
+.role-section input{
+
+}
+.role-section h2  {
     margin-top: 0;
     color: #333;
     font-size: 1.5em;
     border-bottom: 2px solid #4caf50;
     padding-bottom: 10px;
 }
+
 
 .role-item {
     margin: 5px 0;

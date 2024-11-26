@@ -2,13 +2,18 @@ import { createWebHistory, createRouter } from "vue-router";
 
 const routes = [
   {
-    path: "/",
+    path: "/:lang(en|ka)",
     component: () => import("@/views/MainlayoutView.vue"),
     children: [
       {
         path: "",
         name: "Home",
-        component: () => import("@/views/HomeView.vue"),
+        component: () => import("@/views/Products/MainHomeView.vue"),
+      },
+      {
+        path: "product",
+        name: "allproduct",
+        component: () => import("@/views/Products/ProductsView.vue"),
       },
       {
         path: "cart",
@@ -16,43 +21,57 @@ const routes = [
         component: () => import("@/views/CartView.vue"),
       },
       {
-        path: "/profile",
+        path: "profile",
         name: "Profile",
         component: () => import("@/views/ProfileView.vue"),
       },
       {
-        path: "/product/:id",
+        path: "product/:id",
         name: "single",
         component: () => import("@/views/SingleProductView.vue"),
         props: true,
       },
       {
-        path: "/favorites",
+        path: "favorites",
         name: "favorite",
         component: () => import("@/views/FavoriteView.vue"),
       },
       {
-        path: "/orders",
-        name: "orders",
+        path: "orders",
+        name: "ordersuser",
         component: () => import("@/views/OrderView.vue"),
+      },
+      {
+        path: "collection/:id",
+        name: "productsinglecollection",
+        component: () => import("@/components/CollectionsingleComponent.vue"),
+        props: true,
       },
     ],
   },
   {
-    path: "/login",
+    path: "/:lang(en|ka)/login",
     name: "Login",
     component: () => import("@/views/LoginView.vue"),
   },
   {
-    path: "/register",
+    path: "/:lang(en|ka)/register",
     name: "Register",
     component: () => import("@/views/RegisterView.vue"),
   },
-
+  {
+    path: "/email/verification",
+    component: () =>
+      import("@/components/Verify/VerificationMessageComponent.vue"),
+  },
+  {
+    path: "/:lang(en|ka)/email-verify/:id",
+    component: () => import("@/components/Verify/VerificationComponent.vue"),
+  },
   {
     path: "/admin",
     name: "Admin",
-    component: () => import("@/views/AdminView.vue"),
+    component: () => import("@/components/Admin/SideBar.vue"),
     meta: {
       needsauth: true,
     },
@@ -75,6 +94,25 @@ const routes = [
           import("@/components/Admin/ManageCategoryComponent.vue"),
       },
       {
+        path: "collection",
+        name: "collection",
+        component: () =>
+          import("@/components/Admin/Collection/CollectionComponent.vue"),
+      },
+      {
+        path: "collection/create",
+        name: "collectioncreate",
+        component: () =>
+          import("@/components/Admin/Collection/CollectionCreateComponent.vue"),
+      },
+      {
+        path: "collection/display/:id",
+        name: "singlecollection",
+        component: () =>
+          import("@/components/Admin/Collection/CollectionsingleComponent.vue"),
+        props: true,
+      },
+      {
         path: "roles",
         name: "roles",
         component: () => import("@/components/Admin/roles/RolesComponent.vue"),
@@ -91,12 +129,63 @@ const routes = [
         component: () =>
           import("@/components/Admin/DiscountManageComponent.vue"),
       },
+      {
+        path: "orders",
+        name: "orders",
+        component: () => import("@/components/Admin/orders/OrderView.vue"),
+      },
+      {
+        path: "orders/:id",
+        name: "SingleOrder",
+        component: () => import("@/components/Admin/orders/SingleView.vue"),
+        props: true,
+      },
+      {
+        path: "logs",
+        name: "logs",
+        component: () => import("@/views/Admin/LoggerView.vue"),
+      },
+
+      {
+        path: "statuses",
+        name: "status",
+        component: () => import("@/views/Status/StatusView.vue"),
+        children: [
+          {
+            path: "",
+            name: "statuses",
+            component: () =>
+              import("@/components/Status/StatusesComponent.vue"),
+          },
+          {
+            path: ":id(\\d+)",
+            name: "singlestatus",
+            component: () =>
+              import("@/components/Status/SingleStatusComponent.vue"),
+            props: true,
+          },
+          {
+            path: "eligible/:id(\\d+)",
+            name: "singleeligiblestatus",
+            component: () =>
+              import("@/components/Status/EligibleproductComponent.vue"),
+            props: true,
+          },
+          {
+            path: "seteligible/:id(\\d+)",
+            name: "productseligible",
+            component: () =>
+              import("@/components/Status/StatusProductsComponent.vue"),
+            props: true,
+          },
+        ],
+      },
     ],
   },
   {
     path: "/admin/login",
     name: "AdminLogin",
-    component: () => import("@/views/AdminLoginView.vue"),
+    component: () => import("@/views/Admin/AdminLoginView.vue"),
   },
 ];
 
@@ -105,21 +194,30 @@ const router = createRouter({
   routes,
 });
 
+router.afterEach(() => {
+  window.scrollTo(0, 0);
+});
+
 router.beforeEach((to, from, next) => {
   const isAuthenticated = !!localStorage.getItem("token");
   const roles = localStorage.getItem("roles");
 
-  console.log("isAuthenticated:", isAuthenticated);
-  console.log("roles:", roles);
-
-  if (to.meta.needsauth) {
-    if (isAuthenticated && roles !== "default") {
-      next();
+  if (to.path.startsWith("/admin")) {
+    if (to.meta.needsauth) {
+      if (isAuthenticated && roles !== "default") {
+        next();
+      } else {
+        next(`/admin/login`);
+      }
     } else {
-      next("/admin/login");
+      next();
     }
   } else {
-    next();
+    if (!to.params.lang) {
+      next({ path: "/ka" });
+    } else {
+      next();
+    }
   }
 });
 

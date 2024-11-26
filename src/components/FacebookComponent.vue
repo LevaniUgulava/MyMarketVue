@@ -25,7 +25,7 @@ export default {
   methods: {
     async login(accessToken, name){
    try{
-      const response = await axios.post('http://127.0.0.1:8000/api/auth/facebook', {
+      const response = await axios.post('auth/facebook', {
               accessToken : accessToken
       });
       console.log(response.data);
@@ -33,6 +33,7 @@ export default {
       localStorage.setItem('roles', response.data.roles[0]);
 
       localStorage.setItem('name', name);
+        this.$root.$emit('updateDisplayName'); // Emit a global event to update displayName if needed
 
 
 
@@ -62,6 +63,7 @@ console.log(error);
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 66%;
   padding: 10px;
   margin-top: 10px;
   border: 1px solid black;
@@ -72,6 +74,7 @@ console.log(error);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
   background-color: #3b5998;
+  margin-bottom: 10px;
 }
 .facebookbtn:hover{
   transform: translateY(-5px);

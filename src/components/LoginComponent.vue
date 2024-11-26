@@ -7,7 +7,7 @@
       <div class="login-content">
         <h2>Welcome Back!</h2>
         <p>Please login to your account</p>
-        <router-link to='/register' class="registerlink">Register</router-link>
+        <router-link to='/ka/register' class="registerlink">Register</router-link>
         <form @submit.prevent="login" method="post" id="loginform">
           <label for="email">Email:</label>
           <input v-model="email" type="text" name="email" id="email" required>
@@ -17,10 +17,10 @@
           <div class="social-login">
 
             <FacebookComponentVue/>
-            <button class="googlebtn" @click="googleLogin">
-              <i class="fab fa-google"></i>
-              <span class="icon-text"> Login with Google</span>
-            </button>
+            <GoogleComponent/>
+
+            
+          
           </div>
         </form>
       </div>
@@ -38,11 +38,14 @@
 <script>
 import axios from 'axios';
 import FacebookComponentVue from './FacebookComponent.vue';
+import GoogleComponent from './GoogleComponent.vue';
+
 
 export default {
   name: "LoginComponent",
     components: {
-    FacebookComponentVue
+    FacebookComponentVue,
+    GoogleComponent
   },
   data() {
     return {
@@ -53,7 +56,7 @@ export default {
   methods: {
     async login() {
       try {
-        const response = await axios.post('http://127.0.0.1:8000/api/login', {
+        const response = await axios.post('login', {
           email: this.email,
           password: this.password
         });
@@ -62,6 +65,7 @@ export default {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('roles', response.data.roles[0]);
         localStorage.setItem('userid', response.data.id);
+ 
 
         this.$router.push("/");
       } catch (error) {
@@ -154,23 +158,6 @@ button:disabled {
 
 
 
-.googlebtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  padding: 10px;
-  margin-top: 10px;
-  border: 1px solid black;
-  border-radius: 5px;
-  color: white;
-  font-size: 16px;
-  cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    background-color: #db4437;
-
-}
 
 
 

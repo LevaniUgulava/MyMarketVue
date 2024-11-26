@@ -2,10 +2,10 @@
     <div>
         <!-- Main Categories -->
         <div v-if="!showMainCategory">
-            <button @click="showMainCategoryMethod">Show Main Categories</button>
+            <button @click="toggleMainCategory">Show Main Categories</button>
         </div>
         <div v-else>
-            <button @click="closeMainCategoryMethod">Close Main Categories</button>
+            <button @click="toggleMainCategory">Close Main Categories</button>
         </div>
 
         <div class="container" v-if="showMainCategory">
@@ -38,16 +38,16 @@
 
         <!-- Categories -->
         <div v-if="!showCategory">
-            <button @click="showCategoryMethod">Show Categories</button>
+            <button @click="toggleCategory">Show Categories</button>
         </div>
         <div v-else>
-            <button @click="closeCategoryMethod">Close Categories</button>
+            <button @click="toggleCategory">Close Categories</button>
         </div>
 
         <div class="container" v-if="showCategory">
             <h1>Add Category</h1>
-            <select v-model="selectedMainCategory" @change="filterCategoriesMethod">
-                <option selected value="">Select a main category...</option>
+            <select v-model="selectedMainCategory" @change="filterCategories">
+                <option value="">Select a main category...</option>
                 <option v-for="category in mainCategories" :key="category.id" :value="category.id">
                     {{ category.name }}
                 </option>
@@ -68,7 +68,7 @@
                     <th>Action</th>
                 </tr>
                 <tr v-if="filteredCategories.length === 0">
-                    <td colspan="2">No categories available for the selected main category.</td>
+                    <td colspan="2">No categories available.</td>
                 </tr>
                 <tr v-for="category in filteredCategories" :key="category.id">
                     <td>{{ category.name }}</td>
@@ -83,22 +83,22 @@
 
         <!-- Subcategories -->
         <div v-if="!showSubCategory">
-            <button @click="showSubCategoryMethod">Show Subcategories</button>
+            <button @click="toggleSubCategory">Show Subcategories</button>
         </div>
         <div v-else>
-            <button @click="closeSubCategoryMethod">Close Subcategories</button>
+            <button @click="toggleSubCategory">Close Subcategories</button>
         </div>
 
         <div class="container" v-if="showSubCategory">
             <h1>Add Subcategory</h1>
             <select v-model="selectedMainCategoryForSub" @change="filterCategoriesForSub">
-                <option selected value="">Select a main category...</option>
+                <option value="">Select a main category...</option>
                 <option v-for="category in mainCategories" :key="category.id" :value="category.id">
                     {{ category.name }}
                 </option>
             </select>
-            <select v-model="selectedCategoryForSub" @change="filterSubCategoriesMethod">
-                <option selected value="">Select a category...</option>
+            <select v-model="selectedCategoryForSub" @change="filterSubCategories">
+                <option value="">Select a category...</option>
                 <option v-for="category in filteredCategories" :key="category.id" :value="category.id">
                     {{ category.name }}
                 </option>
@@ -119,7 +119,7 @@
                     <th>Action</th>
                 </tr>
                 <tr v-if="filteredSubcategories.length === 0">
-                    <td colspan="2">No subcategories available for the selected category.</td>
+                    <td colspan="2">No subcategories available.</td>
                 </tr>
                 <tr v-for="subcategory in filteredSubcategories" :key="subcategory.id">
                     <td>{{ subcategory.name }}</td>
@@ -152,209 +152,210 @@ export default {
             showCategory: false,
             showMainCategory: true,
             showSubCategory: false,
-            selectedMainCategory: null,
-            selectedMainCategoryForSub: null,
-            selectedCategoryForSub: null,
+            selectedMainCategory: '',
+            selectedMainCategoryForSub: '',
+            selectedCategoryForSub: '',
         };
     },
     methods: {
-        showCategoryMethod() {
-            this.showCategory = true;
-            this.getCategory(); // Load categories when showing
+        toggleMainCategory() {
+            this.showMainCategory = !this.showMainCategory;
+            if (this.showMainCategory) {
+                this.getMainCategory();
+            }
         },
-        closeCategoryMethod() {
-            this.showCategory = false;
+        toggleCategory() {
+            this.showCategory = !this.showCategory;
+            if (this.showCategory) {
+                this.getCategory();
+            }
         },
-        showMainCategoryMethod() {
-            this.showMainCategory = true;
-        },
-        closeMainCategoryMethod() {
-            this.showMainCategory = false;
-        },
-        showSubCategoryMethod() {
-            this.showSubCategory = true;
-            this.getSubCategory(); // Load subcategories when showing
-        },
-        closeSubCategoryMethod() {
-            this.showSubCategory = false;
-            this.filteredSubcategories = []; // Reset filtered subcategories
+        toggleSubCategory() {
+            this.showSubCategory = !this.showSubCategory;
+            if (this.showSubCategory) {
+                this.getSubCategory();
+            }
         },
         async createMainCategory() {
             const token = localStorage.getItem('token');
             try {
                 const response = await axios.post(
-                    'http://127.0.0.1:8000/api/admin/categories/maincategory/create',
+                    'admin/categories/maincategory/create',
                     { name: this.mainCategoryName },
                     {
                         headers: {
-                            'Content-Type': 'application/json',
                             'Authorization': `Bearer ${token}`
                         }
                     }
                 );
-                console.log('Main category created successfully:', response.data);
+                response
                 this.mainCategoryName = '';
-                this.getMainCategory(); // Refresh main categories
+                this.getMainCategory();
             } catch (error) {
-                console.error('Error creating main category:', error.response ? error.response.data : error.message);
+                console.error(error);
             }
         },
-
         async getMainCategory() {
             try {
-                const response = await axios.get('http://127.0.0.1:8000/api/maincategory');
+                const response = await axios.get('maincategory');
                 this.mainCategories = response.data;
             } catch (error) {
                 console.log(error);
             }
         },
-
         async deleteMainCategory(id) {
             const token = localStorage.getItem('token');
             try {
-                await axios.post(`http://127.0.0.1:8000/api/admin/categories/maincategory/delete/${id}`, {}, {
+                await axios.post(`admin/categories/maincategory/delete/${id}`, {}, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
                 });
                 this.mainCategories = this.mainCategories.filter(category => category.id !== id);
-                this.categories = this.categories.filter(category => category.id !== id);
-                this.subcategories = this.subcategories.filter(subcategory => subcategory.main_category_id !== id);
+                this.categories = this.categories.filter(category => category.maincategory_id !== id);
+                this.subcategories = this.subcategories.filter(subcategory => subcategory.maincategory_id !== id);
             } catch (error) {
                 console.log(error);
             }
         },
-
         async createCategory() {
             const token = localStorage.getItem('token');
             try {
                 const response = await axios.post(
-                    'http://127.0.0.1:8000/api/admin/categories/category/create',
+                    'admin/categories/category/create',
                     { name: this.categoryName, maincategory_id: this.selectedMainCategory },
                     {
                         headers: {
-                            'Content-Type': 'application/json',
                             'Authorization': `Bearer ${token}`
                         }
                     }
                 );
-                console.log('Category created successfully:', response.data);
+                response
                 this.categoryName = '';
-                this.getCategory(); // Refresh categories
+                this.getCategory();
             } catch (error) {
-                console.error('Error creating category:', error.response ? error.response.data : error.message);
+                console.error(error);
             }
         },
-
         async getCategory() {
             try {
-                const response = await axios.get('http://127.0.0.1:8000/api/category');
+                const response = await axios.get('category');
                 this.categories = response.data;
+                this.filterCategories(); // Filter categories initially
             } catch (error) {
                 console.log(error);
             }
         },
-
         async deleteCategory(id) {
             const token = localStorage.getItem('token');
             try {
-                await axios.post(`http://127.0.0.1:8000/api/admin/categories/category/delete/${id}`, {}, {
+                await axios.post(`admin/categories/category/delete/${id}`, {}, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
                 });
                 this.categories = this.categories.filter(category => category.id !== id);
-                this.filterCategoriesMethod(); // Refresh filtered categories
+                this.filterCategories();
             } catch (error) {
                 console.log(error);
             }
         },
-
         async createSubCategory() {
             const token = localStorage.getItem('token');
             try {
                 const response = await axios.post(
-                    'http://127.0.0.1:8000/api/admin/categories/subcategory/create',
+                    'admin/categories/subcategory/create',
                     { name: this.subcategoryName, maincategory_id: this.selectedMainCategoryForSub, category_id: this.selectedCategoryForSub },
                     {
                         headers: {
-                            'Content-Type': 'application/json',
                             'Authorization': `Bearer ${token}`
                         }
                     }
                 );
-                console.log('Subcategory created successfully:', response.data);
+                response
                 this.subcategoryName = '';
-                this.getSubCategory(); 
+                this.getSubCategory();
             } catch (error) {
-                console.error('Error creating subcategory:', error.response ? error.response.data : error.message);
+                console.error(error);
             }
         },
-
         async getSubCategory() {
             try {
-                const response = await axios.get('http://127.0.0.1:8000/api/subcategory');
+                const response = await axios.get('subcategory');
                 this.subcategories = response.data;
+                this.filterSubCategories(); // Filter subcategories initially
             } catch (error) {
                 console.log(error);
             }
         },
-
         async deleteSubCategory(id) {
             const token = localStorage.getItem('token');
             try {
-                await axios.post(`http://127.0.0.1:8000/api/admin/categories/subcategory/delete/${id}`, {}, {
+                await axios.post(`admin/categories/subcategory/delete/${id}`, {}, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
                 });
                 this.subcategories = this.subcategories.filter(subcategory => subcategory.id !== id);
-                this.filterSubCategoriesMethod(); // Refresh filtered subcategories
+                this.filterSubCategories();
             } catch (error) {
                 console.log(error);
             }
         },
-
-        filterCategoriesMethod() {
-            this.filteredCategories = this.categories.filter(x => x.maincategory_id === this.selectedMainCategory);
+        filterCategories() {
+            if (this.selectedMainCategory) {
+                this.filteredCategories = this.categories.filter(
+                    category => category.maincategory_id === this.selectedMainCategory
+                );
+            } else {
+                this.filteredCategories = this.categories; // Show all categories
+            }
         },
-
         filterCategoriesForSub() {
-            // This method fetches categories related to the selected main category for subcategories
-            this.filteredCategories = this.categories.filter(x => x.maincategory_id === this.selectedMainCategoryForSub);
-            this.selectedCategoryForSub = null; // Reset selected category for subcategory
-            this.filteredSubcategories = []; // Reset filtered subcategories
+            this.filteredCategories = this.categories.filter(
+                category => category.maincategory_id === this.selectedMainCategoryForSub
+            );
+            this.selectedCategoryForSub = '';
+            this.filterSubCategories(); // Reset subcategories
         },
-
-        filterSubCategoriesMethod() {
-            this.filteredSubcategories = this.subcategories.filter(x => x.maincategory_id === this.selectedMainCategoryForSub && x.category_id === this.selectedCategoryForSub);
-        }
+        filterSubCategories() {
+            if (this.selectedCategoryForSub) {
+                this.filteredSubcategories = this.subcategories.filter(
+                    subcategory => subcategory.category_id === this.selectedCategoryForSub
+                );
+            } else {
+                this.filteredSubcategories = this.subcategories; // Show all subcategories
+            }
+        },
     },
-
     mounted() {
         this.getMainCategory();
-        this.getCategory(); // Load categories on mount
-
+        this.getCategory();
     },
 };
 </script>
-
 <style scoped>
 .container {
     padding: 20px;
     max-width: 800px;
     margin: 0 auto;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 h1 {
     text-align: center;
     margin-bottom: 20px;
+    font-size: 24px;
+    color: #333;
 }
 
 .form {
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin-bottom: 20px;
 }
 
 .maincategoryinput {
@@ -379,6 +380,7 @@ h1 {
     cursor: pointer;
     font-size: 16px;
     margin-top: 10px;
+    transition: background-color 0.3s;
 }
 
 .add:hover {
@@ -390,17 +392,21 @@ h1 {
     max-width: 800px;
     margin: 20px auto;
     border-collapse: collapse;
+    background-color: #fdfdfd;
 }
 
 .category-table th, .category-table td {
     border: 1px solid #ddd;
-    padding: 8px;
+    padding: 10px;
     text-align: left;
+    font-size: 14px;
 }
 
 .category-table th {
     background-color: #f2f2f2;
     font-weight: bold;
+    text-align: center;
+    color: #555;
 }
 
 .category-table tr:nth-child(even) {
@@ -416,14 +422,42 @@ h1 {
     border: none;
     border-radius: 3px;
     cursor: pointer;
+    font-size: 14px;
 }
 
 .btn-danger {
-    background-color: red;
+    background-color: #dc3545;
     color: white;
+    transition: background-color 0.3s;
 }
 
 .btn-danger:hover {
-    background-color: darkred;
+    background-color: #c82333;
+}
+
+button {
+    padding: 10px 20px;
+    margin: 10px 0;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+select {
+    width: 100%;
+    max-width: 600px;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
 }
 </style>

@@ -1,9 +1,9 @@
 <template>
+<message :message="emitcartmessage" @close="emitcartmessage=''"/>
+ <Message :message="emitdata" @close="emitdata=''" :backgroundColor="'rgba(76, 175, 80, 0.25)'" 
+  :textColor="'#004d40'"   :positionType="'fixed'"
+ /><message :message="emitlikemessage" @close="emitlikemessage=''"/>
     <div class="main-content">
-      <Message v-if="emitdata" closable class="message">{{ emitdata }}</Message>
-      <Message v-if="emitlikemessage" closable class="message" severity="error">{{ emitlikemessage }}</Message>
-      <Message v-if="emitcartmessage" closable class="message" severity="error">{{ emitcartmessage }}</Message>
-
       <div class="products-wrapper">
         <ProductCardComponent
           v-for="(item, index) in products"
@@ -30,11 +30,11 @@
 </template>
 
 <script>
-import ProductCardComponent from '../components/ProductCardComponent.vue';
-import CommentModal from '../components/CommentModal.vue';
-import Message from 'primevue/message';
+import ProductCardComponent from '../../components/ProductCardComponent.vue';
+import CommentModal from '../../components/CommentModal.vue';
 import { Bootstrap5Pagination } from 'laravel-vue-pagination';
 import axios from 'axios';
+import Message from '@/components/Message/MessageComponent.vue';
 
 export default {
   name: 'HomeView',
@@ -50,6 +50,8 @@ export default {
       showModal: false,
       selectedProduct: null,
       selectedProductComments: [],
+      selectmin:0,
+      selectmax:0,
       searchname: '',
       maincategories: [],
       selectedmainCategory: null,
@@ -58,6 +60,7 @@ export default {
       emitdata: null,
       emitlikemessage: null,
       emitcartmessage: null,
+      Section:null,
       pagination: {},
     };
   },
@@ -88,44 +91,58 @@ export default {
       immediate: true,
     },
   },
-  methods: {
-     
+  methods: {     
     async fetchProducts() {
       const queryParams = new URLSearchParams(this.$route.query);
       const page = parseInt(queryParams.get('page')) || 1;
       this.searchname = queryParams.get('searchname') || '';
       this.selectedmainCategory = queryParams.get('maincategory') || '';
       this.selectedCategory = queryParams.get('category') || '';
-      this.selectedsubCategory = queryParams.get('subcategory') || ''; // Ensure this is set
+      this.selectedsubCategory = queryParams.get('subcategory') || '';
+      this.Section=queryParams.get('section') || '';
+      this.selectmin=queryParams.get('min');
+      this.selectmax=queryParams.get('max');
+
 
       const token=localStorage.getItem('token');
-      
+      const lang = this.$router.currentRoute.value.params.lang;
       try {
       
-        const response = await axios.get('http://127.0.0.1:8000/api/display', {
-// const response = await axios.get('http://7.tcp.eu.ngrok.io:10601/display', {
+        const response = await axios.get('display', {
 
           headers:{
             'Authorization':`Bearer ${token}`
           },
           params: {
+            lang:lang,
             searchname: this.searchname,
             maincategory: this.selectedmainCategory,
             category: this.selectedCategory,
             subcategory: this.selectedsubCategory,
+            section:this.Section,
+            min:this.selectmin,
+            max:this.selectmax,
             page: page,
           },
         });
 
-        this.products = response.data.data;
+        if(this.Section == "all"){
+       this.products = response.data.all;
+        }else if(this.Section == "discount"){
+           this.products = response.data.discount;
+        }else if(this.Section == "highrate"){
+           this.products = response.data.highrate;
+        }
+         
         
-        this.pagination = {
-          current_page: response.data.meta.current_page,
-          last_page: response.data.meta.last_page,
-          per_page: response.data.meta.per_page,
-          total: response.data.meta.total,
-          links: response.data.links,
-        };
+      this.pagination = {
+  current_page: response.data.meta?.current_page || 1,
+  last_page: response.data.meta?.last_page || 1,
+  per_page: response.data.meta?.per_page || 10,
+  total: response.data.meta?.total || 0,
+  links: response.data.links || [], 
+};
+
 
       } catch (error) {
         console.error('Error fetching products:', error);
@@ -135,7 +152,7 @@ export default {
    
     async showCommentsModal(id) {
       try {
-        const { data } = await axios.get(`http://127.0.0.1:8000/api/products/${id}/display`);
+        const { data } = await axios.get(`products/${id}/display`);
         this.selectedProductComments = data;
         this.selectedProduct = this.products.find((product) => product.id === id);
         this.showModal = true;
@@ -145,7 +162,7 @@ export default {
     },
     async refreshComments(productId) {
       try {
-        const { data } = await axios.get(`http://127.0.0.1:8000/api/products/${productId}/display`);
+        const { data } = await axios.get(`products/${productId}/display`);
         this.selectedProductComments = data;
       } catch (error) {
         console.error('Error refreshing comments:', error);
@@ -159,8 +176,7 @@ export default {
     },
   
     handleCartUpdated(cartData) {
-          console.log('Cart updated:', cartData.message);
-
+      console.log('Cart updated:', cartData.message);
       this.emitdata = cartData.message;
     },
     handleunauthorizedlike(likedmessage) {
@@ -170,7 +186,7 @@ export default {
       this.emitcartmessage = cartmessage;
     },
     changePage(page) {
-      this.$router.push({ path: '/', query: { ...this.$route.query, page } });
+      this.$router.push({ path: '/product/all', query: { ...this.$route.query, page } });
     },
 
   },
@@ -181,16 +197,11 @@ export default {
 <style >
 .products-wrapper {
   display: grid;
-  grid-template-columns: repeat(5, 1fr); /* 5 equal-width columns */
+  grid-template-columns: repeat(5, 1fr);
   width: 100%;
 }
 
-.message {
-  position: sticky;
-  top: 70px;
-  z-index: 999;
-  width: 100%;
-}
+
 .pagination {
   display: flex;
   list-style-type: none;
