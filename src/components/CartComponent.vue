@@ -36,11 +36,11 @@
 
       <div class="checkout-item">
         <label for="shipping">{{$t("cart.shipping")}}:</label>
-        <input type="text" id="shipping" :placeholder="$t('cart.shippinplaceholder')" />
+        <input type="text" id="shipping" :placeholder="$t('cart.shippinplaceholder')" v-model="data.address" />
       </div>
       <div class="checkout-item">
-        <label for="promocode">{{$t("cart.promocode")}}:</label>
-        <input type="text" id="promocode" :placeholder="$t('cart.promocodeplaceholder')" />
+        <label for="phone">{{$t("cart.phone")}}:</label>
+        <input type="number" id="phone" :placeholder="$t('cart.phoneplaceholder')" v-model="data.phone" />
       </div>
     </div>
   <div class="button-container">
@@ -60,6 +60,10 @@ export default {
       mycarts: [],
       allprice: 0,
       verfifyerrormessage:'',
+      data:{
+        address:null,
+        phone:null
+      }
     };
   },
     components: {
@@ -76,6 +80,10 @@ async checkout() {
     const token = localStorage.getItem('token');
     try {
         const response = await axios.get('checkout', {
+          params: {
+                address: this.data.address,
+                phone: this.data.phone
+            },
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -90,7 +98,7 @@ async checkout() {
                 
   window.scrollTo({
         top: 0,
-        behavior: 'smooth' // Adds a smooth scrolling animation
+        behavior: 'smooth'
     });
             } else {
                 alert(`Error: ${error.response.status} - ${error.response.data.message}`);

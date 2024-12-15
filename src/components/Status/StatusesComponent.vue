@@ -7,7 +7,6 @@
           <th>#</th>
           <th>Status Name</th>
           <th>Toachieve</th>
-          <th>Discount</th>
           <th>Action</th>
 
         </tr>
@@ -17,7 +16,6 @@
           <td>{{ status.id }}</td>
           <td>{{ status.name }}</td>
           <td>{{ status.toachieve }}</td>
-          <td>{{ status.discount}} %</td>
     <td>
   <p class="button delete" @click="deletestatus(status.id)">
     <i class="fa-solid fa-trash"></i> Delete
@@ -59,16 +57,6 @@
       placeholder="Enter the target to achieve"
       required
     />
-
-    <label for="discount">Discount (%):</label>
-    <input
-      type="number"
-      id="discount"
-      v-model="data.discount"
-      placeholder="Enter discount percentage"
-      required
-    />
-
     <div class="form-actions">
       <button type="submit" class="submit-button">Create</button>
       <button type="button" class="cancel-button" @click="cancel">
@@ -91,7 +79,6 @@ export default {
            data: {
               name: "",
               toAchieve: "",
-              discount: "",
               },
 
         }
@@ -100,7 +87,6 @@ export default {
         cancel(){
          this.data.name=''
          this.data.toAchieve=''
-         this.data.discount=''
         },
         viewstatus(id){
     this.$router.push({ name: "singlestatus", params: { id } });
@@ -126,7 +112,6 @@ export default {
                 const response = await axios.post('admin/userstatus/create',{
                     name:this.data.name,
                     toachieve:this.data.toAchieve,
-                    discount:this.data.discount
                     },{
                     headers:{
                         "Authorization":`Bearer ${token}`
@@ -134,7 +119,6 @@ export default {
                 });
                 this.data.name='',
                 this.data.toAchieve='',
-                this.data.discount='',
 
                 this.display();
                 console.log(response);

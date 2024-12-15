@@ -41,6 +41,8 @@ export default {
     promocode: "პრომოკოდი",
     promocodeplaceholder: "შეიყვანეთ პრომოკოდი",
     checkout: "გადახდა",
+    phone: "ტელეფონის ნომერი",
+    phoneplaceholder: "შეიყვანეთ ტელეფონის ნომერი",
   },
   favorite: {
     message: "თქვენ ჯერ არ მოგიწონებიათ პროდუქტი",

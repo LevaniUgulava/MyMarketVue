@@ -28,12 +28,12 @@ export default {
   name: "UserStatusComponent",
   data() {
     return {
-      totalSpent: 0, // User's total spent amount
-      progressPercentage: 0, // Progress bar percentage
-      CurrentStatus: null, // Current user status name
-      NextStatus: null, // Next status name
-      nextToAchieve: 0, // Threshold for the next status
-      remainingAmount: 0, // Remaining amount to achieve next status
+      totalSpent: 0, 
+      progressPercentage: 0,
+      CurrentStatus: null, 
+      NextStatus: null, 
+      nextToAchieve: 0, 
+      remainingAmount: 0, 
     };
   },
   methods: {
@@ -80,14 +80,12 @@ export default {
 
         this.totalSpent = parseFloat(user);
 
-        // Determine current and next statuses
         const { current, next } = this.determineStatuses(statuses, this.totalSpent);
 
         this.CurrentStatus = current ? current.name : "No Status";
         this.NextStatus = next ? next.name : null;
         this.nextToAchieve = next ? parseFloat(next.toachieve) : 0;
 
-        // Calculate the remaining amount for the next status
         this.remainingAmount = next
           ? Math.max(0, this.nextToAchieve - this.totalSpent)
           : 0;

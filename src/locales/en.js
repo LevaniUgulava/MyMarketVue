@@ -42,6 +42,8 @@ export default {
     promocode: "Promocode",
     promocodeplaceholder: "Enter promocode",
     checkout: "Checkout",
+    phone: "Phone Number",
+    phoneplaceholder: "Enter Phone Number",
   },
   favorite: {
     message: "You haven't liked any products yet",

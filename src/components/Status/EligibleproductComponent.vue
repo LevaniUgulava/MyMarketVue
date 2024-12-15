@@ -8,13 +8,11 @@
       </div>
       <div class="status-body">
         <p><strong>To Achieve:</strong> ${{ data.toachieve }}</p>
-        <p><strong>Discount:</strong> {{ data.discount }}%</p>
         <p><strong>Created At:</strong> {{ data.created_at || "N/A" }}</p>
         <p><strong>Updated At:</strong> {{ data.updated_at || "N/A" }}</p>
       </div>
     </div>
 
-    <!-- Eligible Products -->
     <div class="eligible-products">
       <div class="eligible-header">
         <h3>Eligible Products</h3>
@@ -56,8 +54,8 @@ export default {
   props: ["id"],
   data() {
     return {
-      data: {}, // Status and products data
-      selectedProducts: [], // Holds selected product IDs
+      data: {},
+      selectedProducts: [], 
     };
   },
   methods: {

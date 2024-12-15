@@ -2,7 +2,19 @@
   <div>
     <div class="header">
       <h3>Products for Status: {{ id }}</h3>
+      
       <button class="add-button" @click="addSelected">Add to Selected</button>
+          <div class="discount-input">
+            <label for="discount">Discount:</label>
+            <input
+              type="number"
+              min="0"
+              max="100"
+              v-model.number="discount"
+              class="discount-field"
+              placeholder="Enter discount"
+            />
+          </div>
     </div>
     <div v-if="filteredProducts.length > 0">
       <ul class="product-list">
@@ -43,8 +55,9 @@ export default {
       products: [],
       eligibleProductIds: [],
       filteredProducts: [],
-      selectedProducts: [], // Holds selected product IDs
+      selectedProducts: [], 
       pagination: {},
+      discount:null
     };
   },
   methods: {
@@ -91,7 +104,7 @@ export default {
     async addSelected() {
         const token = localStorage.getItem("token");
       try {
-        const response = await axios.post(`admin/eligible/create/${this.id}`,{id:this.selectedProducts}, {
+        const response = await axios.post(`admin/eligible/create/${this.id}`,{ids:this.selectedProducts,discount:this.discount}, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -111,6 +124,19 @@ export default {
 </script>
 
 <style scoped>
+.discount-input {
+  display: flex;
+  align-items: center;
+}
+
+.discount-field {
+  width: 150px;
+  margin-left: 10px;
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
 h3 {
   font-size: 24px;
   margin-bottom: 15px;
