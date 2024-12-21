@@ -10,7 +10,7 @@ import vue3GoogleLogin from "vue3-google-login";
 import { createI18n } from "vue-i18n";
 import en from "./locales/en";
 import ka from "./locales/ka";
-axios.defaults.baseURL = "http://127.0.0.1:8000/api/";
+axios.defaults.baseURL = "http://localhost:8001/api/";
 
 const app = createApp(App);
 
