@@ -12,7 +12,6 @@
         </template>
       </carousel> 
            <div class="data">
-
         <p>{{item.name}}</p>
     <div class="col quantity-control">
             <button class="quantitybtn" v-if="item.quantity > 1" @click="updatequantity(item.id, 'decrement',item.size)">-</button>
@@ -21,9 +20,19 @@
           </div>
           <p>{{item.price}}</p>
         <p>{{item.size}}</p>
-           <span class="close" @click="deletecart(item.id,item.size)">&times;</span>
 
-           <p>see details</p>
+<span class="close" @click="deletecart(item.id, item.size)"  :title="currentLanguage==='ka' ? 'პროდუქტის წაშლა' : 'Remove product'">
+  <i class="fas fa-trash-alt"></i>
+</span>
+<router-link 
+  :to="{ path: `/${currentLanguage}/product/${item.id}` }" 
+  class="product-link" 
+  :title="currentLanguage==='ka' ? 'პროდუქტის დეტალების ნახვა' : 'View product details'"
+>
+  <i class="fas fa-info-circle"></i> <span class="details-link">Details</span>
+</router-link>
+
+
       </div>
     </div>
    <div class="back-to-shop">
@@ -34,18 +43,25 @@
       <h3>{{$t("cart.summary")}}: {{allprice}}</h3>
       </div>
 
-      <div class="checkout-item">
-        <label for="shipping">{{$t("cart.shipping")}}:</label>
-        <input type="text" id="shipping" :placeholder="$t('cart.shippinplaceholder')" v-model="data.address" />
-      </div>
-      <div class="checkout-item">
-        <label for="phone">{{$t("cart.phone")}}:</label>
-        <input type="number" id="phone" :placeholder="$t('cart.phoneplaceholder')" v-model="data.phone" />
-      </div>
+<div class="checkout-item">
+  <div class="input-container">
+    <input type="text" id="shipping" placeholder=" " v-model="data.address" />
+    <label for="shipping">{{$t("cart.shippinplaceholder")}}</label>
+  </div>
+</div>
+<div class="checkout-item">
+  <div class="input-container">
+    <input type="number" id="phone" placeholder=" " v-model="data.phone" />
+    <label for="phone">{{$t("cart.phoneplaceholder")}}</label>
+  </div>
+</div>
+<div class="button-container">
+  <button class="checkbtn" @click="checkout">{{$t("cart.checkout")}}</button>
+</div>
+
     </div>
-  <div class="button-container">
-      <button class="checkbtn" @click="checkout">{{$t("cart.checkout")}}</button>
-    </div>  </div>
+        </div>
+
 </template>
 <script>
 import axios from 'axios';
@@ -63,7 +79,9 @@ export default {
       data:{
         address:null,
         phone:null
-      }
+      },
+      currentLanguage:localStorage.getItem('selectedLanguage'),
+
     };
   },
     components: {
@@ -178,6 +196,40 @@ async checkout() {
 
 
 <style scoped>
+.product-link {
+  text-decoration: none;
+  color: #1e90ff;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  transition: color 0.3s ease;
+}
+
+.product-link:hover {
+  color: #1c7ed6;
+}
+
+.details-link {
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.fas.fa-info-circle {
+  font-size: 1rem;
+}
+
+.close {
+  color: #ff6b6b;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.close:hover {
+  color: #fa5252;
+}
+
 .card {
   display: flex;
   background-color: #fff;
@@ -211,27 +263,57 @@ async checkout() {
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+
 .checkout-item {
   display: flex;
   flex-direction: column;
   margin-bottom: 12px;
 }
 
-.checkout-item label {
-  margin-bottom: 6px;
-  font-weight: 600;
-  color: #333;
+.input-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  margin-bottom:6px ;
 }
 
-.checkout-item input {
-  padding: 10px;
+input {
+  padding: 10px 12px;
   border-radius: 8px;
   border: 1px solid #ccc;
   width: 100%;
   box-sizing: border-box;
   font-size: 0.9rem;
   color: #555;
+  outline: none;
+  transition: all 0.3s ease;
+  background: none;
 }
+
+input::placeholder {
+  color: transparent;
+}
+
+label {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  font-size: 0.9rem;
+  color: #aaa;
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+input:focus + label,
+input:not(:placeholder-shown) + label {
+  top: -10px;
+  font-size: 0.8rem;
+  color: #333;
+  background: white;
+  padding: 0 5px;
+}
+
 
 .button-container {
   display: flex;
@@ -291,5 +373,68 @@ async checkout() {
   font-weight: bold;
   font-size: 1.1rem;
 }
+@media (min-width: 375px) and (max-width: 430px) {
+  h3{
+    font-size:0.7rem;
+  }
+  .close {
+  font-size: 0.9rem;
+}
+.product-link {
+  margin-top: 10px;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+
+}
+
+  .back-to-shop{
+  margin-top: 3rem;
+  font-size: 0.6rem;
+  }
+  .checkout{
+  padding: 10px;
+  }
+  .checkout-item input{
+  padding: 10px;
+  width: 90%;
+  font-size: 0.6rem;
+  }
+  .checkout-item label{
+    font-size:0.6rem
+  }
+  .checkbtn{
+  padding: 6px 8px;
+  border-radius: 5px;
+  font-size: 0.6rem;
+  transition: background-color 0.3s ease;
+  }
+  .data{
+  display: inline;
+  flex-direction: row;
+  width: 50%;
+  align-items: center;
+  background-color: #f0f2f5;
+  padding: 1rem; 
+  border: 1px solid #e0e0e0; 
+  border-radius: 8px; 
+   }
+   p{
+    font-size:0.6rem
+   }
+   .quantity{
+    font-size:0.6rem
+   }
+   .quantitybtn{
+    padding:0.3rem 0.5rem
+   }
+   .card{
+    padding:10px;
+   }
+   .custom-carousel {
+    width: 50%; 
+  }
+
+  }
+
 
 </style>

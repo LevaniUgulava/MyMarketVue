@@ -1,6 +1,15 @@
 import { createWebHistory, createRouter } from "vue-router";
-
 const routes = [
+  {
+    path: "/:pathMatch(.*)*",
+    name: "NotFound",
+    component: () => import("@/views/NotFoundView.vue"),
+  },
+
+  {
+    path: "/",
+    redirect: "/ka",
+  },
   {
     path: "/:lang(en|ka)",
     component: () => import("@/views/MainlayoutView.vue"),
@@ -47,6 +56,28 @@ const routes = [
         component: () => import("@/components/CollectionsingleComponent.vue"),
         props: true,
       },
+      {
+        path: "exclusive",
+        name: "ExclusivePage",
+        component: () => import("@/components/Status/ExclusivePage.vue"),
+      },
+
+      {
+        path: "about-us",
+        name: "AboutUs",
+        component: () => import("@/components/FooterContent/about-us.vue"),
+      },
+      {
+        path: "services",
+        name: "Service",
+        component: () => import("@/components/FooterContent/ServicesInfo.vue"),
+      },
+      {
+        path: "privacy-policy",
+        name: "privacy-policy",
+        component: () =>
+          import("@/components/FooterContent/privacy-policy.vue"),
+      },
     ],
   },
   {
@@ -59,11 +90,21 @@ const routes = [
     name: "Register",
     component: () => import("@/views/RegisterView.vue"),
   },
+
   {
-    path: "/email/verification",
-    component: () =>
-      import("@/components/Verify/VerificationMessageComponent.vue"),
+    path: "/reset/password/:id",
+    component: () => import("@/views/Password/PasswordComponent.vue"),
+    props: (route) => ({
+      id: route.params.id,
+      token: route.query.token,
+    }),
   },
+  {
+    path: "/forget/password",
+    name: "Forgetpassword",
+    component: () => import("@/views/Password/ForgetPassword.vue"),
+  },
+
   {
     path: "/:lang(en|ka)/email-verify/:id",
     component: () => import("@/components/Verify/VerificationComponent.vue"),
@@ -213,11 +254,7 @@ router.beforeEach((to, from, next) => {
       next();
     }
   } else {
-    if (!to.params.lang) {
-      next({ path: "/ka" });
-    } else {
-      next();
-    }
+    next();
   }
 });
 

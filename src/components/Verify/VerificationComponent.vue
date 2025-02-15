@@ -49,7 +49,6 @@ export default {
       this.message =
         error.response?.data?.message || "Email verification failed.";
       this.redirectMessage = "Returning to login";
-
       setTimeout(() => {
         router.push("/");
       }, 5000);

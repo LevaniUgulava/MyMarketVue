@@ -6,7 +6,7 @@
       </slide>
       <template #addons>
         <navigation />
-        <pagination />
+        <!-- <pagination /> -->
       </template>
     </carousel>
     <div class="product-details">
@@ -32,13 +32,12 @@
 
 <script>
 import 'vue3-carousel/dist/carousel.css'
-import { Carousel, Slide, Pagination, Navigation } from 'vue3-carousel'
+import { Carousel, Slide, Navigation } from 'vue3-carousel'
 
 export default {
   components: {
     Carousel,
     Slide,
-    Pagination,
     Navigation,
   },
   data() {
@@ -70,7 +69,7 @@ export default {
 
 <style scoped>
 .product-card {
-  width: 300px; 
+  width: 200px; 
   height: auto;
   background-color: #f8f9fa;
   border: 1px solid #e0e0e0;
@@ -94,7 +93,7 @@ export default {
   overflow: hidden; /* Ensure images stay within the carousel */
   margin-bottom: 15px;
   width: 100%; /* Full width of the card */
-  height: 180px; /* Adjusted height for proportional image display */
+  height: 250px; /* Adjusted height for proportional image display */
   display: flex; /* Center image horizontally and vertically */
   align-items: center;
   justify-content: center;
@@ -141,6 +140,19 @@ export default {
 
 .checkbox-container input {
   margin-right: 5px;
+}
+@media (min-width: 375px) and (max-width: 430px) {
+  .custom-carousel{
+     width: 100%; /* Full width of the card */
+     height: 150px;
+  }
+  .product-card{
+      width: 135px; 
+  }
+  .product-details p{
+    font-size: 0.6rem;
+  }
+
 }
 
 </style>

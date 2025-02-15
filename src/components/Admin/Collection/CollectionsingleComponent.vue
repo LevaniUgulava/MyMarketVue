@@ -13,6 +13,7 @@
                     <th>Product Name</th>
                     <th>Description</th>
                     <th>Price</th>
+                    <th>discount</th>
                     <th>Discounted Price</th>
                 </tr>
             </thead>
@@ -22,6 +23,7 @@
                     <td>{{ product.name }}</td>
                     <td>{{ product.description }}</td>
                     <td>{{ product.price }}</td>
+                    <td>{{ product.discount }}</td>
                     <td>{{ product.discountprice }}</td>
                 </tr>
             </tbody>
@@ -36,7 +38,8 @@
                     <th>Product ID</th>
                     <th>Product Name</th>
                     <th>Description</th>
-                    <th>Price</th>
+                    <th>Price</th>    
+                    <th>discount</th>
                     <th>Add to Collection</th>
                 </tr>
             </thead>
@@ -46,6 +49,8 @@
                     <td>{{ product.name }}</td>
                     <td>{{ product.description }}</td>
                     <td>{{ product.price }}</td>
+                    <td>{{ product.discount }}</td>
+                    
                     <td>
                         <button @click="addProductToCollection(product.id)">Add</button>
                     </td>
@@ -85,16 +90,13 @@ export default {
         async getAllProducts() {
             const token = localStorage.getItem('token');
             try {
-                const response = await axios.get('display', {
+                const response = await axios.get(`admin/collection/display/products/${this.id}`, {
                     headers: {
                         "Authorization": `Bearer ${token}`
                     },
-                    params:{
-                        section:"all"
-                    }
                 });
 
-                this.allProducts = response.data.all.filter(product => 
+                this.allProducts = response.data.data.filter(product => 
                     !this.collection.products.some(p => p.id === product.id)
                 );
             } catch (error) {

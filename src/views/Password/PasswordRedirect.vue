@@ -1,6 +1,6 @@
 <template lang="">
     <div>
-        Please check email
+        hello
     </div>
 </template>
 <script>

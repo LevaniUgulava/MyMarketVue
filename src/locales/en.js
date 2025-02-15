@@ -13,6 +13,7 @@ export default {
     cart: "Cart",
     favorite: "Favorite",
     orders: "Orders",
+    openclose: "Close",
   },
   homemain: {
     all: "All Products",
@@ -30,6 +31,19 @@ export default {
       currentpass: "Current Password{msg}",
       newpass: "New Password{msg}",
       password: "password",
+    },
+    status: {
+      title: "Status Benefits",
+      desc: "Unlock exclusive discounts on specific products based on your status level.",
+      CurrentStatus: "Current Status",
+      NextStatus: "Next Status",
+      total: "Total Spent",
+      toachieve: "To Achieve Next Status",
+      left: "Remaining to Achieve Next Status",
+    },
+    verify: {
+      title: "Verification",
+      desc: "Verification is required to complete your purchase. This step ensures the security of your account and protects your transactions. Please verify your account to proceed.",
     },
   },
 
@@ -74,5 +88,13 @@ export default {
     order: "Order",
     pending: "Pending Orders",
     completed: "Completed Orders",
+  },
+  footer: {
+    about: {
+      title: "About Us",
+      txt1: "Welcome to our company! We are dedicated to providing high-quality services and building long-term relationships with our clients. Our goal is to meet your expectations with professionalism and excellence.",
+      txt2: "At the core of our values are integrity, innovation, and customer satisfaction. We believe in working together to create meaningful and lasting impacts.",
+      txt3: "Thank you for trusting us as your partner. We look forward to working with you!",
+    },
   },
 };

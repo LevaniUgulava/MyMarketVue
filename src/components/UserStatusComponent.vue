@@ -1,21 +1,20 @@
 <template>
   <div>
-    <h3 class="status-title">Status Benefits</h3>
+    <h3 class="status-title">{{ $t("profile.status.title") }}</h3>
     <p class="status-description">
-      Unlock exclusive discounts on specific products based on your status level.
-    </p>
+      {{ $t("profile.status.desc") }}    </p>
     <div class="status-bar">
       <div class="progress" :style="{ width: `${progressPercentage}%` }"></div>
     </div>
     <div class="status-info">
-      <span class="status-label">Current Status: {{ CurrentStatus }}</span>
-      <span class="status-label">Next Status: {{ NextStatus || 'None' }}</span>
+      <span class="status-label">{{ $t("profile.status.CurrentStatus") }}: {{ CurrentStatus }}</span>
+      <span class="status-label">{{ $t("profile.status.NextStatus") }}: {{ NextStatus || 'None' }}</span>
     </div>
     <div class="status-details">
-      <p>Total Spent: {{ totalSpent }}</p>
-      <p>To Achieve Next Status: {{ nextToAchieve }}</p>
+      <p>{{ $t("profile.status.total") }}: {{ totalSpent }}</p>
+      <p>{{ $t("profile.status.toachieve") }}: {{ nextToAchieve }}</p>
       <p>
-        Remaining to Achieve Next Status:
+        {{ $t("profile.status.left") }}:
         {{ remainingAmount > 0 ? remainingAmount : 'Achieved' }}
       </p>
     </div>
@@ -90,7 +89,6 @@ export default {
           ? Math.max(0, this.nextToAchieve - this.totalSpent)
           : 0;
 
-        // Update progress bar
         this.updateProgress();
       } catch (error) {
         console.log(error);
@@ -121,7 +119,7 @@ export default {
 .status-bar {
   position: relative;
   width: 100%;
-  height: 30px;
+  height: 15px;
   background-color: #e6e6e6;
   border-radius: 15px;
   overflow: hidden;
@@ -154,5 +152,22 @@ export default {
 
 .status-details p {
   margin: 5px 0;
+}
+@media (min-width: 375px) and (max-width: 430px) {
+  .status-title{
+    font-size: 0.8rem;
+  }
+  .status-description{
+    font-size: 0.6rem;
+  }
+  .status-label{
+    font-size: 0.5rem;
+  }
+  .status-bar{
+    height: 10px;
+  }
+  .status-details p{
+    font-size: 0.5rem;
+  }
 }
 </style>

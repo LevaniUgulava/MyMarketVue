@@ -5,7 +5,8 @@
   </head>
   <div class="header sticky-header">
  
-    <h1>Website Header</h1>
+    <img src="/logo/logo2.png" class="logo">
+
     <nav>
     
       <div class="search-container">
@@ -14,18 +15,13 @@
         <button @click="performSearch" class="srchbtn"><i class="fa-solid fa-magnifying-glass"></i></button>
       </div>
        <div>
-  <div class="language-switcher">
-    <i class="fa-solid fa-globe"></i>
-    <button @click="setLanguage('en')" class="lang-btn">English</button>
-    <button @click="setLanguage('ka')" class="lang-btn">ქართული</button>
-  </div>
   </div>
       <div class="user-section">
         <router-link v-if="notLogin" to="/ka/login">{{$t('header.user.login')}}</router-link>
         <div v-else class="dropdown-wrapper">
           <button @click="toggleDropdown" class="dropdown">{{ displayName }}</button>
           <ul v-if="isOpen" class="dropdown-menu">
-            <li v-for="item in items" :key="item" @click="selectItem(item)">
+            <li v-for="item in (currentlang == 'ka' ? kaitems : enitems)" :key="item" @click="selectItem(item)">
               {{ item }}
             </li>
           </ul>
@@ -44,52 +40,15 @@
 <script>
 import axios from 'axios';
 import CategoryModal from './CategoryModal.vue';
-import { useI18n } from 'vue-i18n';
-import { computed, watch } from 'vue';
-import router from '@/router';
 
 export default {
-  setup() {
-    const { locale, t } = useI18n();
-
-    const setInitialLanguage = () => {
-      const lang = router.currentRoute.value.params.lang || 'en'; 
-      locale.value = lang;
-    };
-    watch(() => router.currentRoute.value.params.lang, (newLang) => {
-      if (newLang) {
-        locale.value = newLang;
-      }
-    });
-
- const setLanguage = (lang) => {
-  const currentPath = router.currentRoute.value.path.replace(/^\/(en|ka)/, `/${lang}`);
-  const currentQuery = { ...router.currentRoute.value.query };
-
-  router.replace({
-    path: currentPath,
-    query: currentQuery,
-  });
-  locale.value = lang;
-};
-
-
-
-    const items = computed(() => [t('header.user.profile'), t('header.user.logout')]);
-
-    return {
-      setLanguage,
-      items,
-      setInitialLanguage,
-    };
-  },
-
   name: 'HeaderComponent',
   components: {
     CategoryModal,
   },
   data() {
     return {
+      currentlang:localStorage.getItem('selectedLanguage'),
       isOpen: false,
       displayName: 'Login',
       searchname: '',
@@ -97,7 +56,10 @@ export default {
       selectedsubCategory: '',
       isModalVisible: false,
       emitmin:'',
-      emitmax:''
+      emitmax:'',
+      enitems: ["Profile","Logout"], 
+      kaitems: ["პროფილი","გასვლა"], 
+
     };
   },
 
@@ -108,7 +70,6 @@ export default {
   },
   
   mounted() {
-    this.setInitialLanguage(); 
     const name = localStorage.getItem('name');
     if (!this.notLogin) {
       this.displayName = name || 'User';
@@ -180,35 +141,9 @@ export default {
 
 
 <style>
-
-.language-switcher {
-  display: flex;
-  align-items: center;
-  background-color: #e6e6e1;
-  padding: 10px;
-  border-radius: 5px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.language-switcher i {
-  font-size: 20px;
-  margin-right: 10px;
-  color: #6e6d6d; 
-}
-
-.lang-btn {
-  background-color: transparent;
-  border: 2px solid #6e6d6d; /* Teal */
-  border-radius: 5px;
-  color: #6e6d6d;
-  padding: 5px 10px;
-  margin-left: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s, color 0.3s;
-}
-
-.lang-btn:hover {
-  background-color: rgba(48, 101, 50, 0.25);
+.logo{
+  height: 65px;
+  margin-left: 20px;
 }
 
 .sticky-header {
@@ -263,8 +198,13 @@ h1 {
   align-items: center;
 }
 
+.dropdown-wrapper {
+  position: relative; /* Ensure the dropdown menu is positioned relative to this parent */
+}
+
 .dropdown {
-  padding: 8px 16px;
+  padding: 8px 35px;
+  width: 100%;
   cursor: pointer;
   border: none;
   background: none;
@@ -273,14 +213,11 @@ h1 {
   transition: background-color 0.3s;
 }
 
-.dropdown:hover {
-  background-color: rgba(76, 175, 80, 0.15); /* Soft green */
-}
-
 .dropdown-menu {
   position: absolute;
-  top: 100%;
-  right: 0;
+  width: 100%; 
+  top: 100%; 
+  left: 0; 
   padding: 0;
   margin: 0;
   list-style: none;
@@ -291,16 +228,23 @@ h1 {
   z-index: 1000;
   display: flex;
   flex-direction: column;
+  align-items: center;
 }
-
 .dropdown-menu li {
-  padding: 10px 20px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  width: 100%; 
+  padding: 10px 20px;
+  text-align: center; 
+  box-sizing: border-box; 
+  transition: background-color 0.2s ease;
 }
 
 .dropdown-menu li:hover {
-  background-color: rgba(76, 175, 80, 0.25); /* Light green */
+  background-color: rgba(76, 175, 80, 0.25);
+}
+
+.dropdown:hover {
+  background-color: rgba(76, 175, 80, 0.15);
 }
 
 .srchbtn {
@@ -336,6 +280,7 @@ h1 {
 .search-container {
   display: flex;
   align-items: center;
+  margin-left: 30px;
 }
 
 .search-container input {
@@ -354,82 +299,39 @@ h1 {
 }
 
 /* Adjust for smaller devices (e.g., iPhone 13 Pro) */
-@media (max-width: 390px) {
+@media (min-width: 375px) and (max-width: 430px) {
+.logo{
+  height: 30px;
+  margin-left: 10px;
+}
+  .header {  
+  padding: 0px 0px;
+}
   h1 {
-    font-size: 0.8rem;
-  }
-
-  .search-container {
-    width: 60%;
+    font-size: 0.5rem;
     margin-left: 5%;
   }
+  nav a {
+      font-size: 0.7rem;
 
-  .search-container input {
-    width: 100%;
-    font-size: 0.8rem;
-  }
-
-  .srchbtn,
-  .catbtn {
-    width: 30px;
-    height: 32px;
-    background-color: #008080; /* Teal */
-  }
-
-  .user-section {
-    margin-left: auto;
-  }
-
-  nav {
-    flex-wrap: wrap;
-    justify-content: space-between;
-    padding: 5px;
-  }
-}
-
-/* Adjust for medium devices */
-@media (min-width: 391px) and (max-width: 575px) {
-  h1 {
-    font-size: 1rem;
   }
 
   .search-container {
-    width: 80%;
-    margin: 0 auto;
-  }
-
-  .search-container input {
-    width: 100%;
-    font-size: 0.9rem;
-  }
-
-  .srchbtn,
-  .catbtn {
-    width: 35px;
-    height: 38px;
-    background-color: #008080; /* Teal */
-  }
-
-  .user-section {
-    margin-left: auto;
-  }
-
-  nav {
-    padding: 5px;
-  }
-}
-
-/* Adjust for larger mobile devices */
-@media (min-width: 576px) and (max-width: 767px) {
-  h1 {
-    font-size: 1.2rem;
-  }
-
-  .search-container {
-    width: 50%;
-    margin-left: 5%;
+    width: 70%;
     display: flex;
     align-items: center;
+  }
+
+  .search-container input {
+    width: 100%;
+    font-size: 0.5rem;
+  }
+
+  .srchbtn,
+  .catbtn {
+    width: 45px;
+    height: 30px;
+    font-size: 0.5rem;
   }
 
   .user-section {
@@ -442,10 +344,20 @@ h1 {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 100%;
-    padding: 0 10px;
+    padding: 5px 10px;
   }
+  .dropdown {
+    padding: 8px 25px;
+    font-size: 0.6rem;
+   
 }
 
 
+  .dropdown-menu li {
+    font-size: 0.6rem;
+
+  }
+
+
+}
 </style>

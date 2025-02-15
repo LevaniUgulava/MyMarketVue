@@ -1,129 +1,85 @@
 <template>
- <Message :message="emitdata" @close="emitdata=''" :backgroundColor="'rgba(76, 175, 80, 0.25)'" 
-  :textColor="'#004d40'"   :positionType="'fixed'"
- />
-   <Message :message="emitlikemessage" @close="emitlikemessage=''"  />
-     <Message :message="emitcartmessage" @close="emitcartmessage=''" />
+  <Message :message="emitdata" @close="emitdata = ''" :backgroundColor="'rgba(76, 175, 80, 0.25)'" :textColor="'#004d40'"
+    :positionType="'fixed'" />
+  <Message :message="emitlikemessage" @close="emitlikemessage = ''" />
+  <Message :message="emitcartmessage" @close="emitcartmessage = ''" />
   <div>
-   
+    <ExclusiveComponent />
+
     <section class="section">
       <div class="section-header">
-        <p>{{$t('homemain.all')}}</p>
-        <button @click="see('all')">{{$t('homemain.seeall')}}</button>
+        <p>{{ $t('homemain.all') }}</p>
+        <button @click="see('all')">{{ $t('homemain.seeall') }}</button>
       </div>
 
       <div class="product-grid">
-        <ProductCardComponent class="product-card"
-          v-for="(item, index) in allProducts"
-          :key="index"
-          :initialproduct="item"
-          @show-comments="showCommentsModal(item.id)"
-          @cart-updated="handleCartUpdated"
-          @liked-message="handleunauthorizedlike"
-          @cart-message="handleunauthorizedcart"
-
-        />
+        <ProductCardComponent class="product-card" v-for="(item, index) in allProducts" :key="index"
+          :initialproduct="item" @show-comments="showCommentsModal(item.id)" @cart-updated="handleCartUpdated"
+          @liked-message="handleunauthorizedlike" @cart-message="handleunauthorizedcart" />
       </div>
 
-         <CommentModal
-      v-if="showModal"
-      :product="selectedProduct"
-      :comments="selectedProductComments"
-      @close="closeModal"
-      @comment-submitted="refreshComments(selectedProduct.id)"
-    />
+      <CommentModal v-if="showModal" :product="selectedProduct" :comments="selectedProductComments" @close="closeModal"
+        @comment-submitted="refreshComments(selectedProduct.id)" />
     </section>
-<section class="section">
-  <section class="subsection">
-    <router-link
-      v-for="(section, index) in section1"
-      :key="index"
-      :to="{ name: 'productsinglecollection', params: { id: section.id } }" 
-      class="grid-item"
-      :style="{ '--header-color': section.headerColor, '--image-url': `url(${section.media_urls})` }"
-    >
-      <div class="grid-item-text">
-        <h1>{{ section.title }}</h1>
-        <p class="description">{{ section.description }}</p>
-        <span v-if="section.discount" class="discount">-{{ section.discount }}%</span>
-      </div>
-      <div class="grid-item-image"></div>
-    </router-link>
-  </section>
-</section>
+    <section class="section" v-if="Array.isArray(section1) && section1.length > 0">
+      <section class="subsection">
+        <router-link v-for="(section, index) in section1" :key="index"
+          :to="{ name: 'productsinglecollection', params: { id: section.id } }" class="grid-item"
+          :style="{ '--header-color': section.headerColor, '--image-url': `url(${section.media_urls})` }">
+          <div class="grid-item-text">
+            <h1>{{ section.title }}</h1>
+            <p class="description">{{ section.description }}</p>
+            <span v-if="section.discount" class="discount">-{{ section.discount }}%</span>
+          </div>
+          <div class="grid-item-image"></div>
+        </router-link>
+      </section>
+    </section>
 
 
     <section class="section">
       <div class="section-header">
-        <p>{{$t('homemain.discount')}}</p>
-        <button @click="see('discount')">{{$t('homemain.seeall')}}</button>
+        <p>{{ $t('homemain.discount') }}</p>
+        <button @click="see('discount')">{{ $t('homemain.seeall') }}</button>
       </div>
 
       <div class="product-grid">
-          <ProductCardComponent class="product-card"
-          v-for="(item, index) in discountProducts"
-          :key="index"
-          :initialproduct="item"
-          @show-comments="showCommentsModal(item.id)"
-          @cart-updated="handleCartUpdated"
-          @liked-message="handleunauthorizedlike"
-          @cart-message="handleunauthorizedcart"
-
-        />
+        <ProductCardComponent class="product-card" v-for="(item, index) in discountProducts" :key="index"
+          :initialproduct="item" @show-comments="showCommentsModal(item.id)" @cart-updated="handleCartUpdated"
+          @liked-message="handleunauthorizedlike" @cart-message="handleunauthorizedcart" />
       </div>
-            <CommentModal
-      v-if="showModal"
-      :product="selectedProduct"
-      :comments="selectedProductComments"
-      @close="closeModal"
-      @comment-submitted="refreshComments(selectedProduct.id)"
-    />
+      <CommentModal v-if="showModal" :product="selectedProduct" :comments="selectedProductComments" @close="closeModal"
+        @comment-submitted="refreshComments(selectedProduct.id)" />
+    </section>
+
+    <section class="section" v-if="Array.isArray(section2) && section2.length > 0">
+      <section class="subsection">
+        <router-link v-for="(section, index) in section2" :key="index"
+          :to="{ name: 'productsinglecollection', params: { id: section.id } }" class="grid-item"
+          :style="{ '--header-color': section.headerColor, '--image-url': `url(${section.media_urls})` }">
+          <div class="grid-item-text">
+            <h1>{{ section.title }}</h1>
+            <p class="description">{{ section.description }}</p>
+            <span v-if="section.discount" class="discount">-{{ section.discount }}%</span>
+          </div>
+          <div class="grid-item-image"></div>
+        </router-link>
+      </section>
     </section>
 
     <section class="section">
-  <section class="subsection">
-    <router-link
-      v-for="(section, index) in section2"
-      :key="index"
-      :to="{ name: 'productsinglecollection', params: { id: section.id } }" 
-      class="grid-item"
-      :style="{ '--header-color': section.headerColor, '--image-url': `url(${section.media_urls})` }"
-    >
-      <div class="grid-item-text">
-        <h1>{{ section.title }}</h1>
-        <p class="description">{{ section.description }}</p>
-        <span v-if="section.discount" class="discount">-{{ section.discount }}%</span>
-      </div>
-      <div class="grid-item-image"></div>
-    </router-link>
-  </section>
-</section>
-
-      <section class="section">
       <div class="section-header">
-        <p>{{$t('homemain.rate')}}</p>
-        <button @click="see('highrate')">{{$t('homemain.seeall')}}</button>
+        <p>{{ $t('homemain.rate') }}</p>
+        <button @click="see('highrate')">{{ $t('homemain.seeall') }}</button>
       </div>
 
       <div class="product-grid">
-          <ProductCardComponent class="product-card"
-          v-for="(item, index) in rateProducts"
-          :key="index"
-          :initialproduct="item"
-          @show-comments="showCommentsModal(item.id)"
-          @cart-updated="handleCartUpdated"
-          @liked-message="handleunauthorizedlike"
-          @cart-message="handleunauthorizedcart"
-
-        />
+        <ProductCardComponent class="product-card" v-for="(item, index) in rateProducts" :key="index"
+          :initialproduct="item" @show-comments="showCommentsModal(item.id)" @cart-updated="handleCartUpdated"
+          @liked-message="handleunauthorizedlike" @cart-message="handleunauthorizedcart" />
       </div>
-            <CommentModal
-      v-if="showModal"
-      :product="selectedProduct"
-      :comments="selectedProductComments"
-      @close="closeModal"
-      @comment-submitted="refreshComments(selectedProduct.id)"
-    />
+      <CommentModal v-if="showModal" :product="selectedProduct" :comments="selectedProductComments" @close="closeModal"
+        @comment-submitted="refreshComments(selectedProduct.id)" />
     </section>
   </div>
 </template>
@@ -133,73 +89,80 @@ import ProductCardComponent from '@/components/ProductCardComponent.vue';
 import CommentModal from '@/components/CommentModal.vue';
 import axios from 'axios';
 import Message from '@/components/Message/MessageComponent.vue';
-
+import ExclusiveComponent from '@/components/Status/ExclusiveCollection.vue';
 export default {
 
   components: {
     ProductCardComponent,
     CommentModal,
+    ExclusiveComponent,
     Message,
+
   },
   data() {
     return {
+      currentLanguage: localStorage.getItem('selectedLanguage'),
       allProducts: [],
       discountProducts: [],
-      rateProducts:[],
+      rateProducts: [],
       selectedProduct: null,
       selectedProductComments: [],
-      emitdata: '', 
-      emitlikemessage: '', 
-      emitcartmessage: '', 
-      showModal: false, 
+      emitdata: '',
+      emitlikemessage: '',
+      emitcartmessage: '',
+      message: {
+        ka: {
+          'AlreadyExist': "პროდუქტი უკვე დამატებულია",
+          'AddSuccestocart': "პროდუქტი წარმატებით დაემატა"
+        },
+        en: {
+          'AlreadyExist': "Product Already Exist",
+          'AddSuccestocart': "Product Added Succesfully"
+        }
+      },
+      showModal: false,
       sections: [],
-      section1:[],
-      section2:[],
+      section1: [],
+      section2: [],
 
 
     };
   },
   methods: {
-async getcollection() {
-            try {
-                const response = await axios.get('collection/display');
-                 
+    async getcollection() {
+      try {
+        const response = await axios.get('collection/display');
+        this.sections = response.data;
+        if (this.sections.length % 2 === 0) {
+          this.section1 = this.sections.slice(0, this.sections.length / 2);
+          this.section2 = this.sections.slice(this.sections.length / 2);
+        } else {
+          const midpoint = Math.ceil(this.sections.length / 2);
+          this.section1 = this.sections.slice(0, midpoint);
+          this.section2 = this.sections.slice(midpoint);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
 
-                this.sections = response.data;
-              if (this.sections.length % 2 === 0) {
-                   this.section1 = this.sections.slice(0, this.sections.length / 2);
-                   this.section2 = this.sections.slice(this.sections.length / 2);
-              } else {
-               const midpoint = Math.ceil(this.sections.length / 2);
-                 this.section1 = this.sections.slice(0, midpoint);
-                  this.section2 = this.sections.slice(midpoint);
-                  }
-
-
-              
-
-            } catch (error) {
-                console.log(error);
-            }
-        },
-        
-        async fetchall() {
-       const lang = this.$router.currentRoute.value.params.lang;
+    async fetchall() {
+      const lang = this.$router.currentRoute.value.params.lang;
       const token = localStorage.getItem('token');
       try {
         const response = await axios.get('display', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-            params: {
-            lang:lang,
-             section: ['all', 'discount', 'highrate']
-           }
+          params: {
+            lang: lang,
+            section: ['all', 'discount', 'highrate']
+          }
         });
 
-       this.allProducts=response.data.all;
-       this.discountProducts=response.data.discount;
-       this.rateProducts=response.data.highrate;
+        this.allProducts = response.data.all;
+        this.discountProducts = response.data.discount;
+        this.rateProducts = response.data.highrate;
 
       } catch (error) {
         console.error('Error fetching products:', error);
@@ -237,28 +200,30 @@ async getcollection() {
         this.$router.push({ path: `/${this.$route.params.lang}/product`, query: { section: 'all' } });
       } else if (category === 'discount') {
         this.$router.push({ path: `/${this.$route.params.lang}/product`, query: { section: 'discount' } });
-      }else if (category === 'highrate') {
+      } else if (category === 'highrate') {
         this.$router.push({ path: `/${this.$route.params.lang}/product`, query: { section: 'highrate' } });
       }
     },
 
     handleunauthorizedlike(message) {
-      this.emitlikemessage = message;
+      const key = message;
+
+      this.emitlikemessage = this.message[this.currentLanguage][key.message];
     },
 
     handleunauthorizedcart(message) {
-      this.emitcartmessage = message;
-
+      const key = message;
+      this.emitcartmessage = this.message[this.currentLanguage][key.message];
     },
 
     handleCartUpdated(message) {
-      this.emitdata=message.message;
+      const key = message;
+      this.emitdata = this.message[this.currentLanguage][key.message];
     },
   },
   mounted() {
     this.fetchall();
     this.getcollection();
-
   },
 };
 </script>
@@ -274,7 +239,7 @@ async getcollection() {
   border-radius: 10px;
   margin-top: 2%;
   box-shadow: 2px 4px 12px rgba(0, 0, 0, 0.1);
-  padding: 20px;
+  padding: 5px;
   width: 100%;
   transition: box-shadow 0.3s;
 }
@@ -282,8 +247,11 @@ async getcollection() {
 .section:hover {
   box-shadow: 4px 6px 16px rgba(0, 0, 0, 0.15);
 }
+
 .subsection {
   display: grid;
+  height: 200px;
+  align-items: center;
   grid-template-columns: repeat(2, 1fr);
   gap: 30px;
   max-width: 1100px;
@@ -292,8 +260,8 @@ async getcollection() {
 
 .grid-item {
   display: flex;
-  width: 500px;
-  height: 200px;
+  width: 400px;
+  height: 150px;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   overflow: hidden;
@@ -321,7 +289,7 @@ async getcollection() {
 }
 
 .grid-item-text h1 {
-  font-size: 1.5em;
+  font-size: 1.2rem;
   font-weight: 700;
   margin: 0 0 10px;
   color: #fff;
@@ -330,7 +298,7 @@ async getcollection() {
 }
 
 .description {
-  font-size: 1em;
+  font-size: 0.8rem;
   margin: 5px 0;
   color: #f0f0f0;
   opacity: 0.9;
@@ -338,9 +306,9 @@ async getcollection() {
 
 .discount {
   background-color: rgba(255, 255, 255, 0.2);
-  padding: 5px 10px;
+  padding: 3px 7px;
   border-radius: 5px;
-  font-size: 0.9em;
+  font-size: 0.8em;
   font-weight: bold;
   margin-top: 10px;
   color: #ffffff;
@@ -356,12 +324,14 @@ async getcollection() {
 
 .product-grid {
   display: grid;
-  grid-auto-flow: column;
-  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-  overflow-x: auto;
   gap: 15px;
+  grid-auto-flow: column;
+  overflow-x: auto;
   padding-bottom: 10px;
   scroll-snap-type: x mandatory;
+  height: 450px;
+  -webkit-overflow-scrolling: touch;
+
 }
 
 .product-card {
@@ -407,30 +377,61 @@ button:hover {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
-
-
-@media (max-width: 768px) {
+@media (min-width: 375px) and (max-width: 430px) {
   .section {
-    padding: 15px;
+    margin-top: none;
+
+  }
+
+  .section-header p {
+    font-size: 0.5rem;
+  }
+
+  button {
+    border-radius: 3px;
+    padding: 4px 8px;
+    font-size: 0.5rem;
+
   }
 
   .product-card {
-    min-width: 180px;
-    max-width: 180px;
+    min-width: 100px;
+    max-width: 100px;
+    transition: none;
   }
 
-  button {
-    padding: 6px 10px;
-  }
-}
-
-@media (max-width: 575px) {
-  .section-header p {
-    font-size: 0.9rem;
+  .product-card:hover {
+    transform: none;
   }
 
-  button {
-    font-size: 0.85rem;
+  .product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
+    height: 255px;
   }
+
+  .grid-item {
+    width: 100px;
+    height: 100px;
+  }
+
+  .grid-item-text h1 {
+    font-size: 0.5rem;
+  }
+
+  .description {
+    font-size: 0.5rem;
+  }
+
+  .discount {
+    font-size: 0.4rem;
+    margin-top: 5px;
+  }
+
+  .subsection {
+    height: 110px;
+    gap: 10px;
+  }
+
 }
 </style>

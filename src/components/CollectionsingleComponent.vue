@@ -102,7 +102,7 @@ export default {
     async getcollection() {
       const token = localStorage.getItem('token');
       try {
-        const response = await axios.get(`product/${this.id}`, {
+        const response = await axios.get(`product/collection/${this.id}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -156,7 +156,7 @@ export default {
   mounted() {
       setTimeout(() => {
         this.getcollection();
-      }, 500);
+      }, 200);
   },
 };
 </script>
@@ -170,7 +170,7 @@ export default {
   height: 50px;
   animation: spin 1s linear infinite;
   margin: 40px auto;
-  margin-top: 10%;
+  margin-top: 20%;
 }
 
 @keyframes spin {
@@ -237,7 +237,6 @@ export default {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   width: 100%;
-  margin-top: 2%;
 }
 
 .message {
@@ -291,6 +290,7 @@ export default {
   background-color: #fff;
   border-color: #dee2e6;
 }
+
 
 @media (max-width: 490px) {
   .products-wrapper {

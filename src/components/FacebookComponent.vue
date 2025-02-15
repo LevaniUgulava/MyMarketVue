@@ -84,6 +84,14 @@ console.log(error);
 .facebookbtn i {
   margin-right: 10px;
 }
-
+@media (min-width: 375px) and (max-width: 430px) {
+  .facebookbtn {
+  width: 100%;
+  padding: 5px 10px;
+  margin-top: 5px;
+  font-size: 0.8rem;
+  margin-bottom: 5px;
+}
+}
 
 </style>

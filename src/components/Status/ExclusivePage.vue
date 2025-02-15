@@ -4,13 +4,10 @@
     <Message v-if="emitlikemessage" closable class="message" severity="error">{{ emitlikemessage }}</Message>
     <Message v-if="emitcartmessage" closable class="message" severity="error">{{ emitcartmessage }}</Message>
 
-    <div v-if="isLoading">
-      <div class="loading-spinner"></div>
-      <div class="loading-text">Loading...</div>
     </div>
 
-    <div v-if="products.length > 0 && !isLoading">
-      <div :class="{'products-wrapper': isSidebarCollapsed, 'products-wrapper-collapsed': !isSidebarCollapsed}">
+    <div >
+      <div class="products-wrapper">
         <ProductCardComponent
           v-for="(item) in products"
           :key="item.id"
@@ -23,14 +20,12 @@
       </div>
     </div>
 
-    <div v-else-if="!isLoading && products.length === 0" class="no-products-message">
-      <p><i class="fas fa-heart-broken"></i>{{$t("favorite.message")}}</p>
-      <a href="/" class="explore-link">{{$t("favorite.btn")}}</a>
-    </div>
 
+
+    <!-- Pagination -->
     <Bootstrap5Pagination :data="pagination" @pagination-change-page="changePage" />
-  </div>
 
+  <!-- Comments Modal -->
   <CommentModal
     v-if="showModal"
     :product="selectedProduct"
@@ -41,25 +36,19 @@
 </template>
 
 <script>
-import ProductCardComponent from '../components/ProductCardComponent.vue';
-import CommentModal from '../components/CommentModal.vue';
+import ProductCardComponent from '@/components/ProductCardComponent.vue';
+import CommentModal from '@/components/CommentModal.vue';
 import Message from 'primevue/message';
 import { Bootstrap5Pagination } from 'laravel-vue-pagination';
 import axios from 'axios';
 
 export default {
-  name: 'FavoriteView',
+  name: 'ExclusivePage',
   components: {
     ProductCardComponent,
     CommentModal,
     Message,
     Bootstrap5Pagination,
-  },
-  props: {
-    isSidebarCollapsed: {
-      type: Boolean,
-      required: true,
-    },
   },
   data() {
     return {
@@ -71,7 +60,6 @@ export default {
       emitlikemessage: null,
       emitcartmessage: null,
       pagination: {},
-      isLoading: true,
     };
   },
   watch: {
@@ -96,29 +84,29 @@ export default {
         }, 3000);
       }
     },
-    '$route.query': {
+   '$route.query': {
       handler() {
-        this.fetchfavorite();
-      },
+            this.getExclusive();
+    },
       immediate: false,
+   },
     },
-  },
   methods: {
-    async fetchfavorite() {
-      const token = localStorage.getItem('token');
-      try {
-        const response = await axios.get('likeproduct', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        this.products = response.data.data;
-        console.log(this.products)
-        this.isLoading = false;
-      } catch (error) {
-        console.log(error);
-      }
-    },
+ async getExclusive(){
+            const token = localStorage.getItem('token');
+            try{
+                const response = await axios.get('/exlusive',{
+                    headers:{
+                      "Authorization": `Bearer ${token}`
+
+                    }
+                });
+                this.products = response.data.products;
+
+            }catch(error){
+                console.log(error);
+            }
+        },
     async showCommentsModal(id) {
       try {
         const { data } = await axios.get(`products/${id}/display`);
@@ -156,15 +144,14 @@ export default {
     },
   },
   mounted() {
-    setTimeout(() => {
-      this.fetchfavorite();
-      this.isLoading=false;
-    }, 500);
+      setTimeout(() => {
+        this.getExclusive();
+      }, 500);
   },
 };
 </script>
 
-<style>
+<style >
 .loading-spinner {
   border: 6px solid #f3f3f3;
   border-top: 6px solid #007bff; 
@@ -239,15 +226,17 @@ export default {
 .products-wrapper {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 15px;
   width: 100%;
+  margin-top: 2%;
 }
 
-.products-wrapper-collapsed {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 15px;
+.message {
+  position: sticky;
+  top: 70px;
+  z-index: 999;
   width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .pagination {
@@ -255,7 +244,7 @@ export default {
   list-style-type: none;
   padding: 0;
   justify-content: center;
-  margin: 20px 0;
+  margin: 25px 0;
 }
 
 .page-item {
@@ -264,12 +253,13 @@ export default {
 
 .page-link {
   display: block;
-  padding: 10px 15px;
+  padding: 8px 14px;
   color: #007bff;
-  text-decoration: none;
+  font-weight: 500;
   border: 1px solid #dee2e6;
-  border-radius: 4px;
-  transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+  border-radius: 6px;
+  transition: all 0.3s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .page-item.active .page-link {
@@ -280,7 +270,7 @@ export default {
 
 .page-link:hover, .page-link:focus {
   background-color: #0056b3;
-  color: white;
+  color: #fff;
   border-color: #0056b3;
   text-decoration: none;
 }
@@ -292,25 +282,16 @@ export default {
   border-color: #dee2e6;
 }
 
-.page-link {
-  font-weight: bold;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.page-link:active {
-  background-color: #004085;
-  border-color: #004085;
-  color: white;
-}
-
-@media (min-width: 390px) and (max-width: 574px) {
+@media (max-width: 490px) {
   .products-wrapper {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-  }
-   .products-wrapper-collapsed {
     grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    gap: 0.5rem;
+    margin-top: 20px;
   }
 }
+
+
 </style>
+
+
+

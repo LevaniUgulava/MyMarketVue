@@ -40,19 +40,25 @@
       <!-- Size Inputs -->
       <div v-if="form.size_type === 'numeric'">
         <label for="size">Numeric Size</label>
-        <input v-model="form.Sizes" name="size" type="text" placeholder="Size"><br>
-      </div>
+        <select v-if="numericbased.length > 0" v-model="form.Sizes" multiple>
+          <option v-for="size in numericbased" :key="size.id" :value="size">{{ size }}</option>
+        </select>
+       </div>
+      
+  <div v-if="(form.size_type === 'numeric') && form.Sizes && form.Sizes.length > 0">
+    <div v-for="(size, index) in form.Sizes" :key="index">
+      <label>{{ size }} Quantity</label>
+      <input type="number" v-model="form.quantity[index]" placeholder="Enter value">
+    </div>
+  </div>
 
       <div v-if="form.size_type === 'letter-based'">
-        <label>Sizes</label>
-        <select v-if="sizes.length > 0" v-model="form.Sizes" multiple>
-          <option v-for="size in sizes" :key="size.id" :value="size">{{ size }}</option>
+        <label>Letter Sizes</label>
+        <select v-if="letterbased.length > 0" v-model="form.Sizes" multiple>
+          <option v-for="size in letterbased" :key="size.id" :value="size">{{ size }}</option>
         </select>
       </div>
 
- 
-      <!-- <label for="quantity">Quantity</label>
-      <input v-model="form.quantity" name="quantity" type="text" placeholder="Quantity"><br> -->
   <div v-if="(form.size_type === 'letter-based') && form.Sizes && form.Sizes.length > 0">
     <div v-for="(size, index) in form.Sizes" :key="index">
       <label>{{ size }} Quantity</label>
@@ -92,7 +98,7 @@ export default {
         category: '',
         subCategory: '',
         image: null,
-        size_type: null,
+        size_type: '',
         Sizes: [],
         quantity:[],
       },
@@ -134,8 +140,9 @@ export default {
     async Getsize() {
       try {
         const response = await axios.get('getSizes');
-        this.sizes = response.data.sizes;
-        console.log(response.data.sizes);
+        this.letterbased = response.data.letterbased;
+        this.numericbased = response.data.numericbased;
+
       } catch (error) {
         console.log(error);
       }

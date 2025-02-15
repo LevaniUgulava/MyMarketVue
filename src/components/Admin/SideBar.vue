@@ -13,10 +13,9 @@
       <ul>
         <li><a href="/admin/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
         <li><a href="/admin/orders"><i class="fas fa-box"></i> Orders</a></li>
-
         <li>
           <button @click="toggleDropproduct" class="dropdown">
-            <i class="fas fa-boxes"></i> Manage Product <i class="fa-solid fa-caret-down"></i>
+            <i class="fas fa-boxes"></i> Manage Product 
           </button>
           <ul v-if="isOpenproduct" class="dropdown-menu">
             <li v-for="item in itemsproduct" :key="item" @click="selectItemproduct(item)">
@@ -71,6 +70,7 @@ export default {
 .container {
   display: flex;
   height: 100vh;
+  padding: 10px;
 }
 
 .sidebar {
@@ -103,8 +103,7 @@ export default {
 }
 
 .sidebar ul li a,
-.sidebar ul li button {
-  width: 100%;
+.sidebar ul li  button {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -126,7 +125,7 @@ export default {
 
 .dropdown {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
 }
 

@@ -1,76 +1,39 @@
 <template>
   <div class="card-container">
-    <div class="card">    
-     <carousel :items-to-show="1">
-        <slide v-for="(image, index) in initialproduct.image_urls" :key="index">
-          <img :src="image" alt="Product Image" class="img" />
-         <button class="likebtn" @click="toggleLike(initialproduct.id)">
-            <i :class="isLiked ? 'fa-solid fa-heart fa-2x' : 'fa-regular fa-heart fa-2x'"></i>
-          </button>
-        </slide>
-        <template #addons>
-          <navigation />
-          <pagination />
-        </template>
-      </carousel>
-       
+    <div class="card">
+      <img :src="initialproduct.image_urls[0]" alt="Product Image" class="img" />
+      <button class="likebtn" @click="toggleLike(initialproduct.id)"
+        :title="isLiked ? (currentLanguage === 'ka' ? 'მოწონების გაუქმება' : 'Unlike') : (currentLanguage === 'ka' ? 'მოწონება' : 'Like')">
+        <i :class="isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
+      </button>
 
-      <h3>{{ initialproduct.name }}</h3>
-      <span class="subtext">See More</span>
- <p class="price" v-if="initialproduct.discount === 0 && (!initialproduct.discountstatus || initialproduct.discountstatus.discount === 0)">
-  {{ initialproduct.discountprice }} <i class="fa-solid fa-lari-sign"></i>
-</p>
-<p class="price" v-else>
-  {{ initialproduct.discountprice }} <i class="fa-solid fa-lari-sign"></i>
-  <span
-    class="discount-square"
-    :class="{
-      'status-discount': initialproduct.discountstatus && initialproduct.discountstatus.discount > 0,
-      'default-discount': (!initialproduct.discountstatus || initialproduct.discountstatus.discount === 0) && initialproduct.discount > 0
-    }"
-  >
-    -{{ initialproduct.discountstatus && initialproduct.discountstatus.discount > 0 
-      ? initialproduct.discountstatus.discount 
-      : initialproduct.discount }}%
-  </span>
-</p>
-
-
-
-      <p class="desc">{{ truncate(initialproduct.description) }}</p>
-
-      <div class="button-group">
-
-          <div class="button-wrapper">
-            <div class="rate">
-          {{ initialproduct.Rate }}
-        </div>
+      <div class="product-info">
+        <h3>{{ initialproduct.name }}</h3>
+        <div class="rate">Rating: {{ initialproduct.Rate }}</div>
+        <p class="price">
+          {{ initialproduct.discountprice }} <i class="fa-solid fa-lari-sign"></i>
+          <span
+            v-if="initialproduct.discount > 0 || (initialproduct.discountstatus && initialproduct.discountstatus.discount > 0)"
+            class="discount-square">
+            -{{ initialproduct.discountstatus && initialproduct.discountstatus.discount > 0
+              ? initialproduct.discountstatus.discount
+              : initialproduct.discount }}%
+          </span>
+        </p>
       </div>
 
-
-   
-        <div class="button-wrapper">
-          <button class="commentbtn" @click="showComments">
-            <i class="fa-regular fa-comment fa-2x"></i>
-            <span>{{ commentcount }}</span>
-            <span class="subtext">Comment</span>
-          </button>
-        </div>
-        <div class="button-wrapper">
-          <button class="addbtn" @click="addToCart(initialproduct.id)">
-            <i class="fa-solid fa-plus fa-2x"></i>
-          </button>
-          <span class="subtext">Add to Cart</span>
-        </div>
-
-        <div class="button-wrapper">
-          <button>
-          <router-link :to="{ name: 'single', params: { id: initialproduct.id } }">
-            <i class="fa-solid fa-ellipsis fa-2x"></i>
-          </router-link>
-          </button>
-          <span class="subtext">See More</span>
-        </div>
+      <div class="button-group">
+        <button class="comment-btn" @click="showComments" :title="currentLanguage === 'ka' ? 'კომენტარი' : 'Comment'">
+          <i class="fa-regular fa-comment"></i>
+        </button>
+        <button class="add-btn" @click="addToCart(initialproduct.id)"
+          :title="currentLanguage === 'ka' ? 'კალათაში დამატება' : 'Add to Cart'">
+          <i class="fa-solid fa-cart-plus"></i>
+        </button>
+        <router-link :to="{ name: 'single', params: { id: initialproduct.id } }" class="details-btn"
+          :title="currentLanguage === 'ka' ? 'დეტალების ნახვა' : 'See Details'">
+          <i class="fa-solid fa-info-circle"></i>
+        </router-link>
       </div>
     </div>
   </div>
@@ -78,76 +41,34 @@
 
 <script>
 import axios from 'axios';
-import 'vue3-carousel/dist/carousel.css'
-import { Carousel, Slide, Pagination, Navigation } from 'vue3-carousel'
 
 export default {
   name: 'ProductCardComponent',
-  components: {
-    Carousel,
-    Slide,
-    Pagination,
-    Navigation,
-  },
   props: {
     initialproduct: {
       type: Object,
       required: true,
     },
- 
   },
   data() {
     return {
-      likecount: 0,
-      commentcount: 0,
-      isLiked:this.initialproduct.isLiked,
-      existsizes:[],
-      randomSize:''
+      isLiked: this.initialproduct.isLiked,
+      currentLanguage: localStorage.getItem('selectedLanguage'),
 
     };
   },
-  watch: {
-    initialproduct: {
-      handler(newVal) {
-        this.updateCounts(newVal.id);
-
-      },
-      immediate: true,
-      deep: true,
-    }
-  },
   methods: {
-    truncate(text) {
-      if (!text) {
-        return ''; 
-      }
-      return text.slice(0, 30) + (text.length > 30 ? '...' : '');
-    },
     async addToCart(id) {
       const token = localStorage.getItem('token');
-
-      this.initialproduct.size.forEach(element => {
-          this.existsizes=element.size;
-      });
-      if (this.existsizes && this.existsizes.length > 0) {
-        const randomIndex = Math.floor(Math.random() * this.existsizes.length);
-        this.randomSize = this.existsizes[randomIndex];
-      }
-
-      console.log(this.existsizes);
       if (!token) {
-        this.$emit('cart-message', 'Not authorized');
+        this.$emit('cart-message', { ka: "არ არის ავტორიზირებული", en: "Not Authorized" });
         return;
       }
       try {
         const response = await axios.post(
           `addcart/${id}`,
-          {size:this.randomSize},
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+          {},
+          { headers: { Authorization: `Bearer ${token}` } }
         );
         this.$emit('cart-updated', response.data);
       } catch (error) {
@@ -155,30 +76,28 @@ export default {
       }
     },
     async toggleLike(id) {
-      if (this.isLiked) {
-        await this.unlike(id);
-      } else {
-        await this.like(id);
+      const previousState = this.isLiked;
+      this.isLiked = !this.isLiked;
+      try {
+        if (this.isLiked) {
+          await this.like(id);
+        } else {
+          await this.unlike(id);
+        }
+      } catch (error) {
+        console.log(error);
+        this.isLiked = previousState;
       }
-
     },
     async like(id) {
       try {
         const token = localStorage.getItem('token');
         if (!token) {
-          this.$emit('liked-message', 'Not authorized');
+          this.$emit('liked-message', { ka: "არ არის ავტორიზირებული", en: "Not Authorized" });
           return;
         }
-        await axios.post(
-          `like/${id}`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        this.isLiked=true;
+        await axios.post(`like/${id}`, {}, { headers: { Authorization: `Bearer ${token}` } });
+        this.isLiked = true;
       } catch (error) {
         console.log(error);
       }
@@ -186,30 +105,9 @@ export default {
     async unlike(id) {
       try {
         const token = localStorage.getItem('token');
-        if (!token) {
-          console.log('Not authorized');
-          return;
-        }
-        await axios.post(
-          `unlike/${id}`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        this.isLiked=false;
-
-      } catch (error) {
-        console.log(error);
-      }
-    },
-    async updateCounts(id) {
-      try {
-        const countResponse = await axios.get(`count/${id}`);
-        this.likecount = countResponse.data.countlike;
-        this.commentcount = countResponse.data.countcomment;
+        if (!token) return;
+        await axios.post(`unlike/${id}`, {}, { headers: { Authorization: `Bearer ${token}` } });
+        this.isLiked = false;
       } catch (error) {
         console.log(error);
       }
@@ -218,47 +116,26 @@ export default {
       this.$emit('show-comments', this.initialproduct.id);
     },
   },
-  mounted() {
-    this.updateCounts(this.initialproduct.id);
 
-  },
 };
 </script>
-<style scoped>
-.rate {
-  font-size: 0.9rem; 
-  border-radius: 3px; 
-  width: 100%; 
-  padding: 5px; 
-  text-align: center; 
-  background-color: #f9f9f9; 
-  color: #333; /* Text color */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
-  transition: background-color 0.3s ease; 
-}
-.rate:hover {
-  background-color: #e0e0e0; 
-}
 
+<style scoped>
 .card-container {
   display: flex;
+  justify-content: center;
   flex-wrap: wrap;
-  justify-content: space-around;
-  margin-top: 2%;
+  gap: 15px;
+  margin: 20px 0;
 }
 
 .card {
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-  flex: 1 1 200px;
-  width: 220px;
-  margin: 5px;
-  text-align: center;
-  font-family: Arial, sans-serif;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  border-radius: 20px;
-}
-
-.img-container {
+  padding: 20px;
+  text-align: center;
   position: relative;
 }
 
@@ -266,206 +143,150 @@ export default {
   width: 100%;
   height: 200px;
   object-fit: cover;
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
+  border-radius: 8px;
+  margin-bottom: 15px;
 }
 
 .likebtn {
   position: absolute;
-  bottom: 10px;  /* Positioning it in the bottom-right corner */
-  right: 10px;   /* Positioning it in the bottom-right corner */
-  background-color: transparent;
+  top: 10px;
+  right: 10px;
+  background: transparent;
   border: none;
   cursor: pointer;
-  z-index: 2;
 }
 
-.likebtn i {
-  color: red;
+.product-info {
+  margin-bottom: 15px;
+}
+
+h3 {
+  font-size: 1.2rem;
+  margin: 10px 0;
+}
+
+.rate {
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 10px;
 }
 
 .price {
-  color: grey;
+  color: #333;
   font-size: 1rem;
+  font-weight: bold;
 }
 
-.desc {
-  font-size: 1rem;
+.discount-square {
+  background: #ff5555;
+  color: #fff;
+  border-radius: 4px;
+  padding: 5px 5px;
+  font-size: 0.7rem;
+  margin-left: 5px;
 }
 
 .button-group {
   display: flex;
   justify-content: space-around;
-  align-items: center;
-  padding: 5px;
+  gap: 10px;
 }
 
-.button-wrapper {
-  position: relative;
-}
-
-button {
-  border: none;
-  background-color: #ffffff00;
+button,
+.details-btn {
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 3px 7px;
+  font-size: 1rem;
   cursor: pointer;
+  text-decoration: none;
+  color: #333;
   display: flex;
   align-items: center;
-  transition: transform 0.2s;
 }
 
-button:hover {
-  transform: scale(1.1);
-}
-
-button i {
-  margin-right: 5px;
-}
-
-.subtext {
-  position: absolute;
-  bottom: 30px;
-  left: 45%;
-  transform: translateX(-50%);
-  background-color: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 2px 5px;
-  border-radius: 5px;
-  font-size: 12px;
-  white-space: nowrap;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-.button-wrapper:hover .subtext {
-  opacity: 1;
-}
-
-.commentbtn i {
-  color: #555;
-}
-
-.addbtn i {
-  color: green;
-}
-
-.strikethrough {
-  text-decoration: line-through;
-  color: #999;
-  margin-right: 10px;
-}
-
-.discount-square {
-  display: inline-block;
+button:hover,
+.details-btn:hover {
+  background: #49535d;
   color: #fff;
-  padding: 3px 7px;
-  border-radius: 4px;
-  margin-left: 10px;
-  font-weight: bold;
-  font-size: 14px;
 }
 
-/* Red for default discount */
-.default-discount {
-  background-color: #f00;
-}
-
-/* Gold for status-based discount */
-.status-discount {
-  background-color: gold;
-}
-
-.singlepage {
-  text-decoration: none;
-  color: inherit;
-  display: block;
-  margin-bottom: 20px;
-}
-
-/* Responsive styles */
 @media (min-width: 390px) and (max-width: 574px) {
+  .card-container {
+    margin: 10px 0;
+    gap: 10px;
+  }
+
   .card {
-    width: 120px;
+    width: 100%;
+    /* Adjust card width to fit smaller screens */
+    padding: 10px;
+    /* Reduce padding */
+    height: 225px;
   }
-  .subtext {
-    display: none;
+
+  .img {
+    height: 100px;
+    /* Adjust image height */
+    object-fit: cover;
   }
-  .price {
-    color: grey;
-    font-size: 0.5rem;
-  }
-  .desc {
-    font-size: 0.5rem;
-  }
-  .discount-square {
-    padding: 1px 3px;
-    margin-left: 3px;
-    font-size: 0.5rem;
-  }
+
   h3 {
     font-size: 0.6rem;
+    /* Smaller font for product title */
+    margin: 5px 0;
   }
-  .img {
-    height: 100%;
-    object-fit: cover;
-    border-top-left-radius: 20px;
-    border-top-right-radius: 20px;
-  }
-  .button-group {
-    padding: 2px;
-  }
-  .button-wrapper {
-    margin: 1px;
-  }
-  button {
-    font-size: 0.5rem;
-    padding: 1px 2px;
-  }
-  button i {
-    font-size: 1rem;
-  }
-}
 
-@media (min-width: 576px) and (max-width: 767px) {
-  .card {
-    width: 220px;
+  .rate {
+    font-size: 0.6rem;
+    /* Smaller font for rating text */
+    margin-bottom: 8px;
   }
+
   .price {
-    color: grey;
-    font-size: 1rem;
+    font-size: 0.6rem;
+    /* Adjust font size for price */
+    color: #333;
   }
-  .desc {
-    font-size: 1rem;
-  }
+
   .discount-square {
-    padding: 4px 6px;
-    margin-left: 5px;
-    font-size: 0.8rem;
+    font-size: 0.4rem;
+    /* Smaller font size for discount text */
+    padding: 2px 2px;
+    /* Reduce padding */
+    border-radius: 3px;
   }
-  h3 {
-    font-size: 1.2rem;
-  }
-  .img {
-    height: 50%;
-    width: 100%;
-    object-fit: cover;
-  }
+
   .button-group {
-    padding: 10px;
+    display: flex;
+    /* Keep buttons side by side */
+    justify-content: space-between;
+    /* Add spacing between buttons */
+    gap: 5px;
+    /* Minimal gap between buttons */
+    flex-wrap: wrap;
   }
-  .button-wrapper {
-    margin: 5px;
+
+  .button-group button,
+  .details-btn {
+    padding: 3px;
+    font-size: 0.6rem;
+    text-align: center;
+    max-width: 32%;
   }
-  button {
-    font-size: 0.9rem;
-    padding: 4px 6px;
+
+  .likebtn {
+    top: 5px;
+    right: 5px;
+    font-size: 0.6rem;
   }
-  button i {
-    font-size: 1.5rem;
+
+  .likebtn:hover {
+    background-color: transparent;
+    color: inherit;
+    cursor: default;
   }
+
 }
 </style>
-
-
-
-
-

@@ -335,7 +335,6 @@ th, td {
   border-color: #dee2e6;
 }
 
-/* Additional styling for a more solid look */
 .page-link {
   font-weight: bold;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);

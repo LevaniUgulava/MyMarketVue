@@ -114,6 +114,7 @@ export default {
   mounted() {
     setTimeout(() => {
       this.getorder();
+      this.isLoading=false;
     }, 500);
   }
 };
@@ -210,7 +211,7 @@ export default {
 
 .products {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 15px;
 }
 
@@ -240,4 +241,46 @@ export default {
 .shop-link:hover {
   background-color: #0056b3;
 }
+@media (min-width: 375px) and (max-width: 430px) {
+  .toggle-buttons button{
+      font-size: 0.8rem;
+      background-color: white;
+  }
+  .toggle-buttons button.active {
+      font-size: 0.5rem;
+      background-color: rgba(76, 175, 80, 0.25);
+      color: black;
+   }
+    .no-order-message i{
+      font-size: 2rem;
+  }
+  p{
+      font-size: 0.6rem;
+  }
+  .shop-link{
+    margin-top: 10px;
+    padding: 5px 10px;
+    font-size: 0.6rem;
+  }
+  .section-header h2{
+   font-size: 0.6rem;
+  }
+  .card-header h3{
+    font-size: 0.6rem;
+  }
+  .order-box{
+    padding: 10px;
+  }
+  .products {
+  grid-template-columns: repeat(auto-fill, minmax(120px, 2fr));
+  gap: 10px;
+  justify-items: center;
+}
+.container{
+  padding: 0px;
+}
+}
+ 
+  
+
 </style>

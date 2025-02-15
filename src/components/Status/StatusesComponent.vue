@@ -6,6 +6,8 @@
         <tr>
           <th>#</th>
           <th>Status Name</th>
+          <th>Start</th>
+          <th>End</th>
           <th>Toachieve</th>
           <th>Action</th>
 
@@ -15,6 +17,9 @@
         <tr v-for="(status) in statuses" :key="status.id">
           <td>{{ status.id }}</td>
           <td>{{ status.name }}</td>
+          <td>{{ status.start_data }}</td>
+          <td>{{ status.end_date }}</td>
+
           <td>{{ status.toachieve }}</td>
     <td>
   <p class="button delete" @click="deletestatus(status.id)">
@@ -57,6 +62,20 @@
       placeholder="Enter the target to achieve"
       required
     />
+      <label for="start_date">Start_date:</label>
+    <input
+      type="datetime-local"
+      id="start_data"
+      v-model="data.start_data"
+      placeholder="Enter the Start Date"
+    />
+        <label for="end_date">End_date:</label>
+    <input
+      type="datetime-local"
+      id="end_date"
+      v-model="data.end_date"
+      placeholder="Enter the End Date"
+    />
     <div class="form-actions">
       <button type="submit" class="submit-button">Create</button>
       <button type="button" class="cancel-button" @click="cancel">
@@ -79,6 +98,8 @@ export default {
            data: {
               name: "",
               toAchieve: "",
+              start_data:"",
+              end_date:""
               },
 
         }
@@ -108,10 +129,13 @@ export default {
         },
         async create(){
             const token = localStorage.getItem('token');
+            
             try{
                 const response = await axios.post('admin/userstatus/create',{
                     name:this.data.name,
                     toachieve:this.data.toAchieve,
+                    start_data:this.data.start_data,
+                    end_date:this.data.end_date,
                     },{
                     headers:{
                         "Authorization":`Bearer ${token}`
@@ -119,6 +143,9 @@ export default {
                 });
                 this.data.name='',
                 this.data.toAchieve='',
+                this.data.start_data='',
+                this.data.end_date_date=''
+                
 
                 this.display();
                 console.log(response);

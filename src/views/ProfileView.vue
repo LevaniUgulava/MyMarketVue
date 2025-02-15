@@ -17,5 +17,4 @@ export default {
 </script>
 
 <style lang="">
-/* Add your styles here if needed */
 </style>

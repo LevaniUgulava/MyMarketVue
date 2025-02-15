@@ -181,4 +181,23 @@ display: flex;
   left: 0;
   pointer-events: none;
 }
+
+@media (min-width: 375px) and (max-width: 430px) {
+.star-container{
+  margin-top: 10%;
+  margin-left: 5%;
+}
+
+.split-star i {
+  font-size: 0.8rem;
+}
+p{
+  font-size: 0.6rem;
+  margin-top: -3%;
+  margin-left: 3%;
+}
+.star{
+  margin: -3%;
+}
+}
 </style>

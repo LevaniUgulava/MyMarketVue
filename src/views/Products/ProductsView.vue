@@ -4,7 +4,7 @@
   :textColor="'#004d40'"   :positionType="'fixed'"
  /><message :message="emitlikemessage" @close="emitlikemessage=''"/>
     <div class="main-content">
-      <div class="products-wrapper">
+      <div :class="{'products-wrapper': isSidebarCollapsed ,'products-wrapper-collapsed' : !isSidebarCollapsed}">
         <ProductCardComponent
           v-for="(item, index) in products"
           :key="index"
@@ -44,6 +44,13 @@ export default {
     Message,
     Bootstrap5Pagination,
   },
+  props: {
+    isSidebarCollapsed: {
+      type: Boolean,
+      required: true,
+    },
+  },
+
   data() {
     return {
       products: [],
@@ -194,14 +201,12 @@ export default {
 
 };
 </script>
-<style >
+<style scoped >
 .products-wrapper {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   width: 100%;
 }
-
-
 .pagination {
   display: flex;
   list-style-type: none;
@@ -263,10 +268,17 @@ export default {
 
 @media (min-width: 390px) and (max-width: 574px) {
   .products-wrapper{
-      grid-template-columns: repeat(2, 1fr); /* 5 equal-width columns */
-      margin-top: 20px;
-
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 10px;
   }
+  .products-wrapper-collapsed{
+     grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+     display: grid;
+     width: 100%;
+  }
+  
 }
 
 </style>

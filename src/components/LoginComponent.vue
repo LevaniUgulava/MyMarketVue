@@ -8,21 +8,23 @@
         <h2>Welcome Back!</h2>
         <p>Please login to your account</p>
         <router-link to='/ka/register' class="registerlink">Register</router-link>
-        <form @submit.prevent="login" method="post" id="loginform">
-          <label for="email">Email:</label>
-          <input v-model="email" type="text" name="email" id="email" required>
-          <label for="password">Password:</label>
-          <input v-model="password" type="password" name="password" id="password" required>
-          <button :disabled="!email || !password">Login</button>
-          <div class="social-login">
+<form @submit.prevent="login" method="post" id="loginform">
+  <div class="input-container">
+    <input v-model="email" type="text" name="email" id="email" required placeholder=" " />
+    <label for="email">Email</label>
+  </div>
+  <div class="input-container">
+    <input v-model="password" type="password" name="password" id="password" required placeholder=" " />
+    <label for="password">Password</label>
+  </div>
+  <button :disabled="!email || !password">Login</button>
+  <a href="/forget/password" class="forget">forget password?</a>
+  <div class="social-login">
+    <FacebookComponentVue />
+    <GoogleComponent />
+  </div>
+</form>
 
-            <FacebookComponentVue/>
-            <GoogleComponent/>
-
-            
-          
-          </div>
-        </form>
       </div>
       <div class="image-content">
         <img src="https://via.placeholder.com/300" alt="Sample Image">
@@ -67,7 +69,7 @@ export default {
         localStorage.setItem('userid', response.data.id);
  
 
-        this.$router.push("/");
+        this.$router.push("/ka");
       } catch (error) {
         console.error(error);
       }
@@ -78,11 +80,14 @@ export default {
 
 <style scoped>
 #app {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background-color: #f0f0f0;
+ margin-top:10%;
+ display: flex;
+ justify-content: center;
+ align-items: center;
+}
+.forget{
+  margin: 5px;
+  text-decoration: none;
 }
 
 .login-card {
@@ -126,20 +131,44 @@ form {
   flex-direction: column;
 }
 
-label {
-  font-weight: bold;
-  font-size: 14px;
-  margin-bottom: 5px;
+
+ .input-container {
+  position: relative;
+  margin-bottom: 20px;
+  width: 100%;
 }
 
 input {
-  margin-bottom: 15px;
+  width: 100%;
   padding: 10px;
   font-size: 14px;
-  width: 100%;
-  border-radius: 5px;
   border: 1px solid #ddd;
+  border-radius: 5px;
+  outline: none;
+  background: none;
+  transition: all 0.3s ease;
 }
+
+label {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #aaa;
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+input:focus + label,
+input:not(:placeholder-shown) + label {
+  top: -10px;
+  font-size: 12px;
+  color: #333;
+  background-color: #fff;
+  padding: 0 5px;
+}
+
 
 button {
   padding: 10px;
@@ -155,13 +184,6 @@ button:disabled {
   background-color: grey;
   cursor: not-allowed;
 }
-
-
-
-
-
-
-
 
 .image-content {
   width: 500px;
@@ -195,5 +217,45 @@ button:disabled {
 .card p {
   font-size: 14px;
   color: #666;
+}
+@media (min-width: 375px) and (max-width: 430px) {
+.login-content {
+  padding: 10px;
+  width: 60%;
+}
+.image-content {
+  width: 40%;
+  padding: 10px;
+}
+p{
+  font-size: 0.5rem;
+}
+h2{
+    font-size: 1rem;
+}
+.registerlink{
+    font-size: 0.6rem;
+}
+label{
+      font-size: 0.7rem;
+}
+input{
+  width:100%;
+  height: 35px;
+}
+button{
+ padding: 5px 10px;
+  font-size: 0.8rem;
+}
+.card p{
+  font-size: 0.5rem;
+}
+.card h3{
+  font-size: 0.8rem;
+}
+.card{
+  margin-bottom: 20px;
+}
+
 }
 </style>

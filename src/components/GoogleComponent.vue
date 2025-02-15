@@ -35,7 +35,4 @@ const handleLogin = async (googleResponse) => {
 </script>
 
 <style>
-
-
-
 </style>
