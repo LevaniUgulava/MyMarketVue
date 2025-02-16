@@ -41,9 +41,9 @@
           <p class="product-description">{{ singleproduct.description }}</p>
 
           <div class="size-container">
-            <div v-for="item in letterbased" :key="item"
-              :class="['size-item', { disabled: !availablesize.includes(item) }]"
-              :disabled="!availablesize.includes(item)" @click="handleClick(item)">
+            <div v-for="item in availableSizes" :key="item"
+              :class="['size-item', { disabled: !availablesize.map(String).includes(String(item)) }]"
+              @click="availablesize.map(String).includes(String(item)) ? handleClick(item) : null">
               {{ item }}
             </div>
           </div>
@@ -106,6 +106,8 @@ export default {
       getsizes: [],
       selectedProductComments: [],
       availablesize: [],
+      letterbased: [],
+      numericbased: [],
       message: null,
       errormessage: null,
       showModal: false,
@@ -125,15 +127,24 @@ export default {
   },
   methods: {
     handleClick(item) {
-      if (this.availablesize.includes(item)) {
+      let itemString = String(item); // Convert item to a string for consistent comparison
+
+      // Convert `availablesize` to strings before checking `.includes()`
+      if (this.availablesize.map(String).includes(itemString)) {
         this.singleproduct.size.forEach(element => {
-          if (element.size.includes(item)) {
+          // Ensure `element.size` is an array before using `.includes()`
+          let elementSize = Array.isArray(element.size) ? element.size.map(String) : [String(element.size)];
+
+          if (elementSize.includes(itemString)) {
             this.quantity = element.quantity;
             this.size = element.size;
           }
         });
       }
     },
+
+
+
     async getproduct() {
       const token = localStorage.getItem('token');
       try {
@@ -146,6 +157,7 @@ export default {
         this.singleproduct = response1.data.data;
         this.rate = response1.data.data.MyRate;
         this.availablesize = this.singleproduct.size.map(element => element.size);
+        console.log(this.availablesize)
 
         const response2 = await axios.get(`similar/${this.id}/products`, {
           headers: {
@@ -222,11 +234,22 @@ export default {
       this.emitcartmessage = cartmessage;
     },
 
-    async comparesize() {
-      const filteredSizes = this.getsizes.filter(x => x.singleproduct === this.singleproduct);
-      return filteredSizes;
-    },
   },
+  computed: {
+    availableSizes() {
+      if (!this.singleproduct || !this.singleproduct.size_type) {
+        console.warn("singleproduct or size_type is not defined yet.");
+        return [];
+      }
+      if (!this.letterbased.length || !this.numericbased.length) {
+        console.warn("letterbased or numericbased is not loaded yet.");
+        return [];
+      }
+
+      return this.singleproduct.size_type === "letterbased" ? this.letterbased : this.numericbased;
+    }
+  },
+
 
   mounted() {
     this.getproduct();
