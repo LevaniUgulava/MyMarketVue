@@ -53,9 +53,9 @@ export default {
         }
     },
     computed: {
-        // ✅ Keep previous section from route query, default to "all" if missing
         computedSection() {
-            return this.$route.query.section || "all";
+            let section = this.$route.query.section || localStorage.getItem('section') || "all";
+            return section;
         }
     },
     methods: {
@@ -63,13 +63,14 @@ export default {
             const lang = this.$route.params.lang || 'ka';
             this.$router.push({
                 path: `/${lang}/product`,
-                query: { section: this.computedSection, ...params, page: 1 } // ✅ Keep section unchanged
+                query: { section: this.computedSection, ...params, page: 1 }
             });
         },
         formatSection(section) {
             return this.$t(`homemain.${section}`) || this.$t("homemain.default");
         }
     }
+
 };
 </script>
 

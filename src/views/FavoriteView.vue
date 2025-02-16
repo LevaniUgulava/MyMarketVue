@@ -4,40 +4,28 @@
     <Message v-if="emitlikemessage" closable class="message" severity="error">{{ emitlikemessage }}</Message>
     <Message v-if="emitcartmessage" closable class="message" severity="error">{{ emitcartmessage }}</Message>
 
-    <div v-if="isLoading">
-      <div class="loading-spinner"></div>
-      <div class="loading-text">Loading...</div>
+    <div v-if="isLoading" class="loading-message">
+      <p>Hold on! We're gathering your favorite products. This won't take long...</p>
     </div>
 
     <div v-if="products.length > 0 && !isLoading">
-      <div :class="{'products-wrapper': isSidebarCollapsed, 'products-wrapper-collapsed': !isSidebarCollapsed}">
-        <ProductCardComponent
-          v-for="(item) in products"
-          :key="item.id"
-          :initialproduct="item"
-          @show-comments="showCommentsModal(item.id)"
-          @cart-updated="handleCartUpdated"
-          @liked-message="handleunauthorizedlike"
-          @cart-message="handleunauthorizedcart"
-        />
+      <div :class="{ 'products-wrapper': isSidebarCollapsed, 'products-wrapper-collapsed': !isSidebarCollapsed }">
+        <ProductCardComponent v-for="(item) in products" :key="item.id" :initialproduct="item"
+          @show-comments="showCommentsModal(item.id)" @cart-updated="handleCartUpdated"
+          @liked-message="handleunauthorizedlike" @cart-message="handleunauthorizedcart" />
       </div>
     </div>
 
     <div v-else-if="!isLoading && products.length === 0" class="no-products-message">
-      <p><i class="fas fa-heart-broken"></i>{{$t("favorite.message")}}</p>
-      <a href="/" class="explore-link">{{$t("favorite.btn")}}</a>
+      <p><i class="fas fa-heart-broken"></i>{{ $t("favorite.message") }}</p>
+      <a href="/" class="explore-link">{{ $t("favorite.btn") }}</a>
     </div>
 
     <Bootstrap5Pagination :data="pagination" @pagination-change-page="changePage" />
   </div>
 
-  <CommentModal
-    v-if="showModal"
-    :product="selectedProduct"
-    :comments="selectedProductComments"
-    @close="closeModal"
-    @comment-submitted="refreshComments(selectedProduct.id)"
-  />
+  <CommentModal v-if="showModal" :product="selectedProduct" :comments="selectedProductComments" @close="closeModal"
+    @comment-submitted="refreshComments(selectedProduct.id)" />
 </template>
 
 <script>
@@ -100,7 +88,7 @@ export default {
       handler() {
         this.fetchfavorite();
       },
-      immediate: false,
+      immediate: true,
     },
   },
   methods: {
@@ -158,34 +146,19 @@ export default {
   mounted() {
     setTimeout(() => {
       this.fetchfavorite();
-      this.isLoading=false;
+      this.isLoading = false;
     }, 500);
   },
 };
 </script>
 
 <style>
-.loading-spinner {
-  border: 6px solid #f3f3f3;
-  border-top: 6px solid #007bff; 
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  animation: spin 1s linear infinite;
-  margin: 40px auto;
-  margin-top: 10%;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.loading-text {
+.loading-message {
   text-align: center;
-  font-size: 1.1rem;
-  color: #333;
-  margin-top: 10px;
+  font-size: 1rem;
+  font-weight: bold;
+  color: #444;
+  padding-top: 20px;
 }
 
 .no-products-message {
@@ -194,13 +167,10 @@ export default {
   align-items: center;
   justify-content: center;
   text-align: center;
-  background-color: #f9fafb;
   padding: 40px;
   border-radius: 12px;
-  border: 1px solid #e2e8f0;
   color: #555;
   margin-top: 10%;
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.08);
   transition: transform 0.3s ease;
 }
 
@@ -278,7 +248,8 @@ export default {
   border-color: #007bff;
 }
 
-.page-link:hover, .page-link:focus {
+.page-link:hover,
+.page-link:focus {
   background-color: #0056b3;
   color: white;
   border-color: #0056b3;
@@ -308,7 +279,8 @@ export default {
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;
   }
-   .products-wrapper-collapsed {
+
+  .products-wrapper-collapsed {
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
   }

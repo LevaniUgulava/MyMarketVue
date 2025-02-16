@@ -1,51 +1,41 @@
 <template>
+  <div v-if="isLoading" class="loading-message">
+    <p>Hold on! We're gathering your favorite products. This won't take long...</p>
+  </div>
   <div class="container">
-    <div v-if="isLoading" class="loading-container">
-      <div class="loading-spinner"></div>
-      <div class="loading-text">Fetching your orders...</div>
-    </div>
 
-    <!-- Toggle Buttons -->
     <div v-if="!isLoading" class="toggle-buttons">
-      <button 
-        :class="{ active: showPending }" 
-        @click="toggleSection('pending')">
-{{$t('order.pending')}}
+      <button :class="{ active: showPending }" @click="toggleSection('pending')">
+        {{ $t('order.pending') }}
       </button>
-      <button 
-        :class="{ active: !showPending }" 
-        @click="toggleSection('completed')">
-{{$t('order.completed')}}
+      <button :class="{ active: !showPending }" @click="toggleSection('completed')">
+        {{ $t('order.completed') }}
       </button>
     </div>
 
     <!-- Pending Orders Section -->
     <div v-if="showPending && OrderProducts.length > 0 && !isLoading" class="order-section">
       <div class="section-header">
-        <h2>{{$t('order.pending')}}</h2>
+        <h2>{{ $t('order.pending') }}</h2>
       </div>
       <div class="order-box">
         <div v-for="order in OrderProducts" :key="order.order_id" class="order-card">
           <div class="card-header">
-            <h3 class="order-id">{{$t('order.order')}} #{{ order.order_id }}</h3>
-            <h3 class="order-amount">{{$t('order.paid')}}: {{ order.order_amount }} <i class="fa-solid fa-lari-sign"></i></h3>
+            <h3 class="order-id">{{ $t('order.order') }} #{{ order.order_id }}</h3>
+            <h3 class="order-amount">{{ $t('order.paid') }}: {{ order.order_amount }} <i
+                class="fa-solid fa-lari-sign"></i></h3>
           </div>
           <div class="products">
-            <OrderComponent
-              v-for="product in order.products"
-              :key="product.id"
-              :product="product"
-              :order_status="order.order_status"
-            />
+            <OrderComponent v-for="product in order.products" :key="product.id" :product="product"
+              :order_status="order.order_status" />
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Completed Orders Section -->
     <div v-if="!showPending && CompletedProducts.length > 0 && !isLoading" class="order-section">
       <div class="section-header">
-        <h2>{{$t('order.completed')}}</h2>
+        <h2>{{ $t('order.completed') }}</h2>
       </div>
       <div class="order-box">
         <div v-for="order in CompletedProducts" :key="order.order_id" class="order-card">
@@ -54,19 +44,15 @@
             <h3 class="order-amount">Paid: ${{ order.order_amount }}</h3>
           </div>
           <div class="products">
-            <OrderComponent
-              v-for="product in order.products"
-              :key="product.id"
-              :product="product"
-              :order_status="order.order_status"
-            />
+            <OrderComponent v-for="product in order.products" :key="product.id" :product="product"
+              :order_status="order.order_status" />
           </div>
         </div>
       </div>
     </div>
 
-    <!-- No Orders -->
-    <div v-else-if="!isLoading && OrderProducts.length === 0 && CompletedProducts.length === 0" class="no-order-message">
+    <div v-else-if="!isLoading && OrderProducts.length === 0 && CompletedProducts.length === 0"
+      class="no-order-message">
       <i class="fas fa-box-open"></i>
       <p>You have no orders yet!</p>
       <a href="/" class="shop-link">Go Shopping</a>
@@ -87,7 +73,7 @@ export default {
       OrderProducts: [],
       CompletedProducts: [],
       isLoading: true,
-      showPending: true, 
+      showPending: true,
     };
   },
   methods: {
@@ -112,21 +98,25 @@ export default {
     }
   },
   mounted() {
-    setTimeout(() => {
-      this.getorder();
-      this.isLoading=false;
-    }, 500);
+    this.getorder();
+
   }
 };
 </script>
 <style scoped>
+.loading-message {
+  text-align: center;
+  font-size: 1rem;
+  font-weight: bold;
+  color: #444;
+  padding-top: 20px;
+}
+
 .container {
   margin: 20px auto;
   padding: 20px;
   max-width: 1200px;
-  background: linear-gradient(145deg, #f0f0f0, #ffffff);
   border-radius: 16px;
-  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 /* Toggle Buttons */
@@ -241,46 +231,53 @@ export default {
 .shop-link:hover {
   background-color: #0056b3;
 }
+
 @media (min-width: 375px) and (max-width: 430px) {
-  .toggle-buttons button{
-      font-size: 0.8rem;
-      background-color: white;
+  .toggle-buttons button {
+    font-size: 0.8rem;
+    background-color: white;
   }
+
   .toggle-buttons button.active {
-      font-size: 0.5rem;
-      background-color: rgba(76, 175, 80, 0.25);
-      color: black;
-   }
-    .no-order-message i{
-      font-size: 2rem;
+    font-size: 0.5rem;
+    background-color: rgba(76, 175, 80, 0.25);
+    color: black;
   }
-  p{
-      font-size: 0.6rem;
+
+  .no-order-message i {
+    font-size: 2rem;
   }
-  .shop-link{
+
+  p {
+    font-size: 0.6rem;
+  }
+
+  .shop-link {
     margin-top: 10px;
     padding: 5px 10px;
     font-size: 0.6rem;
   }
-  .section-header h2{
-   font-size: 0.6rem;
-  }
-  .card-header h3{
+
+  .section-header h2 {
     font-size: 0.6rem;
   }
-  .order-box{
+
+  .card-header h3 {
+    font-size: 0.6rem;
+  }
+
+  .order-box {
     padding: 10px;
   }
-  .products {
-  grid-template-columns: repeat(auto-fill, minmax(120px, 2fr));
-  gap: 10px;
-  justify-items: center;
-}
-.container{
-  padding: 0px;
-}
-}
- 
-  
 
+  .products {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 2fr));
+    gap: 10px;
+    justify-items: center;
+  }
+
+  .container {
+    padding: 0px;
+  }
+}
 </style>

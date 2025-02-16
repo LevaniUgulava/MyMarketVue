@@ -18,7 +18,7 @@ export default {
   homemain: {
     all: "All Products",
     discount: "Discount Products",
-    rate: "High Rate Products",
+    highrate: "High Rate Products",
     seeall: "See All",
   },
   profile: {

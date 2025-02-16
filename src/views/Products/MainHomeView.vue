@@ -1,6 +1,6 @@
 <template>
-  <Message :message="emitdata" @close="emitdata = ''" :backgroundColor="'rgba(76, 175, 80, 0.25)'" :textColor="'#004d40'"
-    :positionType="'fixed'" />
+  <Message :message="emitdata" @close="emitdata = ''" :backgroundColor="'rgba(76, 175, 80, 0.25)'"
+    :textColor="'#004d40'" :positionType="'fixed'" />
   <Message :message="emitlikemessage" @close="emitlikemessage = ''" />
   <Message :message="emitcartmessage" @close="emitcartmessage = ''" />
   <div>
@@ -69,7 +69,7 @@
 
     <section class="section">
       <div class="section-header">
-        <p>{{ $t('homemain.rate') }}</p>
+        <p>{{ $t('homemain.highrate') }}</p>
         <button @click="see('highrate')">{{ $t('homemain.seeall') }}</button>
       </div>
 
