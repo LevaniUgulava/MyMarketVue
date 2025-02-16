@@ -127,12 +127,10 @@ export default {
   },
   methods: {
     handleClick(item) {
-      let itemString = String(item); // Convert item to a string for consistent comparison
+      let itemString = String(item);
 
-      // Convert `availablesize` to strings before checking `.includes()`
       if (this.availablesize.map(String).includes(itemString)) {
         this.singleproduct.size.forEach(element => {
-          // Ensure `element.size` is an array before using `.includes()`
           let elementSize = Array.isArray(element.size) ? element.size.map(String) : [String(element.size)];
 
           if (elementSize.includes(itemString)) {
