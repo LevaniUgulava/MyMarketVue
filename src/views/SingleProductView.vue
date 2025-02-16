@@ -4,6 +4,8 @@
       :textColor="'#004d40'" />
     <Message :message="errormessage" @close="errormessage = ''" />
 
+    <Breadcrumb :maincategory="singleproduct.MainCategory" :category="singleproduct.Category"
+      :subcategory="singleproduct.SubCategory" :name="singleproduct.name" />
 
     <div class="product-container">
       <div class="product-content">
@@ -83,13 +85,14 @@ import { Carousel, Slide, Pagination, Navigation } from 'vue3-carousel';
 import StarRatingComponent from "@/components/StarRatingComponent.vue";
 import Message from '@/components/Message/MessageComponent.vue';
 import ProductCardComponent from '@/components/ProductCardComponent.vue';
-
+import Breadcrumb from '@/components/BreadcrumbComponent.vue';
 export default {
   props: ['id'],
   components: {
     Carousel,
     CommentModal,
     Slide,
+    Breadcrumb,
     Message,
     ProductCardComponent,
     StarRatingComponent,
@@ -140,8 +143,8 @@ export default {
           },
         });
 
-        this.singleproduct = response1.data.data[0];
-        this.rate = response1.data.data[0].MyRate;
+        this.singleproduct = response1.data.data;
+        this.rate = response1.data.data.MyRate;
         this.availablesize = this.singleproduct.size.map(element => element.size);
 
         const response2 = await axios.get(`similar/${this.id}/products`, {
