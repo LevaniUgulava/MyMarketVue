@@ -68,11 +68,6 @@
     </div>
 
 </div>
-
-
-<p>{{rate}}</p>
-
-
   </div>
 </template>
 
