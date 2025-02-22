@@ -199,7 +199,10 @@ export default {
       try {
         const response = await axios.post(
           `addcart/${this.id}`,
-          { size: this.size },
+          {
+            size: this.size,
+            type: this.singleproduct.size_type
+          },
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -244,7 +247,7 @@ export default {
         return [];
       }
 
-      return this.singleproduct.size_type === "letterbased" ? this.letterbased : this.numericbased;
+      return this.singleproduct.size_type === "clothsize" ? this.letterbased : this.numericbased;
     }
   },
 

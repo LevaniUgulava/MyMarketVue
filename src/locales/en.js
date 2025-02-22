@@ -96,5 +96,20 @@ export default {
       txt2: "At the core of our values are integrity, innovation, and customer satisfaction. We believe in working together to create meaningful and lasting impacts.",
       txt3: "Thank you for trusting us as your partner. We look forward to working with you!",
     },
+    title:{
+      quick:"Quick Links",
+      follow:"Follow",
+      Contact:"Contact"
+    },
+    contact:{
+      email:"Email",
+      num:"Phone"
+    },
+     links:{
+      home:"Home",
+      aboutus:"About Us",
+      service:"Services",
+      privacy:"Privacy and Policy"
+     }
   },
 };

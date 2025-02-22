@@ -46,10 +46,6 @@ export default {
 
   data() {
     return {
-      vau: {
-        id: 1,
-        name: "cool"
-      },
       products: [],
       showModal: false,
       selectedProduct: null,
