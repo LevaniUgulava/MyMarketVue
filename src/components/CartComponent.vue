@@ -76,7 +76,7 @@ import { Carousel, Slide, Pagination, Navigation } from 'vue3-carousel'
 
 export default {
   name: 'ShoppingCart',
- 
+
   data() {
     return {
       mycarts: [],
