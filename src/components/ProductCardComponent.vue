@@ -67,7 +67,7 @@ export default {
       try {
         const response = await axios.post(
           `addcart/${id}`,
-          {},
+          { type: this.initialproduct.size_type },
           { headers: { Authorization: `Bearer ${token}` } }
         );
         this.$emit('cart-updated', response.data);
