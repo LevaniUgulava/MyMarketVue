@@ -1,5 +1,5 @@
 <template>
-  <div class="product-page">
+  <div class="product-page" v-if="singleproduct">
     <Message :message="message" @close="message = ''" :backgroundColor="'rgba(76, 175, 80, 0.25)'"
       :textColor="'#004d40'" />
     <Message :message="errormessage" @close="errormessage = ''" />
@@ -74,6 +74,11 @@
       <a href="/" class="back">Back to shop</a>
     </div>
   </div>
+
+  <!-- Loading Spinner -->
+  <!-- <div v-else class="loading-spinner">
+    <p>Loading...</p>
+  </div> -->
 </template>
 
 <script>
@@ -86,6 +91,7 @@ import StarRatingComponent from "@/components/StarRatingComponent.vue";
 import Message from '@/components/Message/MessageComponent.vue';
 import ProductCardComponent from '@/components/ProductCardComponent.vue';
 import Breadcrumb from '@/components/BreadcrumbComponent.vue';
+
 export default {
   props: ['id'],
   components: {
@@ -101,7 +107,7 @@ export default {
   },
   data() {
     return {
-      singleproduct: {},
+      singleproduct: null, // Initialize as null to show loading state
       products: [],
       getsizes: [],
       selectedProductComments: [],
@@ -140,12 +146,10 @@ export default {
         });
       }
     },
-
-
-
     async getproduct() {
       const token = localStorage.getItem('token');
       try {
+        // Fetch single product
         const response1 = await axios.get(`display/${this.id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -155,8 +159,8 @@ export default {
         this.singleproduct = response1.data.data;
         this.rate = response1.data.data.MyRate;
         this.availablesize = this.singleproduct.size.map(element => element.size);
-        console.log(this.availablesize)
 
+        // Fetch similar products
         const response2 = await axios.get(`similar/${this.id}/products`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -164,7 +168,8 @@ export default {
         });
         this.products = response2.data.data;
       } catch (error) {
-        console.log(error);
+        this.errormessage = "An error occurred while loading the data.";
+        console.error(error);
       }
     },
     async showCommentsModal(id) {
@@ -210,8 +215,8 @@ export default {
           }
         );
         this.message = response.data.message;
-        console.log(response.data);
       } catch (error) {
+        this.errormessage = "Failed to add to cart.";
         console.log(error);
       }
     },
@@ -225,32 +230,15 @@ export default {
         console.log(error);
       }
     },
-    handleCartUpdated(cartData) {
-      this.emitdata = cartData.message;
-    },
-    handleunauthorizedlike(likedmessage) {
-      this.emitlikemessage = likedmessage;
-    },
-    handleunauthorizedcart(cartmessage) {
-      this.emitcartmessage = cartmessage;
-    },
-
   },
   computed: {
     availableSizes() {
       if (!this.singleproduct || !this.singleproduct.size_type) {
-        console.warn("singleproduct or size_type is not defined yet.");
         return [];
       }
-      if (!this.letterbased.length || !this.numericbased.length) {
-        console.warn("letterbased or numericbased is not loaded yet.");
-        return [];
-      }
-
       return this.singleproduct.size_type === "clothsize" ? this.letterbased : this.numericbased;
     }
   },
-
 
   mounted() {
     this.getproduct();

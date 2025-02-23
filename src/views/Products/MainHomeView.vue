@@ -329,7 +329,7 @@ export default {
   overflow-x: auto;
   padding-bottom: 10px;
   scroll-snap-type: x mandatory;
-  height: 450px;
+  height: 420px;
   -webkit-overflow-scrolling: touch;
 
 }

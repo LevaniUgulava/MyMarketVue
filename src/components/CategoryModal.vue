@@ -138,12 +138,12 @@ export default {
 <style scoped lang="css">
 .inputs {
   display: flex;
-  gap: 10px; /* Space between the input fields */
-  margin-bottom: 20px; /* Adds space below the input fields */
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
 .inputs input {
-  flex: 1; /* Make the input fields take equal space */
+  flex: 1; 
   padding: 10px;
   font-size: 0.95rem;
   border: 1px solid #ddd;

@@ -9,7 +9,10 @@
 
       <div class="product-info">
         <h3>{{ initialproduct.name }}</h3>
-        <div class="rate">Rating: {{ initialproduct.Rate }}</div>
+        <!-- <div class="rate">
+          <div class="rating-badge">{{ initialproduct.Rate }}</div>
+          <span class="rating-text">Rating</span>
+        </div> -->
         <p class="price">
           {{ initialproduct.discountprice }} <i class="fa-solid fa-lari-sign"></i>
           <span
@@ -54,7 +57,6 @@ export default {
     return {
       isLiked: this.initialproduct.isLiked,
       currentLanguage: localStorage.getItem('selectedLanguage'),
-
     };
   },
   methods: {
@@ -132,6 +134,7 @@ export default {
 .card {
   background: #fff;
   border-radius: 12px;
+  width: 220px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   padding: 20px;
@@ -162,14 +165,11 @@ export default {
 
 h3 {
   font-size: 1.2rem;
+  width: 180px;
   margin: 10px 0;
+  text-align: center;
 }
 
-.rate {
-  font-size: 1rem;
-  color: #555;
-  margin-bottom: 10px;
-}
 
 .price {
   color: #333;

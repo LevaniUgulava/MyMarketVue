@@ -38,7 +38,7 @@
       <li>
 
         <select v-model="locale" @change="setLanguage(locale)">
-          <option value="ka">{{ isSidebarCollapsed ? "ka" : "ქართული" }}</option>
+          <option value="ka">{{ isSidebarCollapsed ? "ქა" : "ქართული" }}</option>
           <option value="en">{{ isSidebarCollapsed ? "en" : "English" }}</option>
         </select>
       </li>

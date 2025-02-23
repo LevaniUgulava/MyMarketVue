@@ -3,7 +3,7 @@
     <div class="modal-content">
       <button class="close-btn" @click="closeModal">✕</button>
       <h2>{{ product.name }}'s Comments</h2>
-      
+
       <div class="comments-container">
         <ul v-if="comments.length > 0">
           <li v-for="comment in comments" :key="comment.pivot.created_at" class="comment-item">
@@ -74,11 +74,12 @@ export default {
 .comment-modal {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgb(71 68 68 / 19%);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  backdrop-filter: blur(1px);
 }
 
 .modal-content {
@@ -93,6 +94,30 @@ export default {
   flex-direction: column;
   gap: 20px;
   transition: transform 0.3s ease;
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 25px;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 600px;
+  position: relative;
+  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.15);
+  animation: fadeIn 0.4s ease-in-out;
+  text-align: left;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .close-btn {
