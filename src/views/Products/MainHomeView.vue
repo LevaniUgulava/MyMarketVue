@@ -4,7 +4,7 @@
   <Message :message="emitlikemessage" @close="emitlikemessage = ''" />
   <Message :message="emitcartmessage" @close="emitcartmessage = ''" />
   <div>
-    <ExclusiveComponent />
+    <SmallSections />
 
     <section class="section">
       <div class="section-header">
@@ -89,13 +89,13 @@ import ProductCardComponent from '@/components/ProductCardComponent.vue';
 import CommentModal from '@/components/CommentModal.vue';
 import axios from 'axios';
 import Message from '@/components/Message/MessageComponent.vue';
-import ExclusiveComponent from '@/components/Status/ExclusiveCollection.vue';
+import SmallSections from '@/components/Status/SmallSections.vue';
 export default {
 
   components: {
     ProductCardComponent,
     CommentModal,
-    ExclusiveComponent,
+    SmallSections,
     Message,
 
   },
@@ -161,6 +161,7 @@ export default {
         });
 
         this.allProducts = response.data.all;
+
         this.discountProducts = response.data.discount;
         this.rateProducts = response.data.highrate;
 
@@ -237,7 +238,7 @@ export default {
   flex-direction: column;
   background: linear-gradient(135deg, #ffffff, #f2f2f2);
   border-radius: 10px;
-  margin-top: 2%;
+  margin-bottom: 2%;
   box-shadow: 2px 4px 12px rgba(0, 0, 0, 0.1);
   padding: 5px;
   width: 100%;

@@ -3,17 +3,19 @@
   <Message :message="emitdata" @close="emitdata = ''" :backgroundColor="'rgba(76, 175, 80, 0.25)'"
     :textColor="'#004d40'" :positionType="'fixed'" />
   <message :message="emitlikemessage" @close="emitlikemessage = ''" />
-  <BreadcrumbComponent :maincategory="maincategory" :category="category" :subcategory="subcategory" class="bread" />
+  <div v-if="products.length > 0">
 
-  <div class="main-content">
+    <BreadcrumbComponent :maincategory="maincategory" :category="category" :subcategory="subcategory" class="bread" />
+    <div class="main-content">
 
-    <div :class="{ 'products-wrapper': isSidebarCollapsed, 'products-wrapper-collapsed': !isSidebarCollapsed }">
-      <ProductCardComponent v-for="(item, index) in products" :key="index" :initialproduct="item"
-        @show-comments="showCommentsModal(item.id)" @cart-updated="handleCartUpdated"
-        @liked-message="handleunauthorizedlike" @cart-message="handleunauthorizedcart" />
+      <div :class="{ 'products-wrapper': isSidebarCollapsed, 'products-wrapper-collapsed': !isSidebarCollapsed }">
+        <ProductCardComponent v-for="(item, index) in products" :key="index" :initialproduct="item"
+          @show-comments="showCommentsModal(item.id)" @cart-updated="handleCartUpdated"
+          @liked-message="handleunauthorizedlike" @cart-message="handleunauthorizedcart" />
+      </div>
+
+      <Bootstrap5Pagination :data="pagination" @pagination-change-page="changePage" />
     </div>
-
-    <Bootstrap5Pagination :data="pagination" @pagination-change-page="changePage" />
   </div>
 
 

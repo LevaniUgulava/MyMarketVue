@@ -163,7 +163,6 @@ select {
   width: 100%;
   padding: 12px;
   border-radius: 8px;
-  font-weight: 500;
   color: #333;
   background-color: rgba(255, 255, 255, 0.9);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
@@ -176,8 +175,10 @@ select {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+
+
 .sidebar ul li button i {
-  font-size: 1rem;
+  font-size: 1.3rem;
   color: #008080;
 }
 
