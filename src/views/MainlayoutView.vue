@@ -1,19 +1,19 @@
 <template>
   <div class="layout-container">
-    <div class="fixed-wrapper" :class="{ 'is-collapsed': isSidebarCollapsed }">
-      <HeaderComponentVue class="header" @search="handleSearch" />
-      <HomeSideBarVue class="sidebar" @sidebar-collapse="handleSidebarCollapse" />
+    <HeaderComponentVue class="header" :isMobile="isMobile" @search="handleSearch" />
 
-    </div>
+    <HomeSideBarVue class="sidebar" :isMobile="isMobile" />
 
-    <div class="main-content" :class="{ 'is-collapsed': isSidebarCollapsed }">
+    <div class="main-content">
       <router-view v-slot="{ Component }">
-        <component :is="Component" :is-sidebar-collapsed="isSidebarCollapsed" />
+        <component :is="Component" />
       </router-view>
     </div>
-    <FooterComponentVue class="footer" :class="{ 'is-collapsed': isSidebarCollapsed }" />
+
+    <FooterComponentVue class="footer" />
   </div>
 </template>
+
 <script>
 import HeaderComponentVue from '@/components/HeaderComponent.vue';
 import HomeSideBarVue from '@/components/HomeSideBar.vue';
@@ -28,150 +28,105 @@ export default {
   },
   data() {
     return {
-      isSidebarCollapsed: window.innerWidth <= 1024, // Initialize collapsed state for mobile
+      isMobile: window.innerWidth <= 768,
     };
   },
-  methods: {
-    toggleSidebar() {
-      this.isSidebarCollapsed = !this.isSidebarCollapsed; // Toggle sidebar collapse state
-    },
-    handleSidebarCollapse(isCollapsed) {
-      this.isSidebarCollapsed = isCollapsed; // Update state when emitted by sidebar
-    },
-    handleResize() {
-      this.isSidebarCollapsed = window.innerWidth <= 1024; // Adjust based on screen size
-    },
-  },
   mounted() {
-    window.addEventListener('resize', this.handleResize); // Add resize listener
+    window.addEventListener('resize', this.checkScreenSize);
   },
   beforeUnmount() {
-    window.removeEventListener('resize', this.handleResize); // Clean up listener
+    window.removeEventListener('resize', this.checkScreenSize);
+  },
+  methods: {
+    checkScreenSize() {
+      this.isMobile = window.innerWidth <= 768;
+    },
   },
 };
 </script>
 
-
 <style scoped>
-/* Layout Container */
-.layout-container {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  width: 100%;
-}
-
-/* Fixed Header and Sidebar */
-.fixed-wrapper {
-  display: flex;
-  flex-direction: column;
+.sidebar {
   width: 250px;
-  /* Default width */
+  height: calc(100vh - 70px);
   position: fixed;
-  top: 0;
+  top: 70px;
   left: 0;
-  height: 100%;
-  z-index: 100;
-  transition: width 0.3s ease;
-  /* Smooth transition for sidebar width */
-}
-
-.fixed-wrapper.is-collapsed {
-  width: 60px;
-  /* Collapsed width */
+  background-color: #f0f4f5;
+  padding: 10px;
+  overflow-y: auto;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
 }
 
 .header {
-  width: calc(100% - 250px);
+  width: 100vh;
   position: fixed;
   top: 0;
-  left: 250px;
   height: 60px;
   background-color: #f8f8f8;
   z-index: 200;
-  transition: left 0.3s ease, width 0.3s ease;
-}
-
-.header.is-collapsed {
-  left: 60px;
-  width: calc(100% - 60px);
-}
-
-.sidebar {
+  display: flex;
+  align-items: center;
   padding: 10px;
-  overflow-y: auto;
-  height: calc(100vh - 60px);
 }
 
 .main-content {
   flex-grow: 1;
   width: calc(100% - 250px);
-  /* Default width */
   margin-left: 250px;
-  /* Default margin */
-  margin-top: 60px;
-  /* Offset for header height */
   padding: 10px;
   box-sizing: border-box;
   min-height: calc(100vh - 60px);
-  /* Ensures footer is pushed if content is short */
+  margin-top: 60px;
   overflow-y: auto;
-  transition: margin-left 0.3s ease, width 0.3s ease;
 }
 
-.main-content.is-collapsed {
-  width: calc(100% - 60px);
-  /* Adjust for collapsed sidebar */
-  margin-left: 60px;
-}
-
-/* Footer */
 .footer {
   width: calc(100% - 250px);
-  /* Default width */
   margin-left: 250px;
-  /* Default margin */
   background-color: #333;
   color: #fff;
   text-align: center;
   font-size: 0.9em;
   padding: 15px 0;
   position: relative;
-  transition: margin-left 0.3s ease, width 0.3s ease;
 }
 
-.footer.is-collapsed {
-  width: calc(100% - 60px);
-  margin-left: 60px;
-}
-
-@media (min-width: 375px) and (max-width: 430px) {
-  .fixed-wrapper {
-    width: 100px;
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    height: 60px;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    top: auto !important;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 9999;
+    padding: 0;
+    overflow: hidden;
+    flex-direction: row;
   }
 
-  .fixed-wrapper.is-collapsed {
-    width: 60px !important;
+  .header {
+    width: 100%;
+    left: 0;
   }
 
   .main-content {
-    width: calc(100% - 100px);
-    margin-left: 100px;
-  }
+    width: 100% !important;
+    margin-left: 0 !important;
+    padding-bottom: 70px !important;
+    margin-top: 0px;
 
-  .main-content.is-collapsed {
-    width: calc(100% - 50px);
-    margin-left: 50px;
   }
 
   .footer {
-    width: calc(100% - 100px);
-    margin-left: 100px;
-  }
-
-  .footer.is-collapsed {
-    width: calc(100% - 60px);
-    margin-left: 60px;
+    width: 100% !important;
+    margin-left: 0 !important;
   }
 }
 </style>

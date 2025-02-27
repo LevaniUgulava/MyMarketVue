@@ -1,31 +1,28 @@
 <template>
-<div class="timer-container">
-  <div class="timer-horizontal">
-    <div class="header">{{header}}</div>
-    <div class="timer-display" v-if="showcountdown">
-      <div class="time-group">
-        <span class="time">{{ countdown.days }}</span>
-        <span class="label">Days</span>
-      </div>
-      <div class="time-group">
-        <span class="time">{{ countdown.hours }}</span>
-        <span class="label">Hours</span>
-      </div>
-      <div class="time-group">
-        <span class="time">{{ countdown.minutes }}</span>
-        <span class="label">Minutes</span>
-      </div>
-      <div class="time-group">
-        <span class="time">{{ countdown.seconds }}</span>
-        <span class="label">Seconds</span>
+  <div class="timer-container">
+    <div class="timer-horizontal">
+      <div class="header">{{ header }}</div>
+      <div class="timer-display" v-if="showcountdown">
+        <div class="time-group">
+          <span class="time">{{ countdown.days }}</span>
+          <span class="label">Days</span>
+        </div>
+        <div class="time-group">
+          <span class="time">{{ countdown.hours }}</span>
+          <span class="label">Hours</span>
+        </div>
+        <div class="time-group">
+          <span class="time">{{ countdown.minutes }}</span>
+          <span class="label">Minutes</span>
+        </div>
+        <div class="time-group">
+          <span class="time">{{ countdown.seconds }}</span>
+          <span class="label">Seconds</span>
+        </div>
       </div>
     </div>
   </div>
-</div>
-
 </template>
-
-
 
 <script>
 export default {
@@ -48,30 +45,26 @@ export default {
         seconds: "00",
       },
       header: "",
-      isEnded:false,
-      showcountdown:true
+      showcountdown: true
     };
   },
   methods: {
     updateCountdown() {
       const now = new Date();
-
       if (now < this.startTime) {
         const timeUntilStart = this.startTime - now;
-        this.header = "Start in:";
+        this.header = "Starts In:"
         this.calculateTime(timeUntilStart);
         return;
       }
       const timeUntilEnd = this.endTime - now;
       if (timeUntilEnd > 0) {
-        this.header = "End in:";
         this.calculateTime(timeUntilEnd);
-      } else {
-        this.header = "Event has ended.";
+        this.header = "Ends In:"
 
-        this.showcountdown=false;
-        this.isEnded=true;
-        this.$emit("isEnded",this.isEnded);
+      } else {
+        this.showcountdown = false;
+        this.header = "Event Ended"
         this.resetCountdown();
       }
     },
@@ -90,21 +83,20 @@ export default {
     },
     resetCountdown() {
       this.countdown = { days: "00", hours: "00", minutes: "00", seconds: "00" };
+      this.showcountdown = false;
     },
   },
   mounted() {
-    this.updateCountdown(); // Initial call
-    this.timer = setInterval(this.updateCountdown, 1000); 
+    this.updateCountdown();
+    this.timer = setInterval(this.updateCountdown, 1000);
   },
   beforeUnmount() {
-    clearInterval(this.timer); 
+    clearInterval(this.timer);
   },
 };
-
 </script>
 
 <style scoped>
-/* Timer Container */
 .timer-container {
   text-align: center;
   font-family: 'Poppins', sans-serif;
@@ -116,28 +108,26 @@ export default {
 
 .timer-horizontal {
   display: flex;
-  align-items: center; 
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  gap: 20px; 
 }
 
 .header {
- font-size: 1.2rem;
+  font-size: 0.6rem;
   font-weight: bold;
-  color: #495057; 
+  color: #000;
   text-align: center;
-  margin-bottom: 10px; 
-  text-transform: uppercase; 
-  letter-spacing: 1px; 
-  background: #f8f9fa; 
-  padding: 5px 10px; 
-  border-radius: 5px; 
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 5px 10px;
+  border-radius: 5px;
 }
 
 .timer-display {
   display: flex;
-  gap: 15px; 
+  gap: 15px;
   font-weight: bold;
   color: #343a40;
 }
@@ -161,5 +151,4 @@ export default {
   margin-top: 5px;
   text-transform: uppercase;
 }
-
 </style>

@@ -15,8 +15,8 @@ axios.defaults.baseURL = "http://192.168.0.103:8001/api/";
 const app = createApp(App);
 
 const i18n = createI18n({
-  locale: "en",
-  fallbackLocale: "en",
+  locale: "ka",
+  fallbackLocale: "ka",
   messages: {
     en,
     ka,

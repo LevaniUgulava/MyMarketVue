@@ -1,37 +1,32 @@
 <template>
-  <div class="main-content">
-    <Message v-if="emitdata" closable class="message">{{ emitdata }}</Message>
-    <Message v-if="emitlikemessage" closable class="message" severity="error">{{ emitlikemessage }}</Message>
-    <Message v-if="emitcartmessage" closable class="message" severity="error">{{ emitcartmessage }}</Message>
-
-    <div v-if="isLoading" class="loading-message">
-      <p>Hold on! We're gathering your favorite products. This won't take long...</p>
-    </div>
-
-    <div v-if="products.length > 0 && !isLoading">
-      <div :class="{ 'products-wrapper': isSidebarCollapsed, 'products-wrapper-collapsed': !isSidebarCollapsed }">
-        <ProductCardComponent v-for="(item) in products" :key="item.id" :initialproduct="item"
+  <div class="favorites-container">
+    <div v-if="products.length > 0" class="products-grid-wrapper">
+      <div :class="{ 'products-grid': isSidebarCollapsed, 'products-grid-collapsed': !isSidebarCollapsed }">
+        <ProductCardComponent v-for="item in products" :key="item.id" :initialproduct="item"
           @show-comments="showCommentsModal(item.id)" @cart-updated="handleCartUpdated"
-          @liked-message="handleunauthorizedlike" @cart-message="handleunauthorizedcart" />
+          @liked-message="handleUnauthorizedLike" @cart-message="handleUnauthorizedCart" />
       </div>
     </div>
 
-    <div v-else-if="!isLoading && products.length === 0" class="no-products-message">
-      <p><i class="fas fa-heart-broken"></i>{{ $t("favorite.message") }}</p>
-      <a href="/" class="explore-link">{{ $t("favorite.btn") }}</a>
+    <!-- Empty State (Now only shows if API confirms there are no products) -->
+    <div v-if="apiLoaded && products.length === 0" class="empty-favorites">
+      <i class="fas fa-heart-circle-plus empty-icon"></i>
+      <p class="empty-text">{{ $t("favorite.message") }}</p>
+      <p class="empty-subtext">დამატეთ ყველა პროდუქტი, რაც თქვენ გაინტერესებთ</p>
+      <div class="empty-actions">
+        <a href="/" class="primary-btn">{{ $t("favorite.btn") }}</a>
+        <a href="/" class="secondary-btn">მოინახულე ჩვენი მაღაზია</a>
+      </div>
     </div>
 
-    <Bootstrap5Pagination :data="pagination" @pagination-change-page="changePage" />
+    <!-- Pagination -->
+    <Bootstrap5Pagination v-if="apiLoaded && products.length > 0" :data="pagination"
+      @pagination-change-page="changePage" />
   </div>
-
-  <CommentModal v-if="showModal" :product="selectedProduct" :comments="selectedProductComments" @close="closeModal"
-    @comment-submitted="refreshComments(selectedProduct.id)" />
 </template>
 
 <script>
 import ProductCardComponent from '../components/ProductCardComponent.vue';
-import CommentModal from '../components/CommentModal.vue';
-import Message from 'primevue/message';
 import { Bootstrap5Pagination } from 'laravel-vue-pagination';
 import axios from 'axios';
 
@@ -39,8 +34,6 @@ export default {
   name: 'FavoriteView',
   components: {
     ProductCardComponent,
-    CommentModal,
-    Message,
     Bootstrap5Pagination,
   },
   props: {
@@ -52,174 +45,128 @@ export default {
   data() {
     return {
       products: [],
-      showModal: false,
-      selectedProduct: null,
-      selectedProductComments: [],
-      emitdata: null,
-      emitlikemessage: null,
-      emitcartmessage: null,
       pagination: {},
-      isLoading: true,
+      apiLoaded: false, // New state to track when API is finished loading
     };
   },
-  watch: {
-    emitdata(newVal) {
-      if (newVal) {
-        setTimeout(() => {
-          this.emitdata = null;
-        }, 3000);
-      }
-    },
-    emitlikemessage(newVal) {
-      if (newVal) {
-        setTimeout(() => {
-          this.emitlikemessage = null;
-        }, 3000);
-      }
-    },
-    emitcartmessage(newVal) {
-      if (newVal) {
-        setTimeout(() => {
-          this.emitcartmessage = null;
-        }, 3000);
-      }
-    },
-    '$route.query': {
-      handler() {
-        this.fetchfavorite();
-      },
-      immediate: true,
-    },
-  },
   methods: {
-    async fetchfavorite() {
+    async fetchFavorites() {
       const token = localStorage.getItem('token');
       try {
         const response = await axios.get('likeproduct', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
         this.products = response.data.data;
-        console.log(this.products)
-        this.isLoading = false;
       } catch (error) {
-        console.log(error);
+        console.error(error);
+      } finally {
+        this.apiLoaded = true;
       }
-    },
-    async showCommentsModal(id) {
-      try {
-        const { data } = await axios.get(`products/${id}/display`);
-        this.selectedProductComments = data;
-        this.selectedProduct = this.products.find((product) => product.id === id);
-        this.showModal = true;
-      } catch (error) {
-        console.error('Error fetching comments:', error);
-      }
-    },
-    async refreshComments(productId) {
-      try {
-        const { data } = await axios.get(`products/${productId}/display`);
-        this.selectedProductComments = data;
-      } catch (error) {
-        console.error('Error refreshing comments:', error);
-      }
-    },
-    closeModal() {
-      this.showModal = false;
-      this.selectedProduct = null;
-      this.selectedProductComments = [];
-    },
-    handleCartUpdated(cartData) {
-      this.emitdata = cartData.message;
-    },
-    handleunauthorizedlike(likedmessage) {
-      this.emitlikemessage = likedmessage;
-    },
-    handleunauthorizedcart(cartmessage) {
-      this.emitcartmessage = cartmessage;
     },
     changePage(page) {
       this.$router.push({ path: '/', query: { ...this.$route.query, page } });
     },
   },
   mounted() {
-    setTimeout(() => {
-      this.fetchfavorite();
-      this.isLoading = false;
-    }, 500);
+    this.fetchFavorites();
   },
 };
 </script>
 
 <style>
-.loading-message {
-  text-align: center;
-  font-size: 1rem;
-  font-weight: bold;
-  color: #444;
-  padding-top: 20px;
+.favorites-container {
+  max-width: 1200px;
+  padding: 20px;
 }
 
-.no-products-message {
+
+/* Empty State */
+.empty-favorites {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 40px;
-  border-radius: 12px;
-  color: #555;
-  margin-top: 10%;
-  transition: transform 0.3s ease;
+  padding: 80px 20px;
+  color: #333;
 }
 
-.no-products-message p {
-  font-size: 1.2rem;
-  font-weight: 500;
-  color: #444;
+/* Empty State Icon */
+.empty-icon {
+  font-size: 4rem;
+  color: #9b51e0;
   margin-bottom: 15px;
 }
 
-.no-products-message .fas {
-  margin-right: 8px;
-  color: #ff6b6b;
+/* Empty State Text */
+.empty-text {
   font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
 }
 
-.explore-link {
-  text-decoration: none;
-  background-color: #007bff;
-  color: #fff;
-  padding: 10px 20px;
-  border-radius: 6px;
+.empty-subtext {
   font-size: 1rem;
+  color: #666;
+  margin-top: 5px;
+}
+
+/* Empty State Buttons */
+.empty-actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 15px;
+}
+
+/* Primary CTA Button */
+.primary-btn {
+  text-decoration: none;
+  background-color: #9b51e0;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
   transition: background-color 0.3s ease;
-  font-weight: 500;
 }
 
-.explore-link:hover {
-  background-color: #0056b3;
+.primary-btn:hover {
+  background-color: #7e3ae3;
 }
 
-.no-products-message:hover {
-  transform: scale(1.05);
+/* Secondary CTA Button */
+.secondary-btn {
+  text-decoration: none;
+  color: #9b51e0;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: 2px solid #9b51e0;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.products-wrapper {
+.secondary-btn:hover {
+  background-color: #9b51e0;
+  color: white;
+}
+
+/* Products Grid */
+.products-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 15px;
   width: 100%;
 }
 
-.products-wrapper-collapsed {
+.products-grid-collapsed {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 15px;
   width: 100%;
 }
 
+/* Pagination */
 .pagination {
   display: flex;
   list-style-type: none;
@@ -235,7 +182,7 @@ export default {
 .page-link {
   display: block;
   padding: 10px 15px;
-  color: #007bff;
+  color: #9b51e0;
   text-decoration: none;
   border: 1px solid #dee2e6;
   border-radius: 4px;
@@ -243,46 +190,42 @@ export default {
 }
 
 .page-item.active .page-link {
-  background-color: #007bff;
+  background-color: #9b51e0;
   color: white;
-  border-color: #007bff;
+  border-color: #9b51e0;
 }
 
 .page-link:hover,
 .page-link:focus {
-  background-color: #0056b3;
+  background-color: #7e3ae3;
   color: white;
-  border-color: #0056b3;
-  text-decoration: none;
+  border-color: #7e3ae3;
 }
 
-.page-item.disabled .page-link {
-  color: #6c757d;
-  pointer-events: none;
-  background-color: #fff;
-  border-color: #dee2e6;
-}
-
-.page-link {
-  font-weight: bold;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.page-link:active {
-  background-color: #004085;
-  border-color: #004085;
-  color: white;
-}
-
+/* Responsive Grid */
 @media (min-width: 390px) and (max-width: 574px) {
-  .products-wrapper {
+  .products-grid {
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;
   }
 
-  .products-wrapper-collapsed {
+  .products-grid-collapsed {
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
+  }
+
+  .empty-text {
+    font-size: 1.3rem;
+  }
+
+  .empty-subtext {
+    font-size: 0.9rem;
+  }
+
+  .primary-btn,
+  .secondary-btn {
+    font-size: 0.9rem;
+    padding: 10px 20px;
   }
 }
 </style>

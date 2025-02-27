@@ -3,9 +3,8 @@
   <Message :message="emitdata" @close="emitdata = ''" :backgroundColor="'rgba(76, 175, 80, 0.25)'"
     :textColor="'#004d40'" :positionType="'fixed'" />
   <message :message="emitlikemessage" @close="emitlikemessage = ''" />
+  <BreadcrumbComponent :maincategory="maincategory" :category="category" :subcategory="subcategory" class="bread" />
   <div v-if="products.length > 0">
-
-    <BreadcrumbComponent :maincategory="maincategory" :category="category" :subcategory="subcategory" class="bread" />
     <div class="main-content">
 
       <div :class="{ 'products-wrapper': isSidebarCollapsed, 'products-wrapper-collapsed': !isSidebarCollapsed }">
@@ -235,7 +234,7 @@ export default {
 <style scoped>
 .products-wrapper-collapsed {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 15px;
   width: 100%;
 }
@@ -252,7 +251,6 @@ export default {
   margin: 20px 0;
 }
 
-/* Pagination Items */
 .page-item {
   margin: 0 5px;
 }

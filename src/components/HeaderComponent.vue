@@ -1,10 +1,9 @@
 <template>
 
   <head>
-    <!-- Other head content -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   </head>
-  <div class="header sticky-header">
+  <div :class="['sticky-header', isMobile ? 'mobile-header' : 'desktop-header']">
 
     <img src="/logo/logo2.png" class="logo">
 
@@ -49,6 +48,9 @@ export default {
   name: 'HeaderComponent',
   components: {
     CategoryModal,
+  },
+  props: {
+    isMobile: Boolean,
   },
   data() {
     return {
@@ -176,11 +178,9 @@ export default {
 .suggestions-container {
   position: absolute;
   width: 400px;
-  /* Match input width */
-  background: white;
+  background: #ffffff;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   border: 1px solid #ccc;
-  border-radius: 6px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   max-height: 250px;
   overflow-y: auto;
   z-index: 1000;
@@ -191,8 +191,9 @@ export default {
 
 
 .suggestion-item {
-  padding: 10px;
+  padding: 10px 15px;
   cursor: pointer;
+  border-radius: 10px;
   font-weight: bold;
   font-size: 0.9rem;
   color: #004d40;
@@ -200,9 +201,11 @@ export default {
 }
 
 .suggestion-item:hover {
-  background-color: rgba(76, 175, 80, 0.15);
-  border-radius: 8px;
-  transform: translateZ(3px) scale(1.02);
+  background: linear-gradient(90deg, #f2e8ff, #e0c9fc);
+  /* Soft purple gradient */
+  color: #4a148c;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
 }
 
 .suggestions-container::-webkit-scrollbar {
@@ -224,23 +227,26 @@ export default {
 }
 
 .sticky-header {
-  position: sticky;
+  position: fixed;
   top: 0;
   width: 100vw;
   z-index: 1000;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   min-height: 60px;
 }
 
-.header {
+.mobile-header {
+  display: none;
+}
+
+.desktop-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 10px 20px;
+  width: 100%;
   background-blend-mode: multiply;
-  background-color: rgb(238, 239, 238);
-  /* Light green */
-  background-image: url("https://www.transparenttextures.com/patterns/diamond-upholstery.png");
+  background-color: #f0f4f5;
+
 }
 
 nav {
@@ -280,7 +286,6 @@ h1 {
 
 .dropdown-wrapper {
   position: relative;
-  /* Ensure the dropdown menu is positioned relative to this parent */
 }
 
 .dropdown {
@@ -333,9 +338,7 @@ h1 {
 .srchbtn {
   width: 35px;
   height: 38px;
-  background-color: #e6e6e1;
-  /* Teal */
-  color: #6e6d6d;
+  color: #4155c5;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -343,16 +346,13 @@ h1 {
 }
 
 .srchbtn:hover {
-  background-color: rgba(76, 175, 80, 0.25);
-  /* Darker teal */
+  background-color: #7a1dff1a;
 }
 
 .catbtn {
   height: 38px;
   margin-right: 5px;
-  background-color: #e6e6e1;
-  /* Dark green */
-  color: #6e6d6d;
+  color: #4155c5;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -360,8 +360,8 @@ h1 {
 }
 
 .catbtn:hover {
-  background-color: rgba(76, 175, 80, 0.25);
-  /* Darker green */
+  background-color: #7a1dff1a;
+
 }
 
 .search-container {
@@ -374,27 +374,26 @@ h1 {
   padding: 10px;
   margin: 10px;
   font-size: 16px;
-  border: 1px solid #ccc;
+  border: 1px solid #b180f5;
   border-radius: 6px;
   width: 400px;
   transition: border-color 0.3s;
 }
 
 .search-container input:focus {
-  border-color: #008080;
-  /* Teal */
+  border-color: #7a1dff;
   outline: none;
 }
 
-/* Adjust for smaller devices (e.g., iPhone 13 Pro) */
-@media (min-width: 375px) and (max-width: 430px) {
+@media (max-width: 768px) {
   .logo {
-    height: 30px;
-    margin-left: 10px;
+    height: 40px;
+    margin-left: -10px;
   }
 
   .header {
     padding: 0px 0px;
+    height: 60px;
   }
 
   h1 {
@@ -408,13 +407,18 @@ h1 {
   }
 
   .search-container {
-    width: 70%;
+    width: 90%;
     display: flex;
+    margin-left: 0px;
+
     align-items: center;
   }
 
+
+
   .search-container input {
     width: 100%;
+    margin: 2px;
     font-size: 0.5rem;
   }
 
@@ -435,7 +439,6 @@ h1 {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 5px 10px;
   }
 
   .dropdown {
@@ -447,7 +450,6 @@ h1 {
 
   .dropdown-menu li {
     font-size: 0.6rem;
-
   }
 
 

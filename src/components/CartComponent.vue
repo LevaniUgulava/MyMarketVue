@@ -1,78 +1,93 @@
 <template lang="">
-  <div>
-    <h3>{{$t("cart.shoppingcart")}}</h3>
-    <div class="card" v-for="(item, index) in mycarts" :key="index">
-    <carousel :items-to-show="1" class="custom-carousel">
-        <slide v-for="(image, index) in item.image_urls" :key="index">
-          <img :src="image" alt="Product Image" class="img" />
-        </slide>
-        <template #addons>
-          <navigation />
-          <pagination />
-        </template>
-</carousel>
-<div class="data">
-  <p>{{item.name}}</p>
-  <div class="col quantity-control">
-    <button class="quantitybtn" v-if="item.quantity > 1"
-      @click="updatequantity(item.id, 'decrement',item.size)">-</button>
-    <span class="quantity">{{ item.quantity }}</span>
-    <button class="quantitybtn" @click="updatequantity(item.id, 'increment',item.size)">+</button>
-  </div>
-  <p>{{item.price}}</p>
-  <p>
-    <select v-model="changedsize[item.id]" @change="updatesize(item.id, item.size, changedsize[item.id])">
-      <option v-for="(size, index) in item.availablesize" :value="size" :key="index">
-        {{ size }}
-      </option>
-    </select>
-  </p>
+  <div class="cart-container" v-if="mycarts.length >0">
+    <div class="product-section">
+      <h3>{{$t("cart.shoppingcart")}}</h3>
+      <div class="card" v-for="(item, index) in mycarts" :key="index">
+        <div class="action-buttons">
+          <span class="close" @click="deletecart(item.id, item.size)">
+            <i class="fas fa-trash-alt"></i>
+          </span>
+          <router-link :to="{ path: `/${currentLanguage}/product/${item.id}` }" class="product-link">
+            <i class="fas fa-info-circle"></i> <span class="details-link"></span>
+          </router-link>
+        </div>
 
+        <div class="product-info">
+          <carousel :items-to-show="1" class="custom-carousel">
+            <slide v-for="(image, index) in item.image_urls" :key="index">
+              <img :src="image" alt="Product Image" class="img" />
+            </slide>
+          </carousel>
+        </div>
+        
+        <div class="data">
+          <div class="product-name">{{item.name}}</div>
+          
+          <div class="quantity-control">
+            <button class="quantitybtn" @click="updatequantity(item.id, 'decrement', item.size)">-</button>
+            <span class="quantity">{{ item.quantity }}</span>
+            <button class="quantitybtn" @click="updatequantity(item.id, 'increment', item.size)">+</button>
+          </div>
 
-  <span class="close" @click="deletecart(item.id, item.size)"
-    :title="currentLanguage==='ka' ? 'პროდუქტის წაშლა' : 'Remove product'">
-    <i class="fas fa-trash-alt"></i>
-  </span>
-  <router-link :to="{ path: `/${currentLanguage}/product/${item.id}` }" class="product-link"
-    :title="currentLanguage==='ka' ? 'პროდუქტის დეტალების ნახვა' : 'View product details'">
-    <i class="fas fa-info-circle"></i> <span class="details-link">Details</span>
-  </router-link>
+          <div class="price">{{item.price}}</div>
 
-
-</div>
-</div>
-<div class="back-to-shop">
-  <a href="/">&leftarrow; </a><span class="text-muted">{{$t("cart.backtoshop")}}</span>
-</div>
-<div class="checkout">
-  <div>
-    <h3>{{$t("cart.summary")}}: {{allprice}}</h3>
-  </div>
-
-  <div class="checkout-item">
-    <div class="input-container">
-      <input type="text" id="shipping" placeholder=" " v-model="data.address" />
-      <label for="shipping">{{$t("cart.shippinplaceholder")}}</label>
+          <!-- Size Selection Dropdown -->
+          <div class="size-select">
+            <select v-model="changedsize[item.id]" @change="updatesize(item.id, item.size, changedsize[item.id])">
+              <option v-for="(size, index) in item.availablesize" :value="size" :key="index">
+                {{ size }}
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="payment-section">
+      <div class="checkout">
+        <div>
+          <h3>{{$t("cart.summary")}}: {{allprice}}</h3>
+        </div>
+        <div class="checkout-item">
+          <div class="input-container">
+            <input type="text" id="shipping" placeholder=" " v-model="data.address" />
+            <label for="shipping">{{$t("cart.shippinplaceholder")}}</label>
+          </div>
+        </div>
+        <div class="checkout-item">
+          <div class="input-container">
+            <input type="number" id="phone" placeholder=" " v-model="data.phone" />
+            <label for="phone">{{$t("cart.phoneplaceholder")}}</label>
+          </div>
+        </div>
+        <div class="button-container">
+          <button class="checkbtn" @click="checkout">{{$t("cart.checkout")}}</button>
+        </div>
+      </div>
     </div>
   </div>
-  <div class="checkout-item">
-    <div class="input-container">
-      <input type="number" id="phone" placeholder=" " v-model="data.phone" />
-      <label for="phone">{{$t("cart.phoneplaceholder")}}</label>
+  <div v-else>
+    <div class="cart-container-empty">
+      <div class="cart-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="64" height="64">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l3.6 7.2M5 13h12m-3 5h-3m5-5h-3m0 0a3 3 0 100 6 3 3 0 000-6zM5 3l1.2 4M4 15h3a6 6 0 116 0h3" />
+        </svg>
+        <span class="cart-count">0</span>
+      </div>
+
+      <p class="message">შეიყვანეთ კალათში ნივთები, შესაძენად</p>
+
+      <div class="cart-buttons">
+        <a href="/" class="btn-primary">ფასდაკლებები</a>
+        <a href="/" class="btn-secondary">მთავარი ვებსაიტი</a>
+      </div>
     </div>
   </div>
-  <div class="button-container">
-    <button class="checkbtn" @click="checkout">{{$t("cart.checkout")}}</button>
-  </div>
-
-</div>
-</div>
-
 </template>
+
 <script>
 import axios from 'axios';
 import 'vue3-carousel/dist/carousel.css'
-import { Carousel, Slide, Pagination, Navigation } from 'vue3-carousel'
+import { Carousel, Slide } from 'vue3-carousel'
 
 export default {
   name: 'ShoppingCart',
@@ -92,9 +107,7 @@ export default {
   },
   components: {
     Carousel,
-    Slide,
-    Pagination,
-    Navigation,
+    Slide
   },
   methods: {
     emitmessage() {
@@ -215,16 +228,215 @@ export default {
   }
 }
 </script>
-
-
 <style scoped>
-p {
-  margin: 10px 0;
+.cart-container-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 60px 20px;
+  color: #333;
 }
 
-select {
-  padding: 10px 12px;
+/* Shopping Cart Icon */
+.cart-icon {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.cart-icon svg {
+  color: #9b51e0;
+  width: 72px;
+  height: 72px;
+}
+
+/* Cart Count (0) */
+.cart-count {
+  position: absolute;
+  top: -5px;
+  right: -10px;
+  background-color: red;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+/* Empty Message */
+.message {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+/* Buttons Wrapper */
+.cart-buttons {
+  display: flex;
+  gap: 15px;
+}
+
+/* Primary Button */
+.btn-primary {
+  text-decoration: none;
+  background-color: #9b51e0;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #7e3ae3;
+}
+
+/* Secondary Button */
+.btn-secondary {
+  text-decoration: none;
+  color: #9b51e0;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: 2px solid #9b51e0;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background-color: #9b51e0;
+  color: white;
+}
+
+
+.message {
   font-size: 16px;
+  color: #333;
+  margin-top: 20px;
+}
+
+.btn,
+.btn-second {
+  background-color: #6c5ce7;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  margin-top: 20px;
+  cursor: pointer;
+}
+
+.btn:hover,
+.btn-second:hover {
+  background-color: #4e4ac7;
+}
+
+.cart-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  width: 100%;
+  padding: 20px;
+}
+
+.product-section {
+  width: 70%;
+}
+
+.payment-section {
+  width: 30%;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  margin-top: 20px;
+  padding: 20px;
+  border-radius: 12px;
+  box-sizing: border-box;
+  border-bottom: 1px solid #ccc;
+  position: relative;
+}
+
+.product-info {
+  width: 20%;
+  margin-right: 15px;
+}
+
+.custom-carousel {
+  width: 100%;
+}
+
+.img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.data {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 80%;
+}
+
+.product-name {
+  font-weight: bold;
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+
+.quantity-control {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 8px;
+  background-color: #fff;
+}
+
+.quantitybtn {
+  background-color: transparent;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #888;
+  padding: 0 10px;
+}
+
+.quantitybtn:hover {
+  color: black;
+
+}
+
+.quantitybtn:focus {
+  outline: none;
+}
+
+.quantity {
+  font-size: 15px;
+  padding: 0 10px;
+  min-width: 30px;
+  text-align: center;
+}
+
+.price {
+  font-size: 1rem;
+  margin: 5px 0;
+}
+
+.size-select select {
+  padding: 5px;
+  font-size: 15px;
   border: 1px solid #ccc;
   border-radius: 8px;
   background-color: #fff;
@@ -232,44 +444,25 @@ select {
   outline: none;
   cursor: pointer;
   transition: border-color 0.3s, box-shadow 0.3s;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  position: relative;
 }
 
-select::after {
-  content: '▼';
-  font-size: 12px;
-  color: #555;
-  position: absolute;
-  right: 15px;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
-}
-
-select:focus,
-select:hover {
+.size-select select:focus {
   border-color: rgba(76, 175, 80, 0.25);
   box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
-option {
-  padding: 10px;
-  font-size: 16px;
-  background-color: #fff;
-  color: #333;
+/* Action buttons positioned at the top right corner */
+.action-buttons {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
 }
 
-option:checked {
-  background-color: rgba(76, 175, 80, 0.25);
-  color: #fff;
-}
-
-option:disabled {
-  color: #aaa;
-  background-color: #f5f5f5;
+.close {
+  cursor: pointer;
 }
 
 .product-link {
@@ -278,75 +471,18 @@ option:disabled {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.3rem 0.5rem;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  transition: color 0.3s ease;
-}
-
-.product-link:hover {
-  color: #1c7ed6;
-  background-color: #a5cdf0;
-  box-shadow: 0 0 8px rgba(76, 128, 240, 0.533);
-
 }
 
 .details-link {
   font-weight: bold;
-  cursor: pointer;
-}
-
-.fas.fa-info-circle {
-  font-size: 1rem;
-}
-
-.close {
-  color: #ff5252;
-  font-size: 1.2rem;
-  cursor: pointer;
-  padding: 0.3rem 0.5rem;
-  border-radius: 8px;
-  transition: color 0.3s;
-}
-
-.close:hover {
-  background-color: #f69191;
-  box-shadow: 0 0 8px rgba(255, 82, 82, 0.5);
-}
-
-.card {
-  display: flex;
-  background-color: #fff;
-  border-radius: 12px;
-  margin-top: 3%;
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  width: 100%;
-}
-
-.data {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  width: 100%;
-  align-items: center;
-  background-color: #f0f2f5;
-  padding: 1rem;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  margin: 1rem 0;
-  gap: 1rem;
 }
 
 .checkout {
   background-color: #fff;
   border-radius: 12px;
-  margin-top: 3%;
   padding: 20px;
-  width: 100%;
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
 }
-
 
 .checkout-item {
   display: flex;
@@ -356,8 +492,6 @@ option:disabled {
 
 .input-container {
   position: relative;
-  display: flex;
-  flex-direction: column;
   margin-bottom: 6px;
 }
 
@@ -366,16 +500,7 @@ input {
   border-radius: 8px;
   border: 1px solid #ccc;
   width: 100%;
-  box-sizing: border-box;
   font-size: 0.9rem;
-  color: #555;
-  outline: none;
-  transition: all 0.3s ease;
-  background: none;
-}
-
-input::placeholder {
-  color: transparent;
 }
 
 label {
@@ -385,7 +510,6 @@ label {
   transform: translateY(-50%);
   font-size: 0.9rem;
   color: #aaa;
-  transition: all 0.3s ease;
   pointer-events: none;
 }
 
@@ -397,7 +521,6 @@ input:not(:placeholder-shown)+label {
   background: white;
   padding: 0 5px;
 }
-
 
 .button-container {
   display: flex;
@@ -412,124 +535,27 @@ input:not(:placeholder-shown)+label {
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.3s ease;
 }
 
 .checkbtn:hover {
   background-color: #1c7ed6;
-  color: #fff;
 }
 
-.back-to-shop {
-  margin-top: 4rem;
-  font-size: 0.9rem;
-  color: #1e90ff;
-}
-
-.custom-carousel {
-  width: 20%;
-  max-width: 400px;
-  margin-right: 20px;
-}
-
-.img {
-  width: 100%;
-  height: auto;
-  border-radius: 8px;
-  object-fit: cover;
-}
-
-.quantitybtn {
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  cursor: pointer;
-  padding: 0.3rem 0.5rem;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.quantitybtn:hover {
-  background-color: #f0f2f5;
-  color: #333;
-}
-
-.quantity {
-  font-weight: bold;
-  font-size: 1.1rem;
-}
-
-@media (min-width: 375px) and (max-width: 430px) {
-  h3 {
-    font-size: 0.7rem;
+@media (max-width: 768px) {
+  .cart-container {
+    flex-direction: column;
   }
 
-  .close {
-    font-size: 0.9rem;
+  .product-section {
+    width: 100%;
   }
 
-  .product-link {
-    margin-top: 10px;
-    gap: 0.5rem;
-    font-size: 0.7rem;
-
-  }
-
-  .back-to-shop {
-    margin-top: 3rem;
-    font-size: 0.6rem;
-  }
-
-  .checkout {
-    padding: 10px;
-  }
-
-  .checkout-item input {
-    padding: 10px;
-    width: 90%;
-    font-size: 0.6rem;
-  }
-
-  .checkout-item label {
-    font-size: 0.6rem
-  }
-
-  .checkbtn {
-    padding: 6px 8px;
-    border-radius: 5px;
-    font-size: 0.6rem;
-    transition: background-color 0.3s ease;
+  .payment-section {
+    width: 100%;
   }
 
   .data {
-    display: inline;
-    flex-direction: row;
-    width: 50%;
-    align-items: center;
-    background-color: #f0f2f5;
-    padding: 1rem;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
+    flex-direction: column;
   }
-
-  p {
-    font-size: 0.6rem
-  }
-
-  .quantity {
-    font-size: 0.6rem
-  }
-
-  .quantitybtn {
-    padding: 0.3rem 0.5rem
-  }
-
-  .card {
-    padding: 10px;
-  }
-
-  .custom-carousel {
-    width: 50%;
-  }
-
 }
 </style>

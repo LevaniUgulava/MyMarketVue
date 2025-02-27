@@ -1,10 +1,7 @@
 <template>
-  <div v-if="isLoading" class="loading-message">
-    <p>Hold on! We're gathering your favorite products. This won't take long...</p>
-  </div>
   <div class="container">
-
-    <div v-if="!isLoading" class="toggle-buttons">
+    <!-- Toggle Buttons -->
+    <div class="toggle-buttons">
       <button :class="{ active: showPending }" @click="toggleSection('pending')">
         {{ $t('order.pending') }}
       </button>
@@ -14,48 +11,68 @@
     </div>
 
     <!-- Pending Orders Section -->
-    <div v-if="showPending && OrderProducts.length > 0 && !isLoading" class="order-section">
+    <div v-if="showPending" class="order-section">
       <div class="section-header">
         <h2>{{ $t('order.pending') }}</h2>
       </div>
-      <div class="order-box">
-        <div v-for="order in OrderProducts" :key="order.order_id" class="order-card">
-          <div class="card-header">
-            <h3 class="order-id">{{ $t('order.order') }} #{{ order.order_id }}</h3>
-            <h3 class="order-amount">{{ $t('order.paid') }}: {{ order.order_amount }} <i
-                class="fa-solid fa-lari-sign"></i></h3>
-          </div>
-          <div class="products">
-            <OrderComponent v-for="product in order.products" :key="product.id" :product="product"
-              :order_status="order.order_status" />
+
+      <div v-if="OrderProducts.length > 0">
+        <div class="order-box">
+          <div v-for="order in OrderProducts" :key="order.order_id" class="order-card">
+            <div class="card-header">
+              <h3 class="order-id">{{ $t('order.order') }} #{{ order.order_id }}</h3>
+              <h3 class="order-amount">{{ $t('order.paid') }}: {{ order.order_amount }} <i
+                  class="fa-solid fa-lari-sign"></i></h3>
+            </div>
+            <div class="products">
+              <OrderComponent v-for="product in order.products" :key="product.id" :product="product"
+                :order_status="order.order_status" />
+            </div>
           </div>
         </div>
       </div>
+
+      <!-- Message when there are no Pending orders -->
+      <div v-else class="no-order-message">
+        <i class="fas fa-box-open"></i>
+        <p>{{ $t("order.no_pending") }}</p>
+      </div>
     </div>
 
-    <div v-if="!showPending && CompletedProducts.length > 0 && !isLoading" class="order-section">
+    <!-- Completed Orders Section -->
+    <div v-if="!showPending" class="order-section">
       <div class="section-header">
         <h2>{{ $t('order.completed') }}</h2>
       </div>
-      <div class="order-box">
-        <div v-for="order in CompletedProducts" :key="order.order_id" class="order-card">
-          <div class="card-header">
-            <h3 class="order-id">Order #{{ order.order_id }}</h3>
-            <h3 class="order-amount">Paid: ${{ order.order_amount }}</h3>
-          </div>
-          <div class="products">
-            <OrderComponent v-for="product in order.products" :key="product.id" :product="product"
-              :order_status="order.order_status" />
+
+      <div v-if="CompletedProducts.length > 0">
+        <div class="order-box">
+          <div v-for="order in CompletedProducts" :key="order.order_id" class="order-card">
+            <div class="card-header">
+              <h3 class="order-id">{{ $t('order.order') }} #{{ order.order_id }}</h3>
+              <h3 class="order-amount">{{ $t('order.paid') }}: {{ order.order_amount }} <i
+                  class="fa-solid fa-lari-sign"></i></h3>
+            </div>
+            <div class="products">
+              <OrderComponent v-for="product in order.products" :key="product.id" :product="product"
+                :order_status="order.order_status" />
+            </div>
           </div>
         </div>
       </div>
+
+      <!-- Message when there are no Completed orders -->
+      <div v-else class="no-order-message">
+        <i class="fas fa-box-open"></i>
+        <p>{{ $t("order.no_completed") }}</p>
+      </div>
     </div>
 
-    <div v-else-if="!isLoading && OrderProducts.length === 0 && CompletedProducts.length === 0"
-      class="no-order-message">
+    <!-- Show full empty message only if there are no orders at all -->
+    <div v-if="OrderProducts.length === 0 && CompletedProducts.length === 0" class="full-empty-message">
       <i class="fas fa-box-open"></i>
-      <p>You have no orders yet!</p>
-      <a href="/" class="shop-link">Go Shopping</a>
+      <p>{{ $t("order.no_orders") }}</p>
+      <a href="/" class="shop-link">{{ $t("order.shop_now") }}</a>
     </div>
   </div>
 </template>
@@ -72,23 +89,18 @@ export default {
     return {
       OrderProducts: [],
       CompletedProducts: [],
-      isLoading: true,
       showPending: true,
     };
   },
   methods: {
-    async getorder() {
+    async getOrders() {
       const token = localStorage.getItem('token');
       try {
         const response = await axios.get('orders', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+          headers: { Authorization: `Bearer ${token}` }
         });
-        this.isLoading = false;
         this.OrderProducts = response.data.Pending || [];
         this.CompletedProducts = response.data.Completed || [];
-        console.log(response.data);
       } catch (error) {
         console.error(error);
       }
@@ -98,186 +110,181 @@ export default {
     }
   },
   mounted() {
-    this.getorder();
-
+    this.getOrders();
   }
 };
 </script>
-<style scoped>
-.loading-message {
-  text-align: center;
-  font-size: 1rem;
-  font-weight: bold;
-  color: #444;
-  padding-top: 20px;
-}
 
+
+<style scoped>
+/* Container */
 .container {
   margin: 20px auto;
   padding: 20px;
   max-width: 1200px;
-  border-radius: 16px;
 }
 
-/* Toggle Buttons */
+/* Toggle Buttons (Now Styled as Minimalist Tabs) */
 .toggle-buttons {
   display: flex;
   justify-content: center;
-  margin-bottom: 20px;
+  gap: 20px;
+  border-bottom: 2px solid #ddd;
+  /* Subtle separator line */
+  padding-bottom: 10px;
 }
 
 .toggle-buttons button {
-  padding: 10px 20px;
-  margin: 0 10px;
+  background: none;
+  border: none;
   font-size: 1rem;
+  color: #777;
   cursor: pointer;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  background-color: #f9f9f9;
-  transition: background-color 0.3s ease;
+  padding: 8px 12px;
+  position: relative;
+  transition: color 0.3s ease;
 }
 
+/* Active State */
 .toggle-buttons button.active {
-  background-color: rgb(103, 181, 105);
-  color: white;
-  border-color: rgba(76, 175, 80, 0.25);
+  color: #9b51e0;
+  /* Strong purple */
+  font-weight: bold;
 }
 
-.toggle-buttons button:hover {
-  background-color: rgba(0, 0, 0, 0.25);
-  color: white;
-  border-color: rgba(76, 175, 80, 0.25);
+/* Underline Effect */
+.toggle-buttons button::after {
+  content: "";
+  display: block;
+  width: 0;
+  height: 2px;
+  background: #9b51e0;
+  transition: width 0.3s ease;
+  position: absolute;
+  left: 50%;
+  bottom: -3px;
+  transform: translateX(-50%);
 }
 
-/* Section Header */
+/* Expand Underline on Hover & Active */
+.toggle-buttons button:hover::after,
+.toggle-buttons button.active::after {
+  width: 100%;
+}
+
+/* Order Sections */
+.order-section {
+  padding-top: 20px;
+}
+
+/* Order Header - No Box, Just Clean Title */
 .section-header {
-  border: 1px solid #ddd;
-  padding: 15px;
-  background-color: #f9f9f9;
-  border-radius: 8px 8px 0 0;
-}
-
-.section-header h2 {
-  margin: 0;
-  font-size: 1.5rem;
-  color: #333;
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #4a148c;
   text-align: center;
+  margin-bottom: 15px;
 }
 
-/* Order Box */
-.order-box {
-  border: 1px solid #ddd;
-  border-top: none;
-  border-radius: 0 0 8px 8px;
-  background-color: #ffffff;
-  padding: 20px;
-}
-
-/* Cards */
+/* Order Cards - No Background, Only Separation */
 .order-card {
-  background: #fff;
-  border-radius: 12px;
-  margin-bottom: 20px;
-  padding: 15px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
+  border-bottom: 1px solid #ddd;
 }
 
-.order-card:hover {
-  transform: scale(1.01);
+/* Last Order No Border */
+.order-card:last-child {
+  border-bottom: none;
 }
 
+/* Card Header - Better Spacing */
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+  font-weight: bold;
+  color: #4a148c;
+  margin-bottom: 10px;
 }
 
-.card-header h3 {
-  font-size: 1.2rem;
-  font-weight: 600;
-}
-
+/* Product Grid - More Flexible */
 .products {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 15px;
 }
 
-/* No Orders */
+/* No Orders Messages */
 .no-order-message {
+  text-align: center;
+  padding: 30px 20px;
+  color: #555;
+}
+
+.no-order-message i {
+  font-size: 2rem;
+  color: #9b51e0;
+  margin-bottom: 10px;
+}
+
+/* Full Empty State */
+.full-empty-message {
   text-align: center;
   padding: 50px 20px;
   color: #555;
 }
 
-.no-order-message i {
+.full-empty-message i {
   font-size: 3rem;
-  color: #007bff;
+  color: #9b51e0;
   margin-bottom: 10px;
 }
 
 .shop-link {
   display: inline-block;
   margin-top: 20px;
-  padding: 10px 20px;
-  background-color: #007bff;
+  padding: 12px 20px;
+  background-color: #9b51e0;
   color: white;
   border-radius: 8px;
   text-decoration: none;
+  transition: all 0.3s ease-in-out;
 }
 
 .shop-link:hover {
-  background-color: #0056b3;
+  background-color: #7e3ae3;
 }
 
-@media (min-width: 375px) and (max-width: 430px) {
+
+
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+  .toggle-buttons {
+    flex-direction: row;
+    justify-content: center;
+  }
+
   .toggle-buttons button {
-    font-size: 0.8rem;
-    background-color: white;
-  }
-
-  .toggle-buttons button.active {
-    font-size: 0.5rem;
-    background-color: rgba(76, 175, 80, 0.25);
-    color: black;
-  }
-
-  .no-order-message i {
-    font-size: 2rem;
-  }
-
-  p {
-    font-size: 0.6rem;
-  }
-
-  .shop-link {
-    margin-top: 10px;
-    padding: 5px 10px;
-    font-size: 0.6rem;
-  }
-
-  .section-header h2 {
-    font-size: 0.6rem;
-  }
-
-  .card-header h3 {
-    font-size: 0.6rem;
-  }
-
-  .order-box {
-    padding: 10px;
+    font-size: 0.9rem;
   }
 
   .products {
-    grid-template-columns: repeat(auto-fill, minmax(120px, 2fr));
-    gap: 10px;
-    justify-items: center;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+}
+
+@media (max-width: 430px) {
+  .toggle-buttons {
+    flex-direction: row;
+    font-size: 0.85rem;
   }
 
-  .container {
-    padding: 0px;
+  .section-header {
+    font-size: 1.1rem;
+  }
+
+  .products {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   }
 }
 </style>

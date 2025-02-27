@@ -1,6 +1,10 @@
 <template>
     <div class="breadcrumb">
-        <!-- Section Selection -->
+        <span class="clickable" @click="navigatemain()">
+            მთავარი
+        </span>
+        <span class="separator"> > </span>
+
         <span v-if="computedSection" class="clickable" @click="navigate({ section: computedSection })">
             {{ formatSection(computedSection) }}
         </span>
@@ -64,6 +68,12 @@ export default {
             this.$router.push({
                 path: `/${lang}/product`,
                 query: { section: this.computedSection, ...params, page: 1 }
+            });
+        },
+        navigatemain() {
+            const lang = this.$route.params.lang || 'ka';
+            this.$router.push({
+                path: `/${lang}`,
             });
         },
         formatSection(section) {

@@ -2,12 +2,18 @@
   <div v-if="isModalVisible" class="modal-overlay">
     <div class="modal-content">
       <span class="close-btn" @click="$emit('close-modal')">✕</span>
-      <h2>{{$t("search.title")}}</h2>
+      <h2>{{ $t("search.title") }}</h2>
+
+      <div class="input-group">
+        <h4>მოძებნე დასახელებით</h4>
+        <input type="text" v-model="searchnameinput" placeholder="მოძებნე სასურველი პროდუქტი..." class="styled-input">
+      </div>
+
 
       <div class="category-group">
-        <h4>{{$t("search.maincategory")}}</h4>
+        <h4>{{ $t("search.maincategory") }}</h4>
         <select v-model="selectedmainCategory" name="maincategory" class="styled-select">
-          <option value="">{{$t('search.select')}}...</option>
+          <option value="">{{ $t('search.select') }}...</option>
           <option v-for="item in maincategories" :key="item.id" :value="item.id">
             {{ item.name }}
           </option>
@@ -15,31 +21,33 @@
       </div>
 
       <div class="category-group">
-        <h4>{{$t("search.category")}}</h4>
+        <h4>{{ $t("search.category") }}</h4>
         <select v-model="selectedCategory" name="category" class="styled-select">
-          <option value="">{{$t('search.select')}}...</option>
-          <option v-for="item in selectedmainCategory ? filteredCategories : categories" :key="item.id" :value="item.id">
+          <option value="">{{ $t('search.select') }}...</option>
+          <option v-for="item in selectedmainCategory ? filteredCategories : categories" :key="item.id"
+            :value="item.id">
             {{ item.name }}
           </option>
         </select>
       </div>
 
       <div class="category-group">
-        <h4>{{$t("search.subcategory")}}</h4>
+        <h4>{{ $t("search.subcategory") }}</h4>
         <select v-model="selectedsubCategory" name="category" class="styled-select">
-          <option value="">{{$t('search.select')}}...</option>
-          <option v-for="item in (selectedmainCategory || selectedCategory) ? filteredsubCategories : subcategories" :key="item.id" :value="item.id">
+          <option value="">{{ $t('search.select') }}...</option>
+          <option v-for="item in (selectedmainCategory || selectedCategory) ? filteredsubCategories : subcategories"
+            :key="item.id" :value="item.id">
             {{ item.name }}
           </option>
         </select>
       </div>
-      <h4>{{$t('search.findprice')}}</h4>
+      <h4>{{ $t('search.findprice') }}</h4>
       <div class="inputs">
         <input type="number" :placeholder="$t('search.from')" v-model="min">
         <input type="number" :placeholder="$t('search.to')" v-model="max">
-        </div>
+      </div>
 
-      <button @click="search" class="save-btn">{{$t("search.save")}}</button>
+      <button @click="search" class="save-btn">{{ $t("search.save") }}</button>
     </div>
   </div>
 </template>
@@ -51,17 +59,18 @@ import axios from 'axios';
 export default {
   data() {
     return {
-      maincategories: [], 
-      categories: [], 
-      subcategories:[],
-      filteredCategories:[],
-      filteredsubCategories:[],
-      selectedmainCategory: "", 
+      maincategories: [],
+      categories: [],
+      subcategories: [],
+      filteredCategories: [],
+      filteredsubCategories: [],
+      selectedmainCategory: "",
       selectedCategory: "",
-      selectedsubCategory:"",
-      min:'',
-      max:''
-
+      selectedsubCategory: "",
+      searchnameinput: "",
+      min: '',
+      max: '',
+      isMobile: window.innerWidth < 768,
     };
   },
   props: {
@@ -72,18 +81,36 @@ export default {
   },
   methods: {
     closeModal() {
-      this.$emit('close-modal'); 
+      this.$emit('close-modal');
     },
     search() {
-        this.$emit('search-category', {
-          maincategory:this.selectedmainCategory,
-          category:this.selectedCategory,
-          subcategory: this.selectedsubCategory,
-          min:this.min,
-          max:this.max
-    });
-        this.closeModal(); 
+      if (this.isMobile) {
+        const currentQuery = { ...this.$route.query };
+        const lang = this.$route.params.lang || 'ka';
 
+        this.$router.push({
+          path: `/${lang}/product`,
+          query: {
+            section: currentQuery.section || 'all',
+            searchname: this.searchnameinput,
+            maincategory: this.selectedmainCategory,
+            category: this.selectedCategory,
+            subcategory: this.selectedsubCategory,
+            min: this.emitmin,
+            max: this.emitmax,
+            page: 1,
+          },
+        });
+      } else {
+        this.$emit('search-category', {
+          maincategory: this.selectedmainCategory,
+          category: this.selectedCategory,
+          subcategory: this.selectedsubCategory,
+          min: this.min,
+          max: this.max
+        });
+      }
+      this.closeModal();
     },
     async fetchCategories() {
       try {
@@ -107,30 +134,30 @@ export default {
   },
   watch: {
     selectedmainCategory() {
- if (this.selectedmainCategory) {
+      if (this.selectedmainCategory) {
         this.filteredCategories = this.categories.filter(
           (category) => category.maincategory_id === this.selectedmainCategory
         );
-        this.filteredsubCategories=this.subcategories.filter(
-          (sub)=>sub.maincategory_id===this.selectedmainCategory
+        this.filteredsubCategories = this.subcategories.filter(
+          (sub) => sub.maincategory_id === this.selectedmainCategory
         )
       } else {
         this.filteredCategories = [];
-      }   
-       },
+      }
+    },
 
-       selectedCategory(){
-        if(this.selectedCategory){
-        this.filteredsubCategories=this.subcategories.filter(
-          (sub)=>sub.category_id===this.selectedCategory
+    selectedCategory() {
+      if (this.selectedCategory) {
+        this.filteredsubCategories = this.subcategories.filter(
+          (sub) => sub.category_id === this.selectedCategory
         )
-    }else {
+      } else {
         this.filteredCategories = [];
-      }  
-       }
+      }
+    }
   },
   mounted() {
-    this.fetchCategories(); 
+    this.fetchCategories();
   },
 };
 </script>
@@ -143,7 +170,7 @@ export default {
 }
 
 .inputs input {
-  flex: 1; 
+  flex: 1;
   padding: 10px;
   font-size: 0.95rem;
   border: 1px solid #ddd;
@@ -190,6 +217,7 @@ export default {
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -244,6 +272,8 @@ h4 {
   transition: border-color 0.3s ease;
 }
 
+
+
 .styled-select:hover,
 .styled-select:focus {
   border-color: #3498db;
@@ -269,4 +299,56 @@ h4 {
   transform: translateY(-2px);
 }
 
+.input-group {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .input-group {
+    display: block;
+  }
+
+  .styled-input {
+    width: 100%;
+    padding: 10px;
+    font-size: 0.8rem;
+    color: #333;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    appearance: none;
+    background-position: right 10px center;
+    transition: border-color 0.3s ease;
+  }
+
+  .save-btn {
+    background-color: #7a1dff;
+    font-size: 0.8rem;
+  }
+
+  .modal-content {
+    width: 80%;
+  }
+
+  h2 {
+    font-size: 1rem;
+  }
+
+  h4 {
+    font-size: 0.8rem;
+  }
+
+  .styled-select {
+    font-size: 0.7rem;
+  }
+
+  .inputs input {
+    font-size: 0.5rem;
+    height: 40px;
+  }
+
+  .inputs input::placeholder {
+    font-size: 0.8rem;
+  }
+}
 </style>

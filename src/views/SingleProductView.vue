@@ -6,7 +6,6 @@
 
     <Breadcrumb :maincategory="singleproduct.MainCategory" :category="singleproduct.Category"
       :subcategory="singleproduct.SubCategory" :name="singleproduct.name" />
-
     <div class="product-container">
       <div class="product-content">
         <carousel :items-to-show="1" class="product-carousel">

@@ -4,35 +4,20 @@
     <Message v-if="emitlikemessage" closable class="message" severity="error">{{ emitlikemessage }}</Message>
     <Message v-if="emitcartmessage" closable class="message" severity="error">{{ emitcartmessage }}</Message>
 
+  </div>
+  <CountDownComponent v-if="status && status.start_data && status.end_date" :startTime="new Date(status.start_data)"
+    :endTime="new Date(status.end_date)" />
+  <div>
+    <div class="products-wrapper">
+      <ProductCardComponent v-for="(item) in products" :key="item.id" :initialproduct="item"
+        @show-comments="showCommentsModal(item.id)" @cart-updated="handleCartUpdated"
+        @liked-message="handleunauthorizedlike" @cart-message="handleunauthorizedcart" />
     </div>
+  </div>
+  <Bootstrap5Pagination :data="pagination" @pagination-change-page="changePage" />
 
-    <div >
-      <div class="products-wrapper">
-        <ProductCardComponent
-          v-for="(item) in products"
-          :key="item.id"
-          :initialproduct="item"
-          @show-comments="showCommentsModal(item.id)"
-          @cart-updated="handleCartUpdated"
-          @liked-message="handleunauthorizedlike"
-          @cart-message="handleunauthorizedcart"
-        />
-      </div>
-    </div>
-
-
-
-    <!-- Pagination -->
-    <Bootstrap5Pagination :data="pagination" @pagination-change-page="changePage" />
-
-  <!-- Comments Modal -->
-  <CommentModal
-    v-if="showModal"
-    :product="selectedProduct"
-    :comments="selectedProductComments"
-    @close="closeModal"
-    @comment-submitted="refreshComments(selectedProduct.id)"
-  />
+  <CommentModal v-if="showModal" :product="selectedProduct" :comments="selectedProductComments" @close="closeModal"
+    @comment-submitted="refreshComments(selectedProduct.id)" />
 </template>
 
 <script>
@@ -41,18 +26,21 @@ import CommentModal from '@/components/CommentModal.vue';
 import Message from 'primevue/message';
 import { Bootstrap5Pagination } from 'laravel-vue-pagination';
 import axios from 'axios';
+import CountDownComponent from '../CountDownComponent.vue';
 
 export default {
   name: 'ExclusivePage',
   components: {
     ProductCardComponent,
     CommentModal,
+    CountDownComponent,
     Message,
     Bootstrap5Pagination,
   },
   data() {
     return {
       products: [],
+      status: [],
       showModal: false,
       selectedProduct: null,
       selectedProductComments: [],
@@ -60,6 +48,7 @@ export default {
       emitlikemessage: null,
       emitcartmessage: null,
       pagination: {},
+      bool: false,
     };
   },
   watch: {
@@ -84,29 +73,39 @@ export default {
         }, 3000);
       }
     },
-   '$route.query': {
+    '$route.query': {
       handler() {
-            this.getExclusive();
-    },
+        this.getExclusive();
+      },
       immediate: false,
-   },
     },
+  },
   methods: {
- async getExclusive(){
-            const token = localStorage.getItem('token');
-            try{
-                const response = await axios.get('/exlusive',{
-                    headers:{
-                      "Authorization": `Bearer ${token}`
 
-                    }
-                });
-                this.products = response.data.products;
+    async getExclusive() {
+      const token = localStorage.getItem('token');
+      try {
+        const [productsResponse, statusResponse] = await Promise.all([
+          axios.get('/exlusive', {
+            headers: {
+              "Authorization": `Bearer ${token}`,
+            },
+          }),
+          axios.get('/current/status', {
+            headers: {
+              "Authorization": `Bearer ${token}`,
+            },
+          }),
+        ]);
 
-            }catch(error){
-                console.log(error);
-            }
-        },
+        this.products = productsResponse.data.products;
+        this.status = statusResponse.data.status;
+
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    },
+
     async showCommentsModal(id) {
       try {
         const { data } = await axios.get(`products/${id}/display`);
@@ -144,64 +143,22 @@ export default {
     },
   },
   mounted() {
-      setTimeout(() => {
-        this.getExclusive();
-      }, 500);
+    setTimeout(() => {
+      this.getExclusive();
+    }, 500);
   },
 };
 </script>
 
-<style >
-.loading-spinner {
-  border: 6px solid #f3f3f3;
-  border-top: 6px solid #007bff; 
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  animation: spin 1s linear infinite;
-  margin: 40px auto;
-  margin-top: 10%;
-}
-
+<style>
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
+  0% {
+    transform: rotate(0deg);
+  }
 
-.loading-text {
-  text-align: center;
-  font-size: 1.1rem;
-  color: #333;
-  margin-top: 10px;
-}
-
-.no-products-message {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  background-color: #f9fafb;
-  padding: 40px;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  color: #555;
-  margin-top: 10%;
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.08);
-  transition: transform 0.3s ease;
-}
-
-.no-products-message p {
-  font-size: 1.2rem;
-  font-weight: 500;
-  color: #444;
-  margin-bottom: 15px;
-}
-
-.no-products-message .fas {
-  margin-right: 8px;
-  color: #ff6b6b;
-  font-size: 1.5rem;
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .explore-link {
@@ -227,7 +184,7 @@ export default {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   width: 100%;
-  margin-top: 2%;
+  margin-bottom: 2%;
 }
 
 .message {
@@ -268,7 +225,8 @@ export default {
   border-color: #007bff;
 }
 
-.page-link:hover, .page-link:focus {
+.page-link:hover,
+.page-link:focus {
   background-color: #0056b3;
   color: #fff;
   border-color: #0056b3;
@@ -289,9 +247,4 @@ export default {
     margin-top: 20px;
   }
 }
-
-
 </style>
-
-
-

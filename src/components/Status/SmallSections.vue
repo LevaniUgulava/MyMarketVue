@@ -1,22 +1,26 @@
 <template>
-    <div class="smallsection-container">
+    <div class="smallsection-container" v-if="categories.length > 0">
         <div class="sectionrole" @click="handlerole">როლის მიხედვით</div>
         <div class="section" @click="handelpopular">პოპულარული</div>
-        <div @click="handle(item)" v-for="(item, index) in categories" :key="index" class="section" :aria-label="item">
-            {{ item }}
+        <div @click="handle(item.id)" v-for="(item, index) in categories" :key="index" class="section"
+            :aria-label="item">
+            {{ item.name }}
         </div>
     </div>
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
     name: "SmallSections",
     data() {
         return {
-            categories: ['კაცი', 'ქალი', 'ფეხსაცმელი', 'სათვალე', 'ჯინსი', 'ქურთუკი', 'საათი', "ზოგადი", 'არაზოგადი', "საოცარი", 'ისერასაოცარი']
+            categories: [],
         }
     },
     methods: {
+
         handlerole() {
             this.$router.push("/ka/exclusive")
         },
@@ -24,9 +28,31 @@ export default {
             this.$router.push("/ka/popular")
         },
         handle(item) {
-            this.$router.push(`/ka/${item}`)
+            const lang = this.$route.params.lang || 'ka';
+
+            this.$router.push({
+                path: `/${lang}/product`,
+                query: {
+                    section: 'all',
+                    maincategory: item,
+                    page: 1,
+                },
+            });
         },
+        async getMaincategories() {
+            try {
+                const response = await axios.get("/maincategory");
+                this.categories = response.data
+            } catch (error) {
+                console.log(error);
+            }
+        },
+
     },
+    mounted() {
+        this.getMaincategories();
+    },
+
 }
 </script>
 
@@ -54,7 +80,7 @@ export default {
 
 .sectionrole {
     padding: 12px 20px;
-    background: linear-gradient(50deg, #d4af37 20%, #fff 40%, #d4af37 60%, #fff 90%);
+    background: linear-gradient(50deg, gold 20%, #fff 40%, gold 60%, #fff 90%);
 
     background-size: 200% 100%;
     font-size: 16px;
@@ -92,11 +118,6 @@ export default {
     }
 }
 
-
-
-
-
-
 .section:hover {
     background-color: rgba(76, 175, 80, 0.15);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
@@ -109,7 +130,6 @@ export default {
 
 @media (max-width: 600px) {
     .smallsection-container {
-        flex-wrap: wrap;
         gap: 10px;
     }
 

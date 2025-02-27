@@ -35,7 +35,6 @@ export default {
 </script>
 <style scoped>
 .cart-container {
-    margin-top: 2%;
     border-radius: 10px;
     padding: 10px;
     transition: transform 0.3s, box-shadow 0.3s;
