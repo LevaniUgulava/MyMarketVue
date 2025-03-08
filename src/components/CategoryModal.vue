@@ -47,7 +47,7 @@
         <input type="number" :placeholder="$t('search.to')" v-model="max">
       </div>
 
-      <button @click="search" class="save-btn">{{ $t("search.save") }}</button>
+      <button @click="search" class="save-btn">{{ isMobile ? "ძიება" : "შენახვა" }}</button>
     </div>
   </div>
 </template>
@@ -286,7 +286,7 @@ h4 {
   font-size: 1rem;
   font-weight: 500;
   color: #fff;
-  background-color: #3498db;
+  background-color: #7a1dff;
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -321,6 +321,12 @@ h4 {
     transition: border-color 0.3s ease;
   }
 
+  .styled-input:hover,
+  .styled-input:focus {
+    border-color: #3498db;
+    outline: none;
+  }
+
   .save-btn {
     background-color: #7a1dff;
     font-size: 0.8rem;
@@ -331,7 +337,7 @@ h4 {
   }
 
   h2 {
-    font-size: 1rem;
+    display: none;
   }
 
   h4 {

@@ -3,12 +3,11 @@
     <div v-if="products.length > 0" class="products-grid-wrapper">
       <div :class="{ 'products-grid': isSidebarCollapsed, 'products-grid-collapsed': !isSidebarCollapsed }">
         <ProductCardComponent v-for="item in products" :key="item.id" :initialproduct="item"
-          @show-comments="showCommentsModal(item.id)" @cart-updated="handleCartUpdated"
-          @liked-message="handleUnauthorizedLike" @cart-message="handleUnauthorizedCart" />
+          @cart-updated="handleCartUpdated" @liked-message="handleUnauthorizedLike"
+          @cart-message="handleUnauthorizedCart" />
       </div>
     </div>
 
-    <!-- Empty State (Now only shows if API confirms there are no products) -->
     <div v-if="apiLoaded && products.length === 0" class="empty-favorites">
       <i class="fas fa-heart-circle-plus empty-icon"></i>
       <p class="empty-text">{{ $t("favorite.message") }}</p>
@@ -224,8 +223,8 @@ export default {
 
   .primary-btn,
   .secondary-btn {
-    font-size: 0.9rem;
-    padding: 10px 20px;
+    font-size: 0.8rem;
+    padding: 12px 15px;
   }
 }
 </style>

@@ -1,6 +1,5 @@
 <template>
   <div class="order-card">
-    <!-- Product Image Carousel (Only Show if Allowed) -->
     <carousel v-if="isimageshown" :items-to-show="1" class="custom-carousel">
       <slide v-for="(image, index) in product.image_urls" :key="index">
         <img :src="image" alt="Product Image" class="product-img" />
@@ -10,7 +9,6 @@
       </template>
     </carousel>
 
-    <!-- Product Details -->
     <div class="order-details">
       <h3 class="product-name">{{ product.name }}</h3>
       <p class="product-description">{{ product.description }}</p>
@@ -22,7 +20,6 @@
             class="fa-solid fa-lari-sign"></i></p>
       </div>
 
-      <!-- Order Status Badge -->
       <p :class="['order-status', statusClass]">
         {{ $t('order.status') }}: <strong>{{ order_status }}</strong>
       </p>
@@ -83,14 +80,11 @@ export default {
   background: #ffffff;
   border-radius: 12px;
   padding: 15px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
   overflow: hidden;
 }
 
 .order-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
 }
 
 /* Image Carousel */
@@ -185,7 +179,7 @@ export default {
 }
 
 /* Mobile Responsive */
-@media (max-width: 430px) {
+@media (max-width: 768px) {
   .order-card {
     width: 150px;
   }

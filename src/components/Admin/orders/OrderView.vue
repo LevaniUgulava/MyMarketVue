@@ -46,7 +46,7 @@
                         </span>
                     </div>
                     <p>Paid: ${{ order.order_amount }}</p>
-                    <p>User: {{ order.user.name }}</p>
+                    <!-- <p>User: {{ order.user.name }}</p> -->
                     <div class="products">
                         <OrderComponentVue
                             v-for="product in order.products" 

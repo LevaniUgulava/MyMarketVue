@@ -27,12 +27,11 @@
       <li :class="[isMobile ? '' : 'mobile-only']" @click="toggleDropup">
         <div class="user-section" ref="userSection" :class="{ active: isActive }">
           <i class="fa-solid fa-user outline-icon"></i>
-          <span>შენ</span>
+          <span>{{ name }}</span>
         </div>
       </li>
-      <!-- Dropup Menu -->
       <div class="dropup" v-if="isdropupopen" ref="dropup">
-        <li>
+        <li v-if="isAuthorized">
           <router-link :to="{ path: `/${$route.params.lang}/favorites` }"
             :class="{ active: $route.path === `/${$route.params.lang}/favorites` }">
             <i class="fa-solid fa-heart outline-icon"
@@ -40,12 +39,42 @@
             <span>{{ $t('homesidebar.favorite') }}</span>
           </router-link>
         </li>
-        <li>
+        <li v-if="isAuthorized">
           <router-link :to="{ path: `/${$route.params.lang}/orders` }"
             :class="{ active: $route.path === `/${$route.params.lang}/orders` }">
             <i class="fa-solid fa-bag-shopping outline-icon"
               :class="{ active: $route.path === `/${$route.params.lang}/orders` }"></i>
             <span>{{ $t('homesidebar.orders') }}</span>
+          </router-link>
+        </li>
+        <li v-if="isAuthorized">
+          <router-link :to="{ path: `/${$route.params.lang}/profile` }"
+            :class="{ active: $route.path === `/${$route.params.lang}/profile` }">
+            <i class="fa-solid fa-user-tie outline-icon"
+              :class="{ active: $route.path === `/${$route.params.lang}/profile` }"></i>
+            <span>პროფილი</span>
+          </router-link>
+        </li>
+        <li v-if="isAuthorized" @click.prevent="logout">
+          <div class="user-section">
+            <i class="fa-solid fa-right-from-bracket outline-icon"></i>
+            <span>გასვლა</span>
+          </div>
+        </li>
+        <li v-if="!isAuthorized">
+          <router-link :to="{ path: `/${$route.params.lang}/login` }"
+            :class="{ active: $route.path === `/${$route.params.lang}/login` }">
+            <i class="fa-solid fa-user-tie outline-icon"
+              :class="{ active: $route.path === `/${$route.params.lang}/login` }"></i>
+            <span>შესვლა</span>
+          </router-link>
+        </li>
+        <li>
+          <router-link :to="{ path: `/${$route.params.lang}/privacy-policy` }"
+            :class="{ active: $route.path === `/${$route.params.lang}/privacy-policy` }">
+            <i class="fa-solid fa-user-lock outline-icon"
+              :class="{ active: $route.path === `/${$route.params.lang}/privacy-policy` }"></i>
+            <span>კონფიდენციალურობის პოლიტიკა</span>
           </router-link>
         </li>
       </div>
@@ -69,6 +98,7 @@
           <span>{{ $t('homesidebar.orders') }}</span>
         </router-link>
       </li>
+
     </ul>
     <CategoryModal :isModalVisible="IsopenSearch" @close-modal="closeModal" @search-category="searchCategory" />
 
@@ -76,6 +106,7 @@
 </template>
 
 <script>
+import axios from 'axios';
 import CategoryModal from './CategoryModal.vue';
 export default {
   props: {
@@ -99,10 +130,37 @@ export default {
   },
   computed: {
     isActive() {
-      return this.$route.path === `/${this.$route.params.lang}/profile` || this.isUserClicked;
+      return (
+        this.$route.path === `/${this.$route.params.lang}/profile` ||
+        this.$route.path === `/${this.$route.params.lang}/orders` ||
+        this.$route.path === `/${this.$route.params.lang}/favorites` ||
+        this.isUserClicked
+      );
+    },
+    isAuthorized() {
+      return Boolean(localStorage.getItem('token'));
+    },
+    name() {
+      return this.isAuthorized ? localStorage.getItem('name') : "შესვლა";
     }
   },
   methods: {
+    logout() {
+      try {
+        axios.post('logout', {}, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+        localStorage.removeItem('token');
+        localStorage.removeItem('name');
+        localStorage.removeItem('roles');
+        this.$router.push(`/${this.$route.params.lang}/login`);
+      } catch (error) {
+        console.error('Logout failed', error);
+      }
+    },
+
     IsopenSearchfun() {
       this.IsopenSearch = true;
     },
@@ -322,5 +380,6 @@ export default {
     flex-direction: column;
     align-items: center;
   }
+
 }
 </style>

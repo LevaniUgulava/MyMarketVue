@@ -4,121 +4,117 @@
       :textColor="'#004d40'" />
     <Message :message="errormessage" @close="errormessage = ''" />
 
-    <Breadcrumb :maincategory="singleproduct.MainCategory" :category="singleproduct.Category"
+    <Breadcrumb class="bread" :maincategory="singleproduct.MainCategory" :category="singleproduct.Category"
       :subcategory="singleproduct.SubCategory" :name="singleproduct.name" />
+
     <div class="product-container">
       <div class="product-content">
-        <carousel :items-to-show="1" class="product-carousel">
-          <slide v-for="(image, index) in singleproduct.image_urls" :key="index">
-            <img :src="image" alt="Product Image" class="product-image" />
-          </slide>
-          <template #addons>
-            <navigation />
-            <pagination />
-          </template>
-        </carousel>
+        <div class="thumbnail-container">
+          <div v-for="(image, index) in singleproduct.image_urls" :key="index" class="thumbnail-item"
+            :class="{ active: image === selectedImage }" @click="selectedImage = image">
+            <img :src="image" alt="Thumbnail" class="thumbnail-image" />
+          </div>
+        </div>
+
+        <div class="product-main-image">
+          <img :src="selectedImage" alt="Product Image" class="product-image" />
+        </div>
 
         <div class="product-info">
           <h1 class="product-name">{{ singleproduct.name }}</h1>
-
-          <p class="price"
-            v-if="singleproduct.discount === 0 && (!singleproduct.discountstatus || singleproduct.discountstatus.discount === 0)">
-            {{ singleproduct.discountprice }} <i class="fa-solid fa-lari-sign"></i>
-          </p>
-          <p class="price" v-else>
-            {{ singleproduct.discountprice }} <i class="fa-solid fa-lari-sign"></i>
-            <span class="discount-square" :class="{
-              'status-discount': singleproduct.discountstatus && singleproduct.discountstatus.discount > 0,
-              'default-discount': (!singleproduct.discountstatus || singleproduct.discountstatus.discount === 0) && singleproduct.discount > 0
-            }">
-              -{{ singleproduct.discountstatus && singleproduct.discountstatus.discount > 0
-                ? singleproduct.discountstatus.discount
-                : singleproduct.discount }}%
-            </span>
-          </p>
-
+          <p class="section-title">მოკლე აღწერა:</p>
           <p class="product-description">{{ singleproduct.description }}</p>
+          <p class="section-title">დეტალები:</p>
+          <div>
+            <ul>
+              <li>
+                ზომები:
+                <div class="size-container">
+                  <div v-for="item in singleproduct.size"
+                    :class="['size-item', { active: clicked && selectedSize === item.size }]" :key="item.size"
+                    @click="handleClick(item)">
+                    {{ item.size }}
+                  </div>
+                </div>
+              </li>
+              <li>
+                ფერი:
 
-          <div class="size-container">
-            <div v-for="item in availableSizes" :key="item"
-              :class="['size-item', { disabled: !availablesize.map(String).includes(String(item)) }]"
-              @click="availablesize.map(String).includes(String(item)) ? handleClick(item) : null">
-              {{ item }}
-            </div>
+                <div class="color-container">
+                  <div v-for="(item, index) in (clicked ? sizecolors : allcolors)" :key="index"
+                    :class="['color-item', { active: cclick && selectedColor === item }]" @click="colorclick(item)">
+                    {{ item.color }}
+                  </div>
+                </div>
+
+              </li>
+            </ul>
           </div>
-
-          <h5 v-if="quantity && quantity < 5">remains: {{ quantity }}</h5>
-          <h5 v-else-if="quantity && quantity > 5">on the stock</h5>
-
-          <button class="addbtn" @click="addToCart()">Add To Cart</button>
+          <p class="section-title">დამატებითი ინფორმაცია:</p>
+          <ul>
+            <li>მასალა:</li>
+            <li>მომწოდებელი:</li>
+            <li>მწარმოებელი:</li>
+          </ul>
         </div>
       </div>
 
-      <StarRatingComponent :rate="rate" :singleid="singleproduct.id" :getproduct="getproduct" />
-      <hr class="custom-line" />
-
-      <div class="similar-products">
-        <h2 class="section-title">Similar Products</h2>
-        <div class="similar-products-scroll">
-          <div class="product-card" v-for="(item, index) in products" :key="index">
-            <ProductCardComponent :initialproduct="item" @show-comments="showCommentsModal(item.id)"
-              @cart-updated="handleCartUpdated" @liked-message="handleunauthorizedlike"
-              @cart-message="handleunauthorizedcart" />
-          </div>
+      <div class="left-section">
+        <p class="price">
+          {{ singleproduct.discountprice }} <i class="fa-solid fa-lari-sign"></i>
+          <span class="original-price">
+            <s>{{ singleproduct.price }}</s>
+          </span>
+          <span class="discount-square">-{{ singleproduct.discount }}%</span>
+        </p>
+        <p class="delivery-info">
+          <i class="fa-solid fa-truck"></i> საქართველოს ფოსტის გარანტია
+        </p>
+        <div class="quantity-control">
+          <button class="quantitybtn" @click="updatequantity('decrement')">-</button>
+          <span class="quantity">{{ quantity }}</span>
+          <button class="quantitybtn" @click="updatequantity('increment')">+</button>
         </div>
-      </div>
-      <CommentModal v-if="showModal" :product="selectedProduct" :comments="selectedProductComments" @close="closeModal"
-        @comment-submitted="refreshComments(selectedProduct.id)" />
+        <button class="buy" @click="redirect">ყიდვა</button>
+        <button class="addbtn" @click="addToCart()">კალათაში დამატება</button>
 
-      <a href="/" class="back">Back to shop</a>
+      </div>
     </div>
+    <!-- <StarRatingComponent class="star" :rate="rate" :singleid="singleproduct.id" :getproduct="getproduct" /> -->
+    <hr class="custom-line" />
   </div>
-
-  <!-- Loading Spinner -->
-  <!-- <div v-else class="loading-spinner">
-    <p>Loading...</p>
-  </div> -->
 </template>
+
 
 <script>
 import axios from 'axios';
-import CommentModal from '../components/CommentModal.vue';
-
 import 'vue3-carousel/dist/carousel.css';
-import { Carousel, Slide, Pagination, Navigation } from 'vue3-carousel';
-import StarRatingComponent from "@/components/StarRatingComponent.vue";
 import Message from '@/components/Message/MessageComponent.vue';
-import ProductCardComponent from '@/components/ProductCardComponent.vue';
 import Breadcrumb from '@/components/BreadcrumbComponent.vue';
 
 export default {
   props: ['id'],
   components: {
-    Carousel,
-    CommentModal,
-    Slide,
     Breadcrumb,
     Message,
-    ProductCardComponent,
-    StarRatingComponent,
-    Pagination,
-    Navigation,
+
   },
   data() {
     return {
-      singleproduct: null, // Initialize as null to show loading state
-      products: [],
-      getsizes: [],
-      selectedProductComments: [],
-      availablesize: [],
-      letterbased: [],
-      numericbased: [],
+      singleproduct: null,
       message: null,
       errormessage: null,
-      showModal: false,
-      quantity: null,
+      quantity: 1,
       size: null,
       rate: 0,
+      selectedSize: null,
+      selectedColor: null,
+      selectedImage: null,
+      selectedColorquantity: 1,
+      allcolors: [],
+      sizecolors: [],
+      clicked: false,
+      cclick: false
     };
   },
   watch: {
@@ -129,72 +125,95 @@ export default {
         }, 3000);
       }
     },
+    singleproduct(newProduct) {
+      if (newProduct && newProduct.image_urls.length > 0) {
+        this.selectedImage = newProduct.image_urls[0];
+      }
+    },
   },
   methods: {
-    handleClick(item) {
-      let itemString = String(item);
+    async redirect() {
+      try {
+        const token = localStorage.getItem("token");
+        const guest_token = localStorage.getItem("guest_token") || crypto.randomUUID();
 
-      if (this.availablesize.map(String).includes(itemString)) {
-        this.singleproduct.size.forEach(element => {
-          let elementSize = Array.isArray(element.size) ? element.size.map(String) : [String(element.size)];
-
-          if (elementSize.includes(itemString)) {
-            this.quantity = element.quantity;
-            this.size = element.size;
-          }
+        if (!localStorage.getItem("guest_token")) {
+          localStorage.setItem("guest_token", guest_token);
+        }
+        const quantity = this.quantity || 1;
+        const data = [{
+          guest_token: guest_token,
+          quantity: quantity,
+          name: this.singleproduct.name,
+          product_id: this.id,
+          size: this.selectedSize,
+          type: "direct",
+          color: this.selectedColor.color,
+          retail_price: this.singleproduct.discountprice,
+          total_price: quantity * this.singleproduct.discountprice,
+        }];
+        await axios.post("/temporder", { products: data }, {
+          headers: { "Authorization": `Bearer ${token}` }
         });
+
+        this.$router.push({ name: "checkout" });
+
+      } catch (error) {
+        console.error("Error during redirection or API request:", error);
       }
+
+    },
+
+    async updatequantity(action) {
+      switch (action) {
+        case 'increment':
+          if (this.selectedColorquantity === this.quantity) {
+            this.quantity;
+          } else {
+            this.quantity++
+          }
+          break;
+        case 'decrement':
+          if (this.quantity < 1) {
+            this.quantity;
+          } else {
+            this.quantity--
+
+          }
+          break;
+        default:
+          break;
+      }
+    },
+    handleClick(item) {
+      this.selectedSize = item.size;
+      this.sizecolors = item.details;
+      this.clicked = true;
+    },
+    colorclick(item) {
+      this.selectedColor = item;
+      this.selectedColorquantity = item.quantity;
+      this.cclick = true;
     },
     async getproduct() {
       const token = localStorage.getItem('token');
       try {
-        // Fetch single product
-        const response1 = await axios.get(`display/${this.id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        const response = await axios.get(`display/${this.id}`, {
+          headers: { Authorization: `Bearer ${token}` },
         });
+        this.singleproduct = response.data.data;
+        this.rate = response.data.data.MyRate;
 
-        this.singleproduct = response1.data.data;
-        this.rate = response1.data.data.MyRate;
-        this.availablesize = this.singleproduct.size.map(element => element.size);
+        this.allcolors = this.singleproduct.size.flatMap(element =>
+          element.details
+        );
+        console.log(this.allcolors);
 
-        // Fetch similar products
-        const response2 = await axios.get(`similar/${this.id}/products`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        this.products = response2.data.data;
       } catch (error) {
         this.errormessage = "An error occurred while loading the data.";
         console.error(error);
       }
     },
-    async showCommentsModal(id) {
-      try {
-        const { data } = await axios.get(`products/${id}/display`);
-        this.selectedProductComments = data;
-        this.selectedProduct = this.products.find((product) => product.id === id);
-        this.showModal = true;
-      } catch (error) {
-        console.error('Error fetching comments:', error);
-      }
-    },
-    async refreshComments(productId) {
-      try {
-        const { data } = await axios.get(`products/${productId}/display`);
-        this.selectedProductComments = data;
-      } catch (error) {
-        console.error('Error refreshing comments:', error);
-      }
-    },
-    closeModal() {
-      this.showModal = false;
-      this.selectedProduct = null;
-      this.selectedProductComments = [];
-    },
-
     async addToCart() {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -203,15 +222,8 @@ export default {
       try {
         const response = await axios.post(
           `addcart/${this.id}`,
-          {
-            size: this.size,
-            type: this.singleproduct.size_type
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+          { size: this.size, type: this.singleproduct.size_type, quantity: this.quantity },
+          { headers: { Authorization: `Bearer ${token}` } }
         );
         this.message = response.data.message;
       } catch (error) {
@@ -219,256 +231,309 @@ export default {
         console.log(error);
       }
     },
-
-    async Getsize() {
-      try {
-        const response = await axios.get('getSizes');
-        this.letterbased = response.data.letterbased;
-        this.numericbased = response.data.numericbased;
-      } catch (error) {
-        console.log(error);
-      }
-    },
   },
-  computed: {
-    availableSizes() {
-      if (!this.singleproduct || !this.singleproduct.size_type) {
-        return [];
-      }
-      return this.singleproduct.size_type === "clothsize" ? this.letterbased : this.numericbased;
-    }
-  },
-
   mounted() {
     this.getproduct();
-    this.Getsize();
   },
 };
 </script>
-
 <style scoped>
-body {
-  font-family: 'Arial', sans-serif;
-  color: #333;
+.bread {
+  margin-bottom: 30px;
 }
 
-.product-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
+.custom-line {
+  border: none;
+  height: 1px;
+  background-color: #ccc;
+  margin: 20px 0;
+  margin-top: 10%;
 }
 
-.product-container {
-  width: 100%;
-  padding: 25px;
-  border-radius: 10px;
-}
 
-.product-content {
+.color-container,
+.size-container {
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  margin-top: 40px;
-  gap: 50px;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 5px;
 }
 
-.product-carousel {
-  width: 45%;
-  max-width: 600px;
-}
-
-.product-image {
-  width: 100%;
+.color-item,
+.size-item {
+  width: 60px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #7a1dff;
   border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  font-size: 12px;
+  font-weight: bold;
+  color: #7a1dff;
+  cursor: pointer;
+  transition: 0.3s;
+  text-transform: uppercase;
 }
 
-.product-info {
-  flex: 1;
-  padding: 15px;
+.color-item.active,
+.size-item.active {
+  background-color: #7a1dff;
+  color: white;
+  border: 2px solid #5e14cc;
+}
+
+.left-section {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #d1d1d1;
+  align-items: center;
+  padding: 20px;
+  border-radius: 12px;
+  background: #fff;
+  height: fit-content;
+  width: 100%;
+  max-width: 300px;
 }
 
 .product-name {
-  font-size: 2rem;
-  font-weight: bold;
-  color: #222;
+  font-size: 20px;
+  color: black;
 }
 
-.price {
-  font-size: 1.6rem;
-  font-weight: bold;
-  color: #555;
-  margin: 15px 0;
+ul li {
+  font-size: 13px;
 }
 
-.discount-square {
-  display: inline-block;
-  color: #fff;
-  padding: 5px 7px;
-  border-radius: 4px;
-  margin-left: 10px;
-  font-weight: bold;
-  font-size: 14px;
-}
-
-.default-discount {
-  background-color: #f00;
-}
-
-.status-discount {
-  background-color: #e67e22;
-}
-
-.size-container {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
-}
-
-.size-item {
-  padding: 8px 15px;
-  background: #e0e0e0;
-  border: 1px solid #b0b0b0;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.size-item.disabled {
-  background: #f0f0f0;
-  color: #aaa;
-  cursor: not-allowed;
-}
-
-.addbtn {
-  background-color: #444;
-  color: #fff;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 6px;
-}
-
-.similar-products {
-  margin-top: 200px;
+.product-description {
+  font-size: 13px;
 
 }
 
 .section-title {
-  font-size: 1.8rem;
-  margin-bottom: 20px;
+  font-size: 15px;
+  color: #2b2731;
+  font-weight: 700;
 }
 
-.similar-products-scroll {
+.price {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
   display: flex;
-  gap: 5px;
-  overflow-x: auto;
-  padding-bottom: 10px;
+  align-items: center;
+  gap: 6px;
 }
 
-.similar-products-scroll::-webkit-scrollbar {
-  height: 8px;
+.discount-square {
+  background: #e60000;
+  color: #fff;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 6px;
 }
 
-.similar-products-scroll::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 10px;
+.status-discount {
+  background: #e60000;
 }
 
-.similar-products-scroll::-webkit-scrollbar-thumb:hover {
-  background: #555;
+.default-discount {
+  background: #e60000;
 }
 
-.product-card {
-  flex: 0 0 auto;
-  width: 220px;
+.addbtn,
+.buy {
+  padding: 14px 20px;
+  border-radius: 8px;
+  width: 100%;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  text-align: center;
+  margin-top: 10px;
+  transition: 0.3s;
+}
+
+.buy {
+  background-color: #7a1dff;
+  color: #fff;
+  border: none;
+}
+
+.buy:hover {
+  background-color: #5e14cc;
+}
+
+.addbtn {
+  background-color: #fff;
+  color: #7a1dff;
+  border: 1px solid #7a1dff;
+}
+
+.addbtn:hover {
+  background-color: #f3e8ff;
+}
+
+.contact {
+  display: flex;
+  align-items: center;
+  background: #f7f7f7;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+}
+
+.contact i {
+  color: #007aff;
+  margin-right: 8px;
+}
+
+
+.product-page {
+  display: flex;
+  flex-direction: column;
+  max-width: 1200px;
+  margin: auto;
+  padding: 20px;
+}
+
+.product-container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 5%;
+  gap: 30px;
+}
+
+.product-content {
+  display: flex;
+  width: 100%;
+  gap: 10px;
+}
+
+.thumbnail-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-right: 20px;
+}
+
+.thumbnail-item {
+  width: 50px;
+  height: 50px;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+}
+
+.thumbnail-item.active {
+  border-color: #7a1dff;
   border-radius: 8px;
 }
 
-.back {
-  display: block;
-  margin-top: 20px;
-  text-decoration: none;
-  color: #666;
+.thumbnail-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 5px;
 }
 
-@media (min-width: 390px) and (max-width: 574px) {
-  .product-page {
-    padding: 15px;
-  }
 
+.product-container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  gap: 30px;
+  align-items: flex-start;
+  /* Ensure alignment is stable */
+}
+
+.product-main-image {
+  flex: 0 0 350px;
+  height: 350px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.product-info {
+  flex: 1;
+  min-width: 300px;
+}
+
+.price {
+  font-size: 18px;
+  font-weight: bold;
+  color: #2b2731;
+  margin-bottom: 15px;
+}
+
+.quantity-control {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 8px;
+  background-color: #fff;
+}
+
+.quantitybtn {
+  background-color: transparent;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #888;
+  padding: 0 10px;
+}
+
+.quantitybtn:hover {
+  color: black;
+
+}
+
+.quantitybtn:focus {
+  outline: none;
+}
+
+.quantity {
+  font-size: 15px;
+  padding: 0 10px;
+  min-width: 30px;
+  text-align: center;
+}
+
+
+@media (max-width: 768px) {
   .product-container {
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-  }
-
-  .product-content {
     flex-direction: column;
-    align-items: center;
-    gap: 15px;
   }
 
-  .product-carousel {
+  .star {
+    margin-top: 15%;
+  }
+
+  .product-content,
+  .left-section {
     width: 100%;
+    margin: auto;
+    display: table-column;
   }
 
-  .product-image {
-    width: 100%;
-    border-radius: 6px;
-  }
-
-  .product-info {
-    padding: 10px;
-  }
-
-  .product-name {
-    font-size: 1.5rem;
-    text-align: center;
-  }
-
-  .price {
-    font-size: 1.4rem;
-    text-align: center;
-  }
-
-  .size-container {
+  .quantity-control {
     justify-content: center;
-    flex-wrap: wrap;
-    gap: 8px;
+    width: auto;
   }
 
-  .size-item {
-    padding: 6px 12px;
-    font-size: 0.9rem;
-  }
-
-  .addbtn {
-    width: 100%;
-    padding: 8px 0;
-    font-size: 1rem;
-    border-radius: 4px;
-  }
-
-  .similar-products {
-    margin-top: 30px;
-  }
-
-  .section-title {
-    font-size: 1.5rem;
-    text-align: center;
-  }
-
-  .similar-products-scroll {
-    gap: 10px;
-  }
-
-  .product-card {
-    width: 180px;
-  }
-
-  .back {
-    margin-top: 15px;
-    font-size: 0.9rem;
-    text-align: center;
+  .thumbnail-container {
+    flex-direction: row;
   }
 }
 </style>

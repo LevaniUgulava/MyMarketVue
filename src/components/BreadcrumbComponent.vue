@@ -114,4 +114,16 @@ export default {
     font-weight: bold;
     color: rgb(58, 53, 53);
 }
+
+@media (max-width: 768px) {
+    .breadcrumb {
+        display: block;
+        font-size: 15px;
+
+    }
+
+    .separator {
+        margin: 0 0px;
+    }
+}
 </style>

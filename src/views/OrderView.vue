@@ -1,6 +1,5 @@
 <template>
   <div class="container">
-    <!-- Toggle Buttons -->
     <div class="toggle-buttons">
       <button :class="{ active: showPending }" @click="toggleSection('pending')">
         {{ $t('order.pending') }}
@@ -10,69 +9,45 @@
       </button>
     </div>
 
-    <!-- Pending Orders Section -->
-    <div v-if="showPending" class="order-section">
-      <div class="section-header">
-        <h2>{{ $t('order.pending') }}</h2>
-      </div>
-
-      <div v-if="OrderProducts.length > 0">
-        <div class="order-box">
-          <div v-for="order in OrderProducts" :key="order.order_id" class="order-card">
-            <div class="card-header">
-              <h3 class="order-id">{{ $t('order.order') }} #{{ order.order_id }}</h3>
-              <h3 class="order-amount">{{ $t('order.paid') }}: {{ order.order_amount }} <i
-                  class="fa-solid fa-lari-sign"></i></h3>
-            </div>
-            <div class="products">
-              <OrderComponent v-for="product in order.products" :key="product.id" :product="product"
-                :order_status="order.order_status" />
-            </div>
+    <div v-if="apiLoaded && showPending" class="order-section">
+      <div v-if="OrderProducts.length > 0" class="order-box">
+        <div v-for="order in OrderProducts" :key="order.order_id" class="order-card">
+          <div class="card-header">
+            <h3 class="order-id">{{ $t('order.order') }} #{{ order.order_id }}</h3>
+            <h3 class="order-amount">{{ $t('order.paid') }}: {{ order.order_amount }} <i
+                class="fa-solid fa-lari-sign"></i></h3>
+          </div>
+          <div class="products">
+            <OrderComponent v-for="product in order.products" :key="product.id" :product="product"
+              :order_status="order.order_status" />
           </div>
         </div>
       </div>
-
-      <!-- Message when there are no Pending orders -->
-      <div v-else class="no-order-message">
+      <div v-else class="no-order-message ">
         <i class="fas fa-box-open"></i>
-        <p>{{ $t("order.no_pending") }}</p>
+        <p>თქვენ არ გაქვთ შეკვეთა</p>
+        <a href="/shop" class="shop-link">მთავარი გვერდი</a>
       </div>
     </div>
 
-    <!-- Completed Orders Section -->
-    <div v-if="!showPending" class="order-section">
-      <div class="section-header">
-        <h2>{{ $t('order.completed') }}</h2>
-      </div>
-
-      <div v-if="CompletedProducts.length > 0">
-        <div class="order-box">
-          <div v-for="order in CompletedProducts" :key="order.order_id" class="order-card">
-            <div class="card-header">
-              <h3 class="order-id">{{ $t('order.order') }} #{{ order.order_id }}</h3>
-              <h3 class="order-amount">{{ $t('order.paid') }}: {{ order.order_amount }} <i
-                  class="fa-solid fa-lari-sign"></i></h3>
-            </div>
-            <div class="products">
-              <OrderComponent v-for="product in order.products" :key="product.id" :product="product"
-                :order_status="order.order_status" />
-            </div>
+    <div v-if="apiLoaded && !showPending" class="order-section">
+      <div v-if="CompletedProducts.length > 0" class="order-box">
+        <div v-for="order in CompletedProducts" :key="order.order_id" class="order-card">
+          <div class="card-header">
+            <h3 class="order-id">{{ $t('order.order') }} #{{ order.order_id }}</h3>
+            <h3 class="order-amount">{{ $t('order.paid') }}: {{ order.order_amount }} <i
+                class="fa-solid fa-lari-sign"></i></h3>
+          </div>
+          <div class="products">
+            <OrderComponent v-for="product in order.products" :key="product.id" :product="product"
+              :order_status="order.order_status" />
           </div>
         </div>
       </div>
-
-      <!-- Message when there are no Completed orders -->
-      <div v-else class="no-order-message">
+      <div v-else class="no-order-message ">
         <i class="fas fa-box-open"></i>
-        <p>{{ $t("order.no_completed") }}</p>
+        <p>თქვენ არ გაქვთ შეკვეთების ისტორია</p>
       </div>
-    </div>
-
-    <!-- Show full empty message only if there are no orders at all -->
-    <div v-if="OrderProducts.length === 0 && CompletedProducts.length === 0" class="full-empty-message">
-      <i class="fas fa-box-open"></i>
-      <p>{{ $t("order.no_orders") }}</p>
-      <a href="/" class="shop-link">{{ $t("order.shop_now") }}</a>
     </div>
   </div>
 </template>
@@ -90,19 +65,30 @@ export default {
       OrderProducts: [],
       CompletedProducts: [],
       showPending: true,
+      apiLoaded: false
     };
+  },
+  computed: {
+    ordersReady() {
+      return this.apiLoaded && (this.OrderProducts.length > 0 || this.CompletedProducts.length > 0);
+    }
   },
   methods: {
     async getOrders() {
       const token = localStorage.getItem('token');
+      this.apiLoaded = false;
       try {
         const response = await axios.get('orders', {
           headers: { Authorization: `Bearer ${token}` }
         });
         this.OrderProducts = response.data.Pending || [];
         this.CompletedProducts = response.data.Completed || [];
+        this.$nextTick(() => {
+          this.apiLoaded = true;
+        });
       } catch (error) {
         console.error(error);
+        this.apiLoaded = true;
       }
     },
     toggleSection(section) {
@@ -114,7 +100,6 @@ export default {
   }
 };
 </script>
-
 
 <style scoped>
 /* Container */
@@ -206,18 +191,20 @@ export default {
   margin-bottom: 10px;
 }
 
-/* Product Grid - More Flexible */
 .products {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 15px;
 }
 
-/* No Orders Messages */
 .no-order-message {
   text-align: center;
   padding: 30px 20px;
   color: #555;
+}
+
+.no-order-message p {
+  font-size: small;
 }
 
 .no-order-message i {
@@ -226,7 +213,6 @@ export default {
   margin-bottom: 10px;
 }
 
-/* Full Empty State */
 .full-empty-message {
   text-align: center;
   padding: 50px 20px;
@@ -241,9 +227,9 @@ export default {
 
 .shop-link {
   display: inline-block;
-  margin-top: 20px;
-  padding: 12px 20px;
+  padding: 10px 15px;
   background-color: #9b51e0;
+  font-size: small;
   color: white;
   border-radius: 8px;
   text-decoration: none;
@@ -269,22 +255,16 @@ export default {
   }
 
   .products {
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  }
-}
-
-@media (max-width: 430px) {
-  .toggle-buttons {
-    flex-direction: row;
-    font-size: 0.85rem;
-  }
-
-  .section-header {
-    font-size: 1.1rem;
-  }
-
-  .products {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 5px;
+  }
+
+  h2 {
+    font-size: 1.3rem;
+  }
+
+  .card-header {
+    font-size: 0.7rem;
   }
 }
 </style>

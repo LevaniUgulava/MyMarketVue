@@ -95,6 +95,10 @@ export default {
 }
 
 @media (max-width: 768px) {
+  .footer {
+    display: none;
+  }
+
   .sidebar {
     width: 100%;
     height: 60px;

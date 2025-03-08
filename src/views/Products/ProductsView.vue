@@ -12,31 +12,29 @@
           @show-comments="showCommentsModal(item.id)" @cart-updated="handleCartUpdated"
           @liked-message="handleunauthorizedlike" @cart-message="handleunauthorizedcart" />
       </div>
-
-      <Bootstrap5Pagination :data="pagination" @pagination-change-page="changePage" />
+      <CustomPagination v-if="products.length > 0 && pagination.total > 1" :currentPage="pagination.current_page"
+        :totalPages="pagination.total" class="pagination" />
     </div>
   </div>
 
 
-  <CommentModal v-if="showModal" :product="selectedProduct" :comments="selectedProductComments" @close="closeModal"
-    @comment-submitted="refreshComments(selectedProduct.id)" />
+
 </template>
 
 <script>
 import ProductCardComponent from '../../components/ProductCardComponent.vue';
-import CommentModal from '../../components/CommentModal.vue';
-import { Bootstrap5Pagination } from 'laravel-vue-pagination';
 import axios from 'axios';
 import Message from '@/components/Message/MessageComponent.vue';
 import BreadcrumbComponent from '@/components/BreadcrumbComponent.vue';
+import CustomPagination from '@/components/CustomPagination.vue';
 export default {
   name: 'HomeView',
   components: {
     ProductCardComponent,
-    CommentModal,
     BreadcrumbComponent,
     Message,
-    Bootstrap5Pagination,
+    CustomPagination
+
   },
   props: {
     isSidebarCollapsed: {
@@ -131,27 +129,29 @@ export default {
         });
 
         if (this.Section == "all") {
-          this.products = response.data.all;
+          this.products = response.data.all.data;
+          this.pagination = {
+            current_page: response.data.all.meta.current_page || 1,
+            total: response.data.all.meta.last_page
+          };
         } else if (this.Section == "discount") {
-          this.products = response.data.discount;
+          this.products = response.data.discount.data;
+          this.pagination = {
+            current_page: response.data.discount.meta.current_page || 1,
+            total: response.data.discount.meta.last_page
+          };
         } else if (this.Section == "highrate") {
-          this.products = response.data.highrate;
+          this.products = response.data.highrate.data;
+          this.pagination = {
+            current_page: response.data.highrate.meta.current_page || 1,
+            total: response.data.highrate.meta.last_page
+          };
         }
-
-
-        this.pagination = {
-          current_page: response.data.meta?.current_page || 1,
-          last_page: response.data.meta?.last_page || 1,
-          per_page: response.data.meta?.per_page || 10,
-          total: response.data.meta?.total || 0,
-          links: response.data.links || [],
-        };
 
         await this.fetchCategoryNames();
       } catch (error) {
         console.error('Error fetching products:', error);
       }
-      console.log(this.products)
     },
     async fetchCategoryNames() {
       try {
@@ -160,7 +160,7 @@ export default {
         if (this.selectedmainCategory) {
           requests.push(axios.get(`maincategory/${this.selectedmainCategory}`));
         } else {
-          this.maincategory = {}; // Reset if not selected
+          this.maincategory = {};
         }
 
         if (this.selectedCategory) {
@@ -187,31 +187,6 @@ export default {
     },
 
 
-    async showCommentsModal(id) {
-      try {
-        const { data } = await axios.get(`products/${id}/display`);
-        this.selectedProductComments = data;
-        this.selectedProduct = this.products.find((product) => product.id === id);
-        this.showModal = true;
-      } catch (error) {
-        console.error('Error fetching comments:', error);
-      }
-    },
-    async refreshComments(productId) {
-      try {
-        const { data } = await axios.get(`products/${productId}/display`);
-        this.selectedProductComments = data;
-      } catch (error) {
-        console.error('Error refreshing comments:', error);
-      }
-    },
-
-    closeModal() {
-      this.showModal = false;
-      this.selectedProduct = null;
-      this.selectedProductComments = [];
-    },
-
     handleCartUpdated(cartData) {
       console.log('Cart updated:', cartData.message);
       this.emitdata = cartData.message;
@@ -232,6 +207,18 @@ export default {
 };
 </script>
 <style scoped>
+.page-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 80vh;
+  /* Ensures enough height */
+}
+
+.content-wrapper {
+  flex-grow: 1;
+  /* Pushes pagination to the bottom */
+}
+
 .products-wrapper-collapsed {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -243,59 +230,13 @@ export default {
   margin-top: 15px;
 }
 
-.pagination {
+.pagination-container {
   display: flex;
-  list-style-type: none;
-  padding: 0;
   justify-content: center;
-  margin: 20px 0;
-}
-
-.page-item {
-  margin: 0 5px;
-}
-
-/* Pagination Links */
-.page-link {
-  display: block;
-  padding: 10px 15px;
-  color: #007bff;
-  text-decoration: none;
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-  transition: background-color 0.3s, color 0.3s, border-color 0.3s;
-}
-
-.page-item.active .page-link {
-  background-color: #007bff;
-  color: white;
-  border-color: #007bff;
-}
-
-.page-link:hover,
-.page-link:focus {
-  background-color: #0056b3;
-  color: white;
-  border-color: #0056b3;
-  text-decoration: none;
-}
-
-.page-item.disabled .page-link {
-  color: #6c757d;
-  pointer-events: none;
-  background-color: #fff;
-  border-color: #dee2e6;
-}
-
-.page-link {
-  font-weight: bold;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.page-link:active {
-  background-color: #004085;
-  border-color: #004085;
-  color: white;
+  padding: 20px 0;
+  background: white;
+  margin-top: auto;
+  /* Forces pagination to bottom */
 }
 
 @media (min-width: 390px) and (max-width: 574px) {
@@ -311,6 +252,5 @@ export default {
     display: grid;
     width: 100%;
   }
-
 }
 </style>

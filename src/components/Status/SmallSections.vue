@@ -119,7 +119,7 @@ export default {
 }
 
 .section:hover {
-    background-color: rgba(76, 175, 80, 0.15);
+    background-color: #7a1dff1a;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     cursor: pointer;
 }
@@ -128,13 +128,21 @@ export default {
     display: none;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .smallsection-container {
         gap: 10px;
+        margin-top: 0px;
+    }
+
+    .sectionrole {
+        padding: 12px 10px;
+        font-size: 14px;
     }
 
     .section {
         flex: 1 1 45%;
+        padding: 12px 10px;
+        font-size: 14px;
     }
 }
 </style>

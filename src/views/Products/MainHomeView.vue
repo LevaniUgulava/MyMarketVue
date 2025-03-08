@@ -14,35 +14,35 @@
 
       <div class="product-grid">
         <ProductCardComponent class="product-card" v-for="(item, index) in category.products" :key="index"
-          :initialproduct="item" @show-comments="showCommentsModal(item.id)" @cart-updated="handleCartUpdated"
-          @liked-message="handleunauthorizedlike" @cart-message="handleunauthorizedcart" />
+          :initialproduct="item" @cart-updated="handleCartUpdated" @liked-message="handleunauthorizedlike"
+          @cart-message="handleunauthorizedcart" />
       </div>
 
-      <CommentModal v-if="showModal" :product="selectedProduct" :comments="selectedProductComments" @close="closeModal"
-        @comment-submitted="refreshComments(selectedProduct.id)" />
     </section>
 
     <section class="collection-section" v-if="sections.length > 0">
-      <h2 class="collection-title">Collection</h2>
+      <p class="collection-title">კოლექციები</p>
       <div class="collection-grid">
         <router-link v-for="(item, index) in sections.flat()" :key="index"
-          :to="{ name: 'productsinglecollection', params: { id: item.id } }" class="grid-item"
-          :style="{ '--header-color': item.headerColor, '--image-url': `url(${item.media_urls})` }">
-          <div class="grid-item-image"></div>
+          :to="{ name: 'productsinglecollection', params: { id: item.id } }" class="grid-item">
+
           <div class="grid-item-text">
-            <h1>{{ item.title }}</h1>
+            <label>{{ item.title }}</label>
             <p class="description">{{ item.description }}</p>
-            <span v-if="item.discount" class="discount">-{{ item.discount }}%</span>
+            <span v-if="item.discount" class="discount">{{ item.discount }}%</span>
           </div>
+
+          <div class="grid-item-image" :style="{ backgroundImage: `url(${item.media_urls})` }"></div>
         </router-link>
       </div>
     </section>
+
+
   </div>
 </template>
 
 <script>
 import ProductCardComponent from '@/components/ProductCardComponent.vue';
-import CommentModal from '@/components/CommentModal.vue';
 import axios from 'axios';
 import Message from '@/components/Message/MessageComponent.vue';
 import SmallSections from '@/components/Status/SmallSections.vue';
@@ -50,7 +50,6 @@ import SmallSections from '@/components/Status/SmallSections.vue';
 export default {
   components: {
     ProductCardComponent,
-    CommentModal,
     SmallSections,
     Message,
   },
@@ -67,10 +66,6 @@ export default {
         ka: {
           'AlreadyExist': "პროდუქტი უკვე დამატებულია",
           'AddSuccestocart': "პროდუქტი წარმატებით დაემატა"
-        },
-        en: {
-          'AlreadyExist': "Product Already Exist",
-          'AddSuccestocart': "Product Added Successfully"
         }
       },
       showModal: false,
@@ -91,9 +86,9 @@ export default {
         ]);
 
         this.categories = [
-          { key: 'all', title: 'homemain.all', products: productsResponse.data.all },
-          { key: 'discount', title: 'homemain.discount', products: productsResponse.data.discount },
-          { key: 'highrate', title: 'homemain.highrate', products: productsResponse.data.highrate },
+          { key: 'all', title: 'homemain.all', products: productsResponse.data.all.data },
+          { key: 'discount', title: 'homemain.discount', products: productsResponse.data.discount.data },
+          { key: 'highrate', title: 'homemain.highrate', products: productsResponse.data.highrate.data },
         ];
 
         const sections = collectionResponse.data;
@@ -103,32 +98,6 @@ export default {
       } catch (error) {
         console.error('Error loading data:', error);
       }
-    },
-
-    async showCommentsModal(id) {
-      try {
-        const { data } = await axios.get(`products/${id}/display`);
-        this.selectedProductComments = data;
-        this.selectedProduct = this.categories.flatMap(cat => cat.products).find(product => product.id === id);
-        this.showModal = true;
-      } catch (error) {
-        console.error('Error fetching comments:', error);
-      }
-    },
-
-    async refreshComments(productId) {
-      try {
-        const { data } = await axios.get(`/products/${productId}/display`);
-        this.selectedProductComments = data;
-      } catch (error) {
-        console.error('Error refreshing comments:', error);
-      }
-    },
-
-    closeModal() {
-      this.showModal = false;
-      this.selectedProduct = null;
-      this.selectedProductComments = [];
     },
 
     see(category) {
@@ -203,66 +172,96 @@ button:hover {
 .collection-section {
   margin-top: 40px;
   padding: 20px;
-  background-color: #fafafa;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: #fafafa;
 }
 
 .collection-title {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-bottom: 20px;
-  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  font-weight: 700;
+  border-bottom: 1px solid #ddd;
 }
 
 .collection-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(45%, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 20px;
 }
 
 .grid-item {
   display: flex;
-  flex-direction: column;
+  align-items: stretch;
   border-radius: 12px;
   overflow: hidden;
   text-decoration: none;
   transition: transform 0.3s;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  height: 250px;
 }
 
 .grid-item:hover {
   transform: translateY(-5px);
 }
 
-.grid-item-image {
-  height: 200px;
-  background-image: var(--image-url);
-  background-size: cover;
-  background-position: center;
+.grid-item-text {
+  flex: 1;
+  padding: 40px;
+  color: black;
+  background: linear-gradient(135deg, #7a1dff 30%, #7a1dff1a 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .grid-item-text {
-  background-color: var(--header-color, #000);
-  color: #fff;
-  padding: 16px;
-}
-
-.grid-item-text h1 {
-  font-size: 1.2rem;
-  margin-bottom: 5px;
+  font-size: 1.5rem;
+  font-weight: bold;
 }
 
 .grid-item-text .description {
-  font-size: 0.9rem;
-  margin-bottom: 10px;
+  font-size: 1.1rem;
+  line-height: 1.5;
+  flex-grow: 1;
+  word-break: break-word;
 }
 
 .grid-item-text .discount {
   background: #ff5555;
-  color: #fff;
+  color: white;
   border-radius: 4px;
-  padding: 2px 6px;
-  font-size: 0.8rem;
+  padding: 8px 12px;
+  font-size: 1rem;
+  font-weight: bold;
+  align-self: flex-start;
+}
+
+.grid-item-image {
+  flex: 1;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  min-width: 300px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .grid-item {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .grid-item-image {
+    width: 100%;
+    height: 250px;
+  }
+
+  .grid-item-text {
+    text-align: center;
+    padding: 20px;
+  }
 }
 </style>

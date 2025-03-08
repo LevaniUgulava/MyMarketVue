@@ -18,11 +18,14 @@ const routes = [
         path: "",
         name: "Home",
         component: () => import("@/views/Products/MainHomeView.vue"),
+        meta:{title:"მთავარი გვერდი"}
       },
       {
         path: "product",
         name: "allproduct",
         component: () => import("@/views/Products/ProductsView.vue"),
+        meta:{title:"პროდუქტები"}
+
       },
       {
         path: "cart",
@@ -71,6 +74,11 @@ const routes = [
         path: "services",
         name: "Service",
         component: () => import("@/components/FooterContent/ServicesInfo.vue"),
+      },
+      {
+        path: "checkout",
+        name: "checkout",
+        component: () => import("@/views/CheckoutView.vue"),
       },
       {
         path: "privacy-policy",
@@ -235,9 +243,11 @@ const router = createRouter({
   routes,
 });
 
-router.afterEach(() => {
+router.afterEach((to) => {
+  document.title = to.meta.title || "ნაგულისხმევი სათაური";
   window.scrollTo(0, 0);
 });
+
 
 router.beforeEach((to, from, next) => {
   const isAuthenticated = !!localStorage.getItem("token");
