@@ -2,19 +2,21 @@
   <footer class="footer">
     <div class="footer-content">
       <div class="footer-section">
-        <h4>{{ $t("footer.title.quick") }}</h4>
-     <ul>
-  <li><router-link :to="'/' + currentLanguage">{{ $t("footer.links.home") }}</router-link></li>
- <li><router-link :to="{ path: `/${currentLanguage}/about-us` }">{{ $t("footer.links.aboutus") }}</router-link></li>
-      <li><router-link :to="{ path: `/${currentLanguage}/services` }">{{ $t("footer.links.service") }}</router-link></li>
-      <li><router-link :to="{ path: `/${currentLanguage}/privacy-policy` }">{{ $t("footer.links.privacy") }}</router-link></li>
-     </ul>
+        <h4>ნავიგაცია</h4>
+        <ul>
+          <li><router-link to="/">მთავარი</router-link></li>
+          <li><router-link to="{ path: `/about-us` }">ჩვენს შესახებ</router-link>
+          </li>
+          <li><router-link to="{ path: `/services` }">სერვისები</router-link>
+          </li>
+          <li><router-link to="{ path: `/privacy-policy` }">კონფიდენციალურობის პოლიტიკა</router-link></li>
+        </ul>
 
       </div>
 
       <!-- Social Media -->
       <div class="footer-section">
-        <h4>{{ $t("footer.title.follow") }}</h4>
+        <h4>გამოგვყევით</h4>
         <div class="social-icons">
           <a href="#"><i class="fab fa-facebook-f"></i></a>
           <a href="#"><i class="fab fa-twitter"></i></a>
@@ -25,9 +27,9 @@
 
       <!-- Company Info -->
       <div class="footer-section">
-        <h4>{{ $t("footer.title.Contact") }}</h4>
-        <p>{{ $t("footer.contact.email") }}: info@company.com</p>
-        <p>{{ $t("footer.contact.num") }}: +123 456 789</p>
+        <h4>კონტაქტები</h4>
+        <p>ელფოსტა: info@company.com</p>
+        <p>ნომერი: +123 456 789</p>
       </div>
     </div>
     <div class="footer-bottom">
@@ -41,7 +43,7 @@ export default {
   name: "FooterComponent",
   data() {
     return {
-      currentLanguage:localStorage.getItem('selectedLanguage'),
+      currentLanguage: localStorage.getItem('selectedLanguage'),
     }
   },
 };
@@ -54,9 +56,9 @@ export default {
   color: #fff;
   padding: 10px 20px;
   text-align: center;
-  font-family: Arial, sans-serif;
   box-sizing: border-box;
 }
+
 .footer-content {
   display: flex;
   justify-content: space-around;
@@ -111,26 +113,29 @@ export default {
   padding-top: 10px;
   font-size: 0.9em;
 }
+
 @media (min-width: 375px) and (max-width: 430px) {
-  .footer-section h4{
+  .footer-section h4 {
     font-size: 0.6rem;
   }
+
   .footer-section ul li {
-   margin: 3px 0;
-   font-size: 0.5rem;
-}
-p{
-  font-size: 0.5rem;;
-}
-.footer-content{
-  padding: 0px;
-}
-.footer-section{
-  margin: 0px;
-}
+    margin: 3px 0;
+    font-size: 0.5rem;
+  }
+
+  p {
+    font-size: 0.5rem;
+    ;
+  }
+
+  .footer-content {
+    padding: 0px;
+  }
+
+  .footer-section {
+    margin: 0px;
+  }
 
 }
-
-
-
 </style>

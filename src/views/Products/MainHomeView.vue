@@ -3,13 +3,36 @@
     :textColor="'#004d40'" :positionType="'fixed'" />
   <Message :message="emitlikemessage" @close="emitlikemessage = ''" />
   <Message :message="emitcartmessage" @close="emitcartmessage = ''" />
-  <div>
-    <SmallSections />
 
-    <section class="section" v-for="(category, idx) in categories" :key="idx">
-      <div class="section-header">
-        <p>{{ $t(category.title) }}</p>
-        <button @click="see(category.key)">{{ $t('homemain.seeall') }}</button>
+  <div>
+    <SwipeCarousel />
+    <section v-for="(category, idx) in categories" :key="idx" class="category-section">
+
+      <section class="collection-section" v-if="sections.length > 0">
+        <div :class="['collection-grid', { 'more-than-two': sections.length > 4 }]">
+          <router-link v-for="(item, index) in sections.slice(idx * 2, (idx + 1) * 2)" :key="index"
+            :to="{ name: 'productsinglecollection', params: { id: item.id } }" class="grid-item"
+            :class="{ 'reduce-height': sections.length > 4 && index === 1 }">
+            <div class="grid-item-image" :style="{ backgroundImage: 'url(' + item.media_urls + ')' }">
+              <div class="grid-item-text">
+                <label>{{ item.title }}</label>
+                <p class="description">{{ item.description }}</p>
+                <span v-if="item.discount" class="discount">{{ item.discount }}%</span>
+              </div>
+            </div>
+            <div class="product-availability">
+              <p>იხილეთ მეტი →</p>
+            </div>
+          </router-link>
+
+          <div v-if="sections.length > 4" class="show-all-collections">
+            <router-link to="/collection" class="show-all-button">იხილეთ მეტი კოლექცია →</router-link>
+          </div>
+        </div>
+      </section>
+
+      <div @click="see(category.key)" class="section-header">
+        <p>{{ category.title }}</p>
       </div>
 
       <div class="product-grid">
@@ -19,44 +42,22 @@
       </div>
 
     </section>
-
-    <section class="collection-section" v-if="sections.length > 0">
-      <p class="collection-title">კოლექციები</p>
-      <div class="collection-grid">
-        <router-link v-for="(item, index) in sections.flat()" :key="index"
-          :to="{ name: 'productsinglecollection', params: { id: item.id } }" class="grid-item">
-
-          <div class="grid-item-text">
-            <label>{{ item.title }}</label>
-            <p class="description">{{ item.description }}</p>
-            <span v-if="item.discount" class="discount">{{ item.discount }}%</span>
-          </div>
-
-          <div class="grid-item-image" :style="{ backgroundImage: `url(${item.media_urls})` }"></div>
-        </router-link>
-      </div>
-    </section>
-
-
   </div>
 </template>
 
 <script>
 import ProductCardComponent from '@/components/ProductCardComponent.vue';
-import axios from 'axios';
 import Message from '@/components/Message/MessageComponent.vue';
-import SmallSections from '@/components/Status/SmallSections.vue';
-
+import SwipeCarousel from '@/components/SwipeCarousel.vue';
+import api from '@/api';
 export default {
   components: {
     ProductCardComponent,
-    SmallSections,
+    SwipeCarousel,
     Message,
   },
   data() {
     return {
-      currentLanguage: localStorage.getItem('selectedLanguage'),
-      categories: [],
       selectedProduct: null,
       selectedProductComments: [],
       emitdata: '',
@@ -70,30 +71,27 @@ export default {
       },
       showModal: false,
       sections: [],
+      categories: [],
     };
   },
   methods: {
     async loadData() {
       try {
-        const lang = this.$router.currentRoute.value.params.lang;
-        const token = localStorage.getItem('token');
         const [productsResponse, collectionResponse] = await Promise.all([
-          axios.get('display', {
-            headers: { Authorization: `Bearer ${token}` },
-            params: { lang, section: ['all', 'discount', 'highrate'] }
+          api.get('display', {
+            tokenOptional: true,
+            params: { section: ['all', 'discount'] }
           }),
-          axios.get('collection/display')
+          api.get('collection/display')
         ]);
 
         this.categories = [
-          { key: 'all', title: 'homemain.all', products: productsResponse.data.all.data },
-          { key: 'discount', title: 'homemain.discount', products: productsResponse.data.discount.data },
-          { key: 'highrate', title: 'homemain.highrate', products: productsResponse.data.highrate.data },
-        ];
-
+          { key: 'all', title: 'ყველა პროდუქტი', products: productsResponse.data.all.data },
+          { key: 'discount', title: 'ფასდაკლებული პროდუქტი', products: productsResponse.data.discount.data },
+        ]
         const sections = collectionResponse.data;
-        const midpoint = Math.ceil(sections.length / 2);
-        this.sections = [sections.slice(0, midpoint), sections.slice(midpoint)];
+        console.log(sections); // Debugging sections content
+        this.sections = sections;
 
       } catch (error) {
         console.error('Error loading data:', error);
@@ -101,7 +99,7 @@ export default {
     },
 
     see(category) {
-      this.$router.push({ path: `/${this.$route.params.lang}/product`, query: { section: category } });
+      this.$router.push({ path: `/product`, query: { section: category } });
     },
 
     handleunauthorizedlike(message) {
@@ -122,6 +120,7 @@ export default {
 };
 </script>
 
+
 <style scoped>
 .section {
   display: flex;
@@ -130,19 +129,36 @@ export default {
   margin-bottom: 2%;
   padding: 20px;
   width: 100%;
-  background: #fff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
+
 
 .section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 95%;
   padding: 10px 0;
   border-bottom: 1px solid #ddd;
+  margin: 0 auto;
+  transition: transform 0.3s ease;
+  /* Smooth transition for transform */
 }
 
+.section-header:hover {
+  cursor: pointer;
+  transform: translateY(-5px);
+  /* Pull up effect on hover */
+}
+
+
 .section-header p {
+  font-weight: 500;
+  cursor: pointer;
+  margin-left: 40px;
+
+}
+
+.section-header p:hover {
   font-weight: 700;
 }
 
@@ -150,6 +166,7 @@ button {
   border: none;
   border-radius: 4px;
   padding: 6px 12px;
+  margin-right: 40px;
   background-color: #f5f5f5;
   cursor: pointer;
 }
@@ -161,8 +178,18 @@ button:hover {
 .product-grid {
   display: flex;
   gap: 15px;
+  margin: 0 auto;
+  width: 95%;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
+}
+
+.product-grid::-webkit-scrollbar {
+  display: none;
+}
+
+.product-grid {
+  -webkit-overflow-scrolling: touch;
 }
 
 .product-card {
@@ -170,11 +197,9 @@ button:hover {
 }
 
 .collection-section {
-  margin-top: 40px;
+  margin-top: 20px;
   padding: 20px;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  background: #fafafa;
 }
 
 .collection-title {
@@ -189,54 +214,30 @@ button:hover {
 .collection-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
+  /* Show two items per row */
   gap: 20px;
+  position: relative;
+  width: 100%;
 }
 
 .grid-item {
   display: flex;
-  align-items: stretch;
+  flex-direction: column;
   border-radius: 12px;
   overflow: hidden;
   text-decoration: none;
   transition: transform 0.3s;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  height: 250px;
+  height: 280px;
+  width: 100%;
+  position: relative;
+}
+
+.grid-item.reduce-height {
+  height: 220px;
 }
 
 .grid-item:hover {
   transform: translateY(-5px);
-}
-
-.grid-item-text {
-  flex: 1;
-  padding: 40px;
-  color: black;
-  background: linear-gradient(135deg, #7a1dff 30%, #7a1dff1a 100%);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.grid-item-text {
-  font-size: 1.5rem;
-  font-weight: bold;
-}
-
-.grid-item-text .description {
-  font-size: 1.1rem;
-  line-height: 1.5;
-  flex-grow: 1;
-  word-break: break-word;
-}
-
-.grid-item-text .discount {
-  background: #ff5555;
-  color: white;
-  border-radius: 4px;
-  padding: 8px 12px;
-  font-size: 1rem;
-  font-weight: bold;
-  align-self: flex-start;
 }
 
 .grid-item-image {
@@ -244,19 +245,102 @@ button:hover {
   height: 100%;
   background-size: cover;
   background-position: center;
-  min-width: 300px;
+  background-repeat: no-repeat;
+  position: relative;
+  border-radius: 12px;
+  transition: all 0.3s ease;
 }
 
-/* Responsive */
+.grid-item-text {
+  position: absolute;
+  color: #fff;
+  padding: 20px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-align: left;
+}
+
+.grid-item-text .description {
+  font-size: 0.8rem;
+  line-height: 1.5;
+  flex-grow: 1;
+}
+
+.grid-item-text .discount {
+  background: #ff5555;
+  color: white;
+  border-radius: 4px;
+  padding: 5px 8px;
+  font-size: 0.7rem;
+  align-self: flex-start;
+}
+
+.product-availability {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  color: white;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.grid-item:hover .product-availability {
+  opacity: 1;
+  visibility: visible;
+}
+
+.show-all-collections {
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+  text-align: center;
+  z-index: 1;
+}
+
+.show-all-button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: solid 1px black;
+  color: black;
+  width: 680px;
+  height: 50px;
+  border-radius: 25px;
+  cursor: pointer;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+}
+
+
+.show-all-button:hover {
+  color: white;
+  background-color: black;
+}
+
 @media (max-width: 768px) {
+  .product-availability {
+    font-size: 0.7rem;
+  }
+
+  .show-all-button {
+    width: 150px;
+    font-size: 0.8rem;
+  }
+
   .grid-item {
     flex-direction: column;
-    height: auto;
   }
 
   .grid-item-image {
     width: 100%;
-    height: 250px;
+    height: 150px;
   }
 
   .grid-item-text {

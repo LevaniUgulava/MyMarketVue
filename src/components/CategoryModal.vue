@@ -1,76 +1,29 @@
 <template lang="html">
-  <div v-if="isModalVisible" class="modal-overlay">
-    <div class="modal-content">
-      <span class="close-btn" @click="$emit('close-modal')">✕</span>
-      <h2>{{ $t("search.title") }}</h2>
-
-      <div class="input-group">
-        <h4>მოძებნე დასახელებით</h4>
-        <input type="text" v-model="searchnameinput" placeholder="მოძებნე სასურველი პროდუქტი..." class="styled-input">
+  <div v-if="isModalVisible" class="modal-overlay" @touchstart="startTouch" @touchmove="onTouchMove"
+    @touchend="endTouch">
+    <div class="modal-content" :style="{ transform: `translateY(${modalTranslateY}px)` }">
+      <!-- Lever for dragging the modal -->
+      <div class="modal-lever"></div>
+      <div class="modal-body" @touchstart.stop @touchmove.stop>
+        <ProductViewCategory />
       </div>
-
-
-      <div class="category-group">
-        <h4>{{ $t("search.maincategory") }}</h4>
-        <select v-model="selectedmainCategory" name="maincategory" class="styled-select">
-          <option value="">{{ $t('search.select') }}...</option>
-          <option v-for="item in maincategories" :key="item.id" :value="item.id">
-            {{ item.name }}
-          </option>
-        </select>
-      </div>
-
-      <div class="category-group">
-        <h4>{{ $t("search.category") }}</h4>
-        <select v-model="selectedCategory" name="category" class="styled-select">
-          <option value="">{{ $t('search.select') }}...</option>
-          <option v-for="item in selectedmainCategory ? filteredCategories : categories" :key="item.id"
-            :value="item.id">
-            {{ item.name }}
-          </option>
-        </select>
-      </div>
-
-      <div class="category-group">
-        <h4>{{ $t("search.subcategory") }}</h4>
-        <select v-model="selectedsubCategory" name="category" class="styled-select">
-          <option value="">{{ $t('search.select') }}...</option>
-          <option v-for="item in (selectedmainCategory || selectedCategory) ? filteredsubCategories : subcategories"
-            :key="item.id" :value="item.id">
-            {{ item.name }}
-          </option>
-        </select>
-      </div>
-      <h4>{{ $t('search.findprice') }}</h4>
-      <div class="inputs">
-        <input type="number" :placeholder="$t('search.from')" v-model="min">
-        <input type="number" :placeholder="$t('search.to')" v-model="max">
-      </div>
-
-      <button @click="search" class="save-btn">{{ isMobile ? "ძიება" : "შენახვა" }}</button>
     </div>
   </div>
 </template>
 
-
 <script>
-import axios from 'axios';
+import ProductViewCategory from '@/views/Products/ProductViewCategory.vue';
 
 export default {
+  components: {
+    ProductViewCategory,
+  },
   data() {
     return {
-      maincategories: [],
-      categories: [],
-      subcategories: [],
-      filteredCategories: [],
-      filteredsubCategories: [],
-      selectedmainCategory: "",
-      selectedCategory: "",
-      selectedsubCategory: "",
-      searchnameinput: "",
-      min: '',
-      max: '',
-      isMobile: window.innerWidth < 768,
+      touchStart: 0,
+      modalTranslateY: 0,
+      maxTranslateY: 0,
+      isDragging: false,
     };
   },
   props: {
@@ -79,282 +32,124 @@ export default {
       required: true,
     },
   },
-  methods: {
-    closeModal() {
-      this.$emit('close-modal');
-    },
-    search() {
-      if (this.isMobile) {
-        const currentQuery = { ...this.$route.query };
-        const lang = this.$route.params.lang || 'ka';
-
-        this.$router.push({
-          path: `/${lang}/product`,
-          query: {
-            section: currentQuery.section || 'all',
-            searchname: this.searchnameinput,
-            maincategory: this.selectedmainCategory,
-            category: this.selectedCategory,
-            subcategory: this.selectedsubCategory,
-            min: this.emitmin,
-            max: this.emitmax,
-            page: 1,
-          },
-        });
-      } else {
-        this.$emit('search-category', {
-          maincategory: this.selectedmainCategory,
-          category: this.selectedCategory,
-          subcategory: this.selectedsubCategory,
-          min: this.min,
-          max: this.max
-        });
-      }
-      this.closeModal();
-    },
-    async fetchCategories() {
-      try {
-        const response = await axios.get('maincategory');
-        const responsee = await axios.get('category');
-        const responseee = await axios.get('subcategory');
-
-
-        this.maincategories = response.data;
-        this.categories = responsee.data;
-        this.subcategories = responseee.data;
-
-
-      } catch (error) {
-        console.error('Failed to fetch categories:', error);
-      }
-
-    },
-
-
-  },
   watch: {
-    selectedmainCategory() {
-      if (this.selectedmainCategory) {
-        this.filteredCategories = this.categories.filter(
-          (category) => category.maincategory_id === this.selectedmainCategory
-        );
-        this.filteredsubCategories = this.subcategories.filter(
-          (sub) => sub.maincategory_id === this.selectedmainCategory
-        )
+    isModalVisible(newValue) {
+      if (newValue) {
+        this.modalTranslateY = 0;  // Reset position when modal opens
+        document.body.style.overflow = 'hidden';  // Disable body scroll when modal is open
       } else {
-        this.filteredCategories = [];
+        document.body.style.overflow = 'auto'; // Re-enable body scroll when modal is closed
+      }
+    },
+  },
+  methods: {
+    startTouch(event) {
+      this.isDragging = true;
+      document.body.style.overflow = 'hidden'; // Disable scrolling on body while dragging the modal
+      this.touchStart = event.touches[0].clientY;
+      this.maxTranslateY = window.innerHeight * 0.8; // Max translate Y value (80% screen height)
+    },
+
+    onTouchMove(event) {
+      const touchMove = event.touches[0].clientY;
+      const deltaY = touchMove - this.touchStart;
+
+      event.preventDefault();  // Prevent scrolling while dragging the modal
+
+      // Allow dragging the modal down within the maximum limit
+      if (deltaY > 0 && deltaY <= this.maxTranslateY) {
+        this.modalTranslateY = deltaY;
       }
     },
 
-    selectedCategory() {
-      if (this.selectedCategory) {
-        this.filteredsubCategories = this.subcategories.filter(
-          (sub) => sub.category_id === this.selectedCategory
-        )
+    endTouch() {
+      // Close the modal if swiped enough or reset position
+      if (this.modalTranslateY > 0) {
+        this.closeModal();
       } else {
-        this.filteredCategories = [];
+        this.resetModalPosition();
       }
-    }
-  },
-  mounted() {
-    this.fetchCategories();
+
+      this.isDragging = false;
+      document.body.style.overflow = 'auto'; // Re-enable scrolling after dragging
+    },
+
+    closeModal() {
+      this.$emit('close-modal', false); // Emit event to close the modal
+    },
+
+    resetModalPosition() {
+      this.modalTranslateY = 0; // Reset position if swipe was not enough to close
+    },
   },
 };
 </script>
 
 <style scoped lang="css">
-.inputs {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.inputs input {
-  flex: 1;
-  padding: 10px;
-  font-size: 0.95rem;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-sizing: border-box;
-  transition: border-color 0.3s ease;
-}
-
-.inputs input::placeholder {
-  color: #aaa;
-}
-
-.inputs input:focus {
-  border-color: #3498db;
-  outline: none;
-}
-
 .modal-overlay {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.4);
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-end;
   z-index: 9999;
-  backdrop-filter: blur(3px);
+  backdrop-filter: blur(10px);
+  overflow-y: auto;
+  animation: slideUp 0.5s ease-out;
 }
-
 
 .modal-content {
   background-color: #fff;
-  padding: 25px;
-  border-radius: 12px;
+  padding: 20px;
+  border-radius: 12px 12px 0 0;
   width: 100%;
-  max-width: 450px;
+  max-width: 100%;
+  max-height: 80vh;
   position: relative;
   box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease-in-out;
   animation: fadeIn 0.4s ease-in-out;
-  text-align: left;
+}
+
+.modal-lever {
+  width: 60px;
+  height: 4px;
+  background-color: #ccc;
+  border-radius: 4px;
+  margin: 10px auto;
+  cursor: grab;
+  user-select: none;
+}
+
+.modal-body {
+  overflow-y: auto;
+  max-height: 60vh;
+  padding-right: 10px;
+  touch-action: none;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(10px);
   }
 
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-.close-btn {
-  position: absolute;
-  top: 12px;
-  right: 15px;
-  font-size: 1.4rem;
-  cursor: pointer;
-  color: #888;
-  transition: color 0.2s;
-}
-
-.close-btn:hover {
-  color: #333;
-}
-
-h2 {
-  color: #333;
-  font-size: 1.6rem;
-  font-weight: 600;
-  margin-bottom: 20px;
-  text-align: center;
-}
-
-.category-group {
-  margin-bottom: 15px;
-}
-
-h4 {
-  font-size: 1rem;
-  color: #555;
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-
-.styled-select {
-  width: 100%;
-  padding: 10px;
-  font-size: 0.95rem;
-  color: #333;
-  background-color: #f9f9f9;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  appearance: none;
-  background-image: url('data:image/svg+xml;utf8,<svg fill="%23666" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  transition: border-color 0.3s ease;
-}
-
-
-
-.styled-select:hover,
-.styled-select:focus {
-  border-color: #3498db;
-  outline: none;
-}
-
-.save-btn {
-  width: 100%;
-  padding: 12px;
-  font-size: 1rem;
-  font-weight: 500;
-  color: #fff;
-  background-color: #7a1dff;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  margin-top: 20px;
-}
-
-.save-btn:hover {
-  background-color: #2980b9;
-  transform: translateY(-2px);
-}
-
-.input-group {
-  display: none;
-}
-
-@media (max-width: 768px) {
-  .input-group {
-    display: block;
-  }
-
-  .styled-input {
-    width: 100%;
-    padding: 10px;
-    font-size: 0.8rem;
-    color: #333;
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    appearance: none;
-    background-position: right 10px center;
-    transition: border-color 0.3s ease;
-  }
-
-  .styled-input:hover,
-  .styled-input:focus {
-    border-color: #3498db;
-    outline: none;
-  }
-
-  .save-btn {
-    background-color: #7a1dff;
-    font-size: 0.8rem;
-  }
-
-  .modal-content {
-    width: 80%;
-  }
-
-  h2 {
-    display: none;
-  }
-
-  h4 {
-    font-size: 0.8rem;
-  }
-
-  .styled-select {
-    font-size: 0.7rem;
-  }
-
-  .inputs input {
-    font-size: 0.5rem;
-    height: 40px;
-  }
-
-  .inputs input::placeholder {
-    font-size: 0.8rem;
   }
 }
 </style>

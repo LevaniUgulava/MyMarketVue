@@ -17,7 +17,7 @@
 </template>
 
 <script>
-import axios from "axios";
+import api from "@/api";
 import { useRoute, useRouter } from "vue-router";
 
 export default {
@@ -35,8 +35,10 @@ export default {
     const { expires, signature } = route.query;
 
     try {
-      const response = await axios.get(`email/verify/${id}`, {
+      const response = await api.get(`email/verify/${id}`, {
         params: { expires, signature },
+        tokenRequired: false
+
       });
 
       this.message = response.data.message || "Email verification successful!";
@@ -147,11 +149,13 @@ export default {
 }
 
 @keyframes blink {
+
   0%,
   80%,
   100% {
     opacity: 0;
   }
+
   40% {
     opacity: 1;
   }
@@ -161,9 +165,11 @@ export default {
   .card {
     padding: 1.5rem;
   }
+
   .title {
     font-size: 1.5rem;
   }
+
   .message {
     font-size: 0.9rem;
   }

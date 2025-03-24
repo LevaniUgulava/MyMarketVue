@@ -5,20 +5,18 @@ const routes = [
     name: "NotFound",
     component: () => import("@/views/NotFoundView.vue"),
   },
-
   {
     path: "/",
-    redirect: "/ka",
-  },
-  {
-    path: "/:lang(en|ka)",
     component: () => import("@/views/MainlayoutView.vue"),
     children: [
       {
         path: "",
         name: "Home",
         component: () => import("@/views/Products/MainHomeView.vue"),
-        meta:{title:"მთავარი გვერდი"}
+        meta:{
+          title:"მთავარი გვერდი",
+          description:"გვერდი სადაც შეიძენთ ქალისა და კაცის ტანსაცმელს,ფეხსაცმელს,სათვალეს,შარვალი,კაბა,ორეული"
+        }
       },
       {
         path: "product",
@@ -60,6 +58,12 @@ const routes = [
         props: true,
       },
       {
+        path: "collection",
+        name: "collectionlist",
+        component: () =>
+          import("@/views/CollectionView.vue"),
+      },
+      {
         path: "exclusive",
         name: "ExclusivePage",
         component: () => import("@/components/Status/ExclusivePage.vue"),
@@ -89,12 +93,12 @@ const routes = [
     ],
   },
   {
-    path: "/:lang(en|ka)/login",
+    path: "/login",
     name: "Login",
     component: () => import("@/views/LoginView.vue"),
   },
   {
-    path: "/:lang(en|ka)/register",
+    path: "/register",
     name: "Register",
     component: () => import("@/views/RegisterView.vue"),
   },
@@ -114,7 +118,7 @@ const routes = [
   },
 
   {
-    path: "/:lang(en|ka)/email-verify/:id",
+    path: "/email-verify/:id",
     component: () => import("@/components/Verify/VerificationComponent.vue"),
   },
   {
@@ -243,9 +247,20 @@ const router = createRouter({
   routes,
 });
 
-router.afterEach((to) => {
+router.afterEach((to,from) => {
   document.title = to.meta.title || "ნაგულისხმევი სათაური";
-  window.scrollTo(0, 0);
+  const metaDescription = document.querySelector('meta[name="description"]');
+  if (metaDescription) {
+    metaDescription.setAttribute('content', to.meta.description || "ნაგულისხმევი აღწერა");
+  } else {
+    const newMetaDescription = document.createElement('meta');
+    newMetaDescription.name = "description";
+    newMetaDescription.content = to.meta.description || "ნაგულისხმევი აღწერა";
+    document.head.appendChild(newMetaDescription);
+  }
+  if (from.path !== to.path) {
+    window.scrollTo(0, 0);
+  }
 });
 
 
@@ -267,5 +282,6 @@ router.beforeEach((to, from, next) => {
     next();
   }
 });
+
 
 export default router;

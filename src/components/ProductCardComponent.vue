@@ -26,8 +26,7 @@
       </div>
 
       <div class="button-group">
-        <button class="add-btn" @click.prevent="addToCart(initialproduct.id)"
-          :title="currentLanguage === 'ka' ? 'კალათაში დამატება' : 'Add to Cart'">
+        <button class="add-btn" @click.prevent="addToCart(initialproduct.id)">
           <i class="fa-solid fa-cart-plus"></i> დამატება
         </button>
       </div>
@@ -36,7 +35,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '@/api';
 
 export default {
   name: 'ProductCardComponent',
@@ -60,10 +59,10 @@ export default {
         return;
       }
       try {
-        const response = await axios.post(
+        const response = await api.post(
           `addcart/${id}`,
           { type: this.initialproduct.size_type },
-          { headers: { Authorization: `Bearer ${token}` } }
+          { tokenRequired: true }
         );
         this.$emit('cart-updated', response.data);
       } catch (error) {
@@ -91,7 +90,7 @@ export default {
           this.$emit('liked-message', { ka: "არ არის ავტორიზირებული", en: "Not Authorized" });
           return;
         }
-        await axios.post(`like/${id}`, {}, { headers: { Authorization: `Bearer ${token}` } });
+        await api.post(`like/${id}`, {}, { tokenRequired: true });
         this.isLiked = true;
       } catch (error) {
         console.log(error);
@@ -101,7 +100,7 @@ export default {
       try {
         const token = localStorage.getItem('token');
         if (!token) return;
-        await axios.post(`unlike/${id}`, {}, { headers: { Authorization: `Bearer ${token}` } });
+        await api.post(`unlike/${id}`, {}, { tokenRequired: true });
         this.isLiked = false;
       } catch (error) {
         console.log(error);
@@ -175,12 +174,10 @@ export default {
   padding: 5px;
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Conv_MarkGEO:wght@700&display=swap');
 
 h3 {
   color: #000000;
   font-size: 14px;
-  font-family: 'Conv_MarkGEO-Medium', sans-serif;
   font-weight: 500;
   margin: 5px 0;
   white-space: nowrap;
@@ -191,7 +188,6 @@ h3 {
 .price {
   color: #2b2731;
   font-size: 16px;
-  font-family: 'Conv_MarkGEO', sans-serif;
   font-weight: bold;
 }
 
@@ -210,14 +206,15 @@ h3 {
 button {
   border: none;
   background: transparent;
+  font-family: 'Noto Sans Georgian', sans-serif;
   cursor: pointer;
-  font-size: 0.8rem;
+  font-size: 12px;
   color: #7a1dff;
   transition: color 0.2s ease-in-out;
 }
 
 button:hover {
-  color: #000;
+  color: #62389c;
 }
 
 @media (max-width: 576px) {

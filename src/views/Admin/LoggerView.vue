@@ -46,7 +46,8 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '@/api';
+
 
 export default {
   name: "LoggerView",
@@ -76,10 +77,9 @@ export default {
       });
     },
     async Logs() {
-      const token = localStorage.getItem('token');
       try {
-        const response = await axios.get('logs', {
-          headers: { 'Authorization': `Bearer ${token}` },
+        const response = await api.get('logs', {
+          tokenRequired: true,
           params: this.$route.query
         });
         this.data = response.data;
@@ -189,12 +189,14 @@ export default {
   background-color: #f8f9fa;
 }
 
-.table th, .table td {
+.table th,
+.table td {
   padding: 10px;
   border: 1px solid #ddd;
   text-align: center;
   font-size: 14px;
-  white-space: nowrap; /* Prevent columns from breaking */
+  white-space: nowrap;
+  /* Prevent columns from breaking */
 }
 
 .table th {

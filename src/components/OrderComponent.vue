@@ -14,14 +14,14 @@
       <p class="product-description">{{ product.description }}</p>
 
       <div class="order-info">
-        <p><i class="fas fa-ruler"></i> {{ $t('order.size') }}: <strong>{{ product.size }}</strong></p>
-        <p><i class="fas fa-cubes"></i> {{ $t('order.quantity') }}: <strong>{{ product.quantity }}</strong></p>
-        <p><i class="fa-solid fa-lari-sign"></i> {{ $t('order.total') }}: <strong>{{ product.total_price }}</strong> <i
+        <p><i class="fas fa-ruler"></i> ზომა: <strong>{{ product.size }}</strong></p>
+        <p><i class="fas fa-cubes"></i> რაოდენობა: <strong>{{ product.quantity }}</strong></p>
+        <p><i class="fa-solid fa-lari-sign"></i> სულ: <strong>{{ product.total_price }}</strong> <i
             class="fa-solid fa-lari-sign"></i></p>
       </div>
 
       <p :class="['order-status', statusClass]">
-        {{ $t('order.status') }}: <strong>{{ order_status }}</strong>
+        სტატუსი: <strong>{{ order_status }}</strong>
       </p>
     </div>
   </div>

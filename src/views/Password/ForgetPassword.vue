@@ -3,15 +3,7 @@
     <div class="card">
       <form @submit.prevent="sendEmail" method="post" class="form">
         <div class="input-container">
-          <input
-            v-model="email"
-            type="email"
-            name="email"
-            id="email"
-            required
-            placeholder=" "
-            class="input-field"
-          />
+          <input v-model="email" type="email" name="email" id="email" required placeholder=" " class="input-field" />
           <label for="email" class="input-label">Email</label>
         </div>
         <button type="submit" class="submit-btn">Send</button>
@@ -21,9 +13,10 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '@/api';
+
 export default {
-  name:"ForgetPassword",
+  name: "ForgetPassword",
   data() {
     return {
       email: ""
@@ -31,7 +24,7 @@ export default {
   },
   methods: {
     async sendEmail() {
-      const response = await axios.post('/forget/password',{email:this.email});
+      const response = await api.post('/forget/password', { email: this.email });
       console.log(response);
     },
   }
@@ -96,8 +89,8 @@ export default {
   transition: 0.3s ease-in-out;
 }
 
-.input-field:focus + .input-label,
-.input-field:not(:placeholder-shown) + .input-label {
+.input-field:focus+.input-label,
+.input-field:not(:placeholder-shown)+.input-label {
   top: -10px;
   font-size: 12px;
   color: #007bff;

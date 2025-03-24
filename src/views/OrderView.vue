@@ -2,20 +2,17 @@
   <div class="container">
     <div class="toggle-buttons">
       <button :class="{ active: showPending }" @click="toggleSection('pending')">
-        {{ $t('order.pending') }}
-      </button>
+        მიმდინარე შეკვეთები </button>
       <button :class="{ active: !showPending }" @click="toggleSection('completed')">
-        {{ $t('order.completed') }}
-      </button>
+        შესრულებული შეკვეთები </button>
     </div>
 
     <div v-if="apiLoaded && showPending" class="order-section">
       <div v-if="OrderProducts.length > 0" class="order-box">
         <div v-for="order in OrderProducts" :key="order.order_id" class="order-card">
           <div class="card-header">
-            <h3 class="order-id">{{ $t('order.order') }} #{{ order.order_id }}</h3>
-            <h3 class="order-amount">{{ $t('order.paid') }}: {{ order.order_amount }} <i
-                class="fa-solid fa-lari-sign"></i></h3>
+            <h3 class="order-id">შეკვეთა #{{ order.order_id }}</h3>
+            <h3 class="order-amount">გადახდილი: {{ order.order_amount }} <i class="fa-solid fa-lari-sign"></i></h3>
           </div>
           <div class="products">
             <OrderComponent v-for="product in order.products" :key="product.id" :product="product"
@@ -34,9 +31,8 @@
       <div v-if="CompletedProducts.length > 0" class="order-box">
         <div v-for="order in CompletedProducts" :key="order.order_id" class="order-card">
           <div class="card-header">
-            <h3 class="order-id">{{ $t('order.order') }} #{{ order.order_id }}</h3>
-            <h3 class="order-amount">{{ $t('order.paid') }}: {{ order.order_amount }} <i
-                class="fa-solid fa-lari-sign"></i></h3>
+            <h3 class="order-id">შეკვეთა #{{ order.order_id }}</h3>
+            <h3 class="order-amount">გადახდილი: {{ order.order_amount }} <i class="fa-solid fa-lari-sign"></i></h3>
           </div>
           <div class="products">
             <OrderComponent v-for="product in order.products" :key="product.id" :product="product"
@@ -53,8 +49,8 @@
 </template>
 
 <script>
+import api from '@/api';
 import OrderComponent from '@/components/OrderComponent.vue';
-import axios from 'axios';
 
 export default {
   components: {
@@ -75,11 +71,10 @@ export default {
   },
   methods: {
     async getOrders() {
-      const token = localStorage.getItem('token');
       this.apiLoaded = false;
       try {
-        const response = await axios.get('orders', {
-          headers: { Authorization: `Bearer ${token}` }
+        const response = await api.get('orders', {
+          tokenRequired: true
         });
         this.OrderProducts = response.data.Pending || [];
         this.CompletedProducts = response.data.Completed || [];

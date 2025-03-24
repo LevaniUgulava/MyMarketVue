@@ -88,103 +88,97 @@
   </div>
 </template>
 <script>
-import axios from 'axios';
+import api from '@/api';
 export default {
-    name:'StatusComponent',
-    data() {
-        return {
-            statuses:[],
-            showform:false,
-           data: {
-              name: "",
-              toAchieve: "",
-              start_data:"",
-              end_date:""
-              },
+  name: 'StatusComponent',
+  data() {
+    return {
+      statuses: [],
+      showform: false,
+      data: {
+        name: "",
+        toAchieve: "",
+        start_data: "",
+        end_date: ""
+      },
 
-        }
+    }
+  },
+  methods: {
+    cancel() {
+      this.data.name = ''
+      this.data.toAchieve = ''
     },
-    methods: {
-        cancel(){
-         this.data.name=''
-         this.data.toAchieve=''
-        },
-        viewstatus(id){
-    this.$router.push({ name: "singlestatus", params: { id } });
-        },
-    
-        async display(){
-            const token = localStorage.getItem('token');
-            try{
-                const response = await axios.get('admin/userstatus/display',{
-                    headers:{
-                        "Authorization":`Bearer ${token}`
-                    }
-                });
-                this.statuses = response.data.statuses
-
-            }catch(error){
-                console.log(error)
-            }
-        },
-        async create(){
-            const token = localStorage.getItem('token');
-            
-            try{
-                const response = await axios.post('admin/userstatus/create',{
-                    name:this.data.name,
-                    toachieve:this.data.toAchieve,
-                    start_data:this.data.start_data,
-                    end_date:this.data.end_date,
-                    },{
-                    headers:{
-                        "Authorization":`Bearer ${token}`
-                    }
-                });
-                this.data.name='',
-                this.data.toAchieve='',
-                this.data.start_data='',
-                this.data.end_date_date=''
-                
-
-                this.display();
-                console.log(response);
-
-            }catch(error){
-                console.log(error);
-            }
-        },
-        async deletestatus(id){
-            const token = localStorage.getItem('token');
-            try{
-                const response = await axios.post(`admin/userstatus/delete/${id}`,{},{
-                    headers:{
-                        "Authorization":`Bearer ${token}`
-                    }
-                });
-                
-                this.display();
-                console.log(response);
-
-            }catch(error){
-                console.log(error);
-            }
-        },
-        vieweligible(id){
-       this.$router.push({ name: "singleeligiblestatus", params: { id } });
-        }
-      
-          
-          
-
-        
+    viewstatus(id) {
+      this.$router.push({ name: "singlestatus", params: { id } });
     },
 
-    mounted() {
+    async display() {
+      try {
+        const response = await api.get('admin/userstatus/display', {
+          tokenRequired: true
+
+        });
+        this.statuses = response.data.statuses
+
+      } catch (error) {
+        console.log(error)
+      }
+    },
+    async create() {
+
+      try {
+        const response = await api.post('admin/userstatus/create', {
+          name: this.data.name,
+          toachieve: this.data.toAchieve,
+          start_data: this.data.start_data,
+          end_date: this.data.end_date,
+        }, {
+          tokenRequired: true
+
+        });
+        this.data.name = '',
+          this.data.toAchieve = '',
+          this.data.start_data = '',
+          this.data.end_date_date = ''
+
+
         this.display();
-    },
+        console.log(response);
 
-    
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    async deletestatus(id) {
+      try {
+        const response = await api.post(`admin/userstatus/delete/${id}`, {}, {
+          tokenRequired: true
+
+        });
+
+        this.display();
+        console.log(response);
+
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    vieweligible(id) {
+      this.$router.push({ name: "singleeligiblestatus", params: { id } });
+    }
+
+
+
+
+
+  },
+
+  mounted() {
+    this.display();
+  },
+
+
 }
 </script>
 <style scoped>
@@ -223,19 +217,20 @@ h1 {
 .status-table tbody tr:hover {
   background-color: #f1f1f1;
 }
+
 .showbutton {
   display: flex;
   align-items: center;
   justify-content: center;
   margin-top: 2%;
   width: 100%;
-  height: 40px; 
+  height: 40px;
   border: none;
   border-radius: 10px;
-  font-size: 16px; 
+  font-size: 16px;
   font-weight: Thin;
-  cursor: pointer; 
-  transition: background-color 0.3s ease; 
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
 .showbutton i {
@@ -245,6 +240,7 @@ h1 {
 .showbutton:hover {
   background-color: #c5cacf;
 }
+
 .form-container {
   margin: 20px auto;
   margin-top: 2%;
@@ -334,7 +330,7 @@ td .button {
   font-size: 14px;
   font-weight: bold;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease; 
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 td .delete {
@@ -342,39 +338,41 @@ td .delete {
 }
 
 td .delete:hover {
-  background-color: rgb(200, 50, 50); 
-  transform: scale(1.05); 
+  background-color: rgb(200, 50, 50);
+  transform: scale(1.05);
 }
 
 td .view {
-  background-color: rgb(75, 146, 246); 
+  background-color: rgb(75, 146, 246);
 }
 
 td .view:hover {
-  background-color: rgb(50, 100, 200); 
+  background-color: rgb(50, 100, 200);
   transform: scale(1.05);
 }
 
 td .eligible {
-  background-color: #28a745; /* Green for eligibility */
+  background-color: #28a745;
+  /* Green for eligibility */
   color: white;
 }
 
 td .eligible:hover {
-  background-color: #218838; /* Darker green on hover */
-  transform: scale(1.05); /* Slight zoom effect */
-  transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth hover effect */
+  background-color: #218838;
+  /* Darker green on hover */
+  transform: scale(1.05);
+  /* Slight zoom effect */
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  /* Smooth hover effect */
 }
 
 td .button i {
-  margin-left: 5px; /* Add spacing between the icon and text */
+  margin-left: 5px;
+  /* Add spacing between the icon and text */
 }
 
 td .button i {
-  margin-left: 5px; 
+  margin-left: 5px;
   margin-right: 5px;
 }
-
-
-
 </style>

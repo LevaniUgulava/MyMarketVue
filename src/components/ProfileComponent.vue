@@ -1,45 +1,45 @@
 <template>
-{{message}}
+  {{ message }}
   <div class="profile-container">
     <div class="content">
       <div class="left-sections">
         <div class="section">
-          <h3>{{$t("profile.user.userdetail")}}</h3>
-        <div class="input-profile">
-            <label>{{$t("profile.user.name")}}</label>
+          <h3>მომხმარებლის დეტალები:</h3>
+          <div class="input-profile">
+            <label>სახელი:</label>
             <input name="name" type="text" placeholder="Name..." v-model="name">
-            <label>{{$t("profile.user.email")}}</label>
+            <label>ელფოსტა:</label>
             <input name="email" type="email" placeholder="Email..." v-model="email">
           </div>
-          <button class="btn" @click="updateprofile">{{$t("profile.user.save", { msg: $t("header.user.profile") })}}</button>
-        </div> 
-        
-        
+          <button class="btn" @click="updateprofile">შეინახე</button>
+        </div>
+
+
 
         <div class="section">
-          <h3>{{$t("profile.user.passchange")}}</h3>
+          <h3>პაროლის შეცვლა:</h3>
           <div class="input-profile">
-            <label>{{$t("profile.user.currentpass", { msg: ":" })}}</label>
-            <input name="currentpassword" type="password" :placeholder="$t('profile.user.currentpass', { msg: '...' })" v-model="currentpassword">
-            <label>{{$t("profile.user.newpass", { msg: ":" })}}</label>
-            <input name="newpassword" type="password" :placeholder="$t('profile.user.newpass', { msg: '...' })" v-model="newpassword">
+            <label>ძველი პაროლი:</label>
+            <input name="currentpassword" type="password" placeholder="ძველი პაროლი" v-model="currentpassword">
+            <label>ახალი პაროლი:</label>
+            <input name="newpassword" type="password" placeholder="ახალი პაროლი" v-model="newpassword">
           </div>
-          <button class="btn" @click="updatepassword">{{$t("profile.user.save", { msg: $t("profile.user.password") })}}</button>
+          <button class="btn" @click="updatepassword">შეინახე</button>
         </div>
       </div>
 
       <div class="section1">
 
-         <div class="section">
-         <div class="side-section">
-    <h3>Side Section</h3>
-    <p>This section will be placed side by side with the two sections.</p>
-    <button @click="resend">Send Verification Email</button>
-  </div>
+        <div class="section">
+          <div class="side-section">
+            <h3>Side Section</h3>
+            <p>This section will be placed side by side with the two sections.</p>
+            <button @click="resend">Send Verification Email</button>
+          </div>
         </div>
-       <div class="section">
- 
-         <UserStatusComponentVue/>
+        <div class="section">
+
+          <UserStatusComponentVue />
         </div>
       </div>
     </div>
@@ -47,11 +47,11 @@
 </template>
 
 <script>
-import axios from 'axios';
 import UserStatusComponentVue from './UserStatusComponent.vue';
+import api from '@/api';
 export default {
   name: "ProfileComponent",
-  components:{
+  components: {
     UserStatusComponentVue
   },
   data() {
@@ -60,7 +60,7 @@ export default {
       email: null,
       currentpassword: null,
       newpassword: null,
-      message:""
+      message: ""
     };
   },
   methods: {
@@ -73,10 +73,8 @@ export default {
       }
 
       try {
-        const response = await axios.get("getprofile", {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+        const response = await api.get("getprofile", {
+          tokenRequired: true
         });
         this.name = response.data.user.name;
         this.email = response.data.user.email;
@@ -84,7 +82,7 @@ export default {
         console.error("Error fetching profile:", error);
       }
     },
-    async updateprofile(){
+    async updateprofile() {
       const token = localStorage.getItem("token");
 
       if (!token) {
@@ -93,22 +91,20 @@ export default {
       }
 
       try {
-        const response = await axios.post("/profile/update", {
-          name:this.name,
-          email:this.email
-        },{
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+        const response = await api.post("/profile/update", {
+          name: this.name,
+          email: this.email
+        }, {
+          tokenRequired: true
         });
-        this.message=response.data.message
-        
+        this.message = response.data.message
+
       } catch (error) {
         console.error("Error fetching profile:", error);
       }
 
     },
-    async updatepassword(){
+    async updatepassword() {
       const token = localStorage.getItem("token");
 
       if (!token) {
@@ -117,19 +113,17 @@ export default {
       }
 
       try {
-        const response = await axios.post("/profile/update/password", {
-          oldpassword:this.currentpassword,
-          newpassword:this.newpassword
-        },{
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+        const response = await api.post("/profile/update/password", {
+          oldpassword: this.currentpassword,
+          newpassword: this.newpassword
+        }, {
+          tokenRequired: true
         });
-         this.currentpassword =""
-         this.newpassword=""
-         this.message=response.data
+        this.currentpassword = ""
+        this.newpassword = ""
+        this.message = response.data
 
-        
+
       } catch (error) {
         console.error("Error fetching profile:", error);
       }
@@ -145,10 +139,8 @@ export default {
       }
 
       try {
-        const response = await axios.post('/resend/verification', {}, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+        const response = await api.post('/resend/verification', {}, {
+          tokenRequired: true
         });
         console.log(response);
       } catch (error) {
@@ -169,44 +161,41 @@ export default {
   margin-top: 2%;
   padding: 10px;
   border-radius: 8px;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-  background-color: #ffffff;
   font-family: 'Raleway', sans-serif;
 }
 
 .content {
   display: flex;
   justify-content: space-between;
+  align-items: stretch;
 }
 
 .left-sections {
   display: flex;
-  gap:25px;
+  gap: 25px;
   flex-direction: column;
-  width: 60%;
-}
-
-.section {
-  display: flex;
-  flex-direction: column;
-  padding: 20px;
-  border-radius: 8px;
-  background-color: #f9f9fb;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
-}
-
-.section:hover {
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-  transform: translateY(-3px);
+  width: 55%;
+  justify-content: space-between;
 }
 
 .section1 {
-  width: 35%;
+  width: 40%;
   margin-left: 20px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 25px;
+  justify-content: space-between;
+}
+
+.section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px;
+  border-radius: 8px;
+  /* background-color: #f9f9fb; */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .input-profile input {
@@ -226,7 +215,7 @@ export default {
 
 .btn {
   color: #ffffff;
-  background-color: #007bff;
+  background-color: #7a1dff;
   border: none;
   border-radius: 6px;
   width: fit-content;
@@ -237,7 +226,7 @@ export default {
 }
 
 .btn:hover {
-  background-color: #0056b3;
+  background-color: #733ebc;
   transform: translateY(-2px);
 }
 
@@ -246,12 +235,12 @@ export default {
 }
 
 .side-section {
-  background: #ffffff;
   border-radius: 8px;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
   padding: 20px;
   text-align: center;
   font-family: 'Raleway', sans-serif;
+  flex: 1;
+  /* Makes side section the same height as other sections */
 }
 
 .side-section h3 {
@@ -293,7 +282,8 @@ export default {
   .content {
     flex-direction: column;
   }
-  .section{
+
+  .section {
     margin-top: 5%;
   }
 
@@ -302,39 +292,48 @@ export default {
     width: 100%;
     margin: 0;
   }
-  h1{
+
+  h1 {
     display: none;
   }
-  h3{
+
+  h3 {
     font-size: 0.8rem;
   }
-  label{
+
+  label {
     font-size: 0.5rem;
   }
-  .input-profile input{
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 5px;
-  font-size: 0.6rem;
-  }
-  .btn{
-   font-size: 0.6rem;
-  border-radius: 6px;
-  padding: 5px 10px;
-  font-weight: 600;
-  }
-  .profile-container {
-  margin-top: 0%;
-}
-.side-section h3{
-  font-size: 0.8rem ;
-}
-.side-section p{
+
+  .input-profile input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 5px;
     font-size: 0.6rem;
-}
-.side-section button{
-  font-size: 0.6rem;
-  padding: 10px 20px;
-}
+  }
+
+  .btn {
+    font-size: 0.6rem;
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-weight: 600;
+  }
+
+  .profile-container {
+    margin-top: 0%;
+  }
+
+  .side-section h3 {
+    font-size: 0.8rem;
+  }
+
+  .side-section p {
+    font-size: 0.6rem;
+  }
+
+  .side-section button {
+    font-size: 0.6rem;
+    padding: 10px 20px;
+  }
 }
 </style>

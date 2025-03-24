@@ -3,58 +3,40 @@
     <Message v-if="emitdata" closable class="message">{{ emitdata }}</Message>
     <Message v-if="emitlikemessage" closable class="message" severity="error">{{ emitlikemessage }}</Message>
     <Message v-if="emitcartmessage" closable class="message" severity="error">{{ emitcartmessage }}</Message>
- 
-    <div v-if="isLoading">
-      <div class="loading-spinner"></div>
-      <div class="loading-text">Loading...</div>
-    </div>
-<h1>{{collection}}</h1>
 
-    <div v-if="products.length > 0 && !isLoading">
+    <Breadcrumb class="bread" :maincategory="[]" :category="[]" :subcategory="[]" :name="title" />
+
+    <div v-if="products.length > 0">
       <div class="products-wrapper">
-        <ProductCardComponent
-          v-for="(item) in products"
-          :key="item.id"
-          :initialproduct="item"
-          @show-comments="showCommentsModal(item.id)"
-          @cart-updated="handleCartUpdated"
-          @liked-message="handleunauthorizedlike"
-          @cart-message="handleunauthorizedcart"
-        />
+        <ProductCardComponent v-for="(item) in products" :key="item.id" :initialproduct="item"
+          @cart-updated="handleCartUpdated" @liked-message="handleunauthorizedlike"
+          @cart-message="handleunauthorizedcart" />
       </div>
     </div>
 
-  
+
 
     <Bootstrap5Pagination :data="pagination" @pagination-change-page="changePage" />
   </div>
 
-  <!-- Comments Modal -->
-  <CommentModal
-    v-if="showModal"
-    :product="selectedProduct"
-    :comments="selectedProductComments"
-    @close="closeModal"
-    @comment-submitted="refreshComments(selectedProduct.id)"
-  />
+
 </template>
 
 <script>
 import ProductCardComponent from '../components/ProductCardComponent.vue';
-import CommentModal from '../components/CommentModal.vue';
 import Message from 'primevue/message';
 import { Bootstrap5Pagination } from 'laravel-vue-pagination';
-import axios from 'axios';
-
+import api from '@/api';
+import Breadcrumb from '@/components/BreadcrumbComponent.vue';
 export default {
   name: 'FavoriteView',
   components: {
     ProductCardComponent,
-    CommentModal,
     Message,
+    Breadcrumb,
     Bootstrap5Pagination,
   },
-  props:["id"],
+  props: ["id"],
   data() {
     return {
       products: [],
@@ -65,8 +47,8 @@ export default {
       emitlikemessage: null,
       emitcartmessage: null,
       pagination: {},
-      isLoading:true,
-      collection:null
+      isLoading: true,
+      title: ""
     };
   },
   watch: {
@@ -91,55 +73,30 @@ export default {
         }, 3000);
       }
     },
-   '$route.query': {
+    '$route.query': {
       handler() {
-            this.getcollection();
-    },
+        this.getcollection();
+      },
       immediate: false,
-   },
     },
+  },
   methods: {
     async getcollection() {
-      const token = localStorage.getItem('token');
       try {
-        const response = await axios.get(`product/collection/${this.id}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
+        const response = await api.get(`product/collection/${this.id}`, {
+          tokenRequired: true
         });
         this.products = response.data.collection.products;
-        this.collection=response.data.collection.title;
+        this.title = response.data.collection.title;
         // this.pagination = response.data.pagination;
-        console.log(response);
 
-        this.isLoading=false;
+
+        this.isLoading = false;
       } catch (error) {
         console.log(error);
       }
     },
-    async showCommentsModal(id) {
-      try {
-        const { data } = await axios.get(`products/${id}/display`);
-        this.selectedProductComments = data;
-        this.selectedProduct = this.products.find((product) => product.id === id);
-        this.showModal = true;
-      } catch (error) {
-        console.error('Error fetching comments:', error);
-      }
-    },
-    async refreshComments(productId) {
-      try {
-        const { data } = await axios.get(`products/${productId}/display`);
-        this.selectedProductComments = data;
-      } catch (error) {
-        console.error('Error refreshing comments:', error);
-      }
-    },
-    closeModal() {
-      this.showModal = false;
-      this.selectedProduct = null;
-      this.selectedProductComments = [];
-    },
+
     handleCartUpdated(cartData) {
       this.emitdata = cartData.message;
     },
@@ -152,19 +109,22 @@ export default {
     changePage(page) {
       this.$router.push({ path: '/', query: { ...this.$route.query, page } });
     },
+
   },
   mounted() {
-      setTimeout(() => {
-        this.getcollection();
-      }, 200);
+    this.getcollection();
   },
 };
 </script>
 
-<style >
+<style scoped>
+.bread {
+  padding: 30px;
+}
+
 .loading-spinner {
   border: 6px solid #f3f3f3;
-  border-top: 6px solid #007bff; 
+  border-top: 6px solid #007bff;
   border-radius: 50%;
   width: 50px;
   height: 50px;
@@ -174,8 +134,13 @@ export default {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .loading-text {
@@ -277,7 +242,8 @@ export default {
   border-color: #007bff;
 }
 
-.page-link:hover, .page-link:focus {
+.page-link:hover,
+.page-link:focus {
   background-color: #0056b3;
   color: #fff;
   border-color: #0056b3;
@@ -299,6 +265,4 @@ export default {
     margin-top: 20px;
   }
 }
-
-
 </style>

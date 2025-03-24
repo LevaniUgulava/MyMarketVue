@@ -1,5 +1,9 @@
 <template>
   <div class="layout-container">
+    <div class="banner">
+      რეგისტრაციის შემთხვევაში თქვენ შეგეძლებათ მიიღოთ სტატუსები, რაც საშუალებას გაძლევთ კონკრეტულ პროდუქტზე ექკლუზიურ
+      ფასდაკლების მიღებას
+    </div>
     <HeaderComponentVue class="header" :isMobile="isMobile" @search="handleSearch" />
 
     <HomeSideBarVue class="sidebar" :isMobile="isMobile" />
@@ -46,6 +50,24 @@ export default {
 </script>
 
 <style scoped>
+.banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 10px;
+  width: 100%;
+  background-color: #62389c;
+  color: white;
+  text-align: center;
+  padding: 15px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  z-index: 1050;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .sidebar {
   width: 250px;
   height: calc(100vh - 70px);
@@ -56,36 +78,34 @@ export default {
   padding: 10px;
   overflow-y: auto;
   z-index: 200;
-  display: flex;
+  display: none;
   flex-direction: column;
 }
 
 .header {
-  width: 100vh;
+  width: 100%;
   position: fixed;
   top: 0;
   height: 60px;
   background-color: #f8f8f8;
   z-index: 200;
   display: flex;
+  left: 0;
   align-items: center;
   padding: 10px;
 }
 
 .main-content {
   flex-grow: 1;
-  width: calc(100% - 250px);
-  margin-left: 250px;
-  padding: 10px;
+  width: 100%;
   box-sizing: border-box;
   min-height: calc(100vh - 60px);
-  margin-top: 60px;
+  margin-top: 120px;
   overflow-y: auto;
 }
 
 .footer {
-  width: calc(100% - 250px);
-  margin-left: 250px;
+  width: 100%;
   background-color: #333;
   color: #fff;
   text-align: center;
@@ -95,8 +115,9 @@ export default {
 }
 
 @media (max-width: 768px) {
-  .footer {
+  .banner {
     display: none;
+
   }
 
   .sidebar {
@@ -124,7 +145,7 @@ export default {
     width: 100% !important;
     margin-left: 0 !important;
     padding-bottom: 70px !important;
-    margin-top: 0px;
+    margin-top: 70px;
 
   }
 

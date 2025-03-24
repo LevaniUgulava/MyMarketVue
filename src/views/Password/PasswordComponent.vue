@@ -3,27 +3,13 @@
     <div class="card">
       <form @submit.prevent="sendPassword" method="post" class="form">
         <div class="input-container">
-          <input
-            v-model="password"
-            type="password"
-            name="password"
-            id="password"
-            required
-            placeholder=" "
-            class="input-field"
-          />
+          <input v-model="password" type="password" name="password" id="password" required placeholder=" "
+            class="input-field" />
           <label for="password" class="input-label">Password</label>
         </div>
         <div class="input-container">
-          <input
-            v-model="repeatpassword"
-            type="password"
-            name="repeatpassword"
-            id="repeatpassword"
-            required
-            placeholder=" "
-            class="input-field"
-          />
+          <input v-model="repeatpassword" type="password" name="repeatpassword" id="repeatpassword" required
+            placeholder=" " class="input-field" />
           <label for="repeatpassword" class="input-label">Repeat Password</label>
         </div>
         <button type="submit" class="submit-btn">Send</button>
@@ -33,9 +19,10 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '@/api';
+
 export default {
-    props:['id','token'],
+  props: ['id', 'token'],
   data() {
     return {
       password: "",
@@ -52,16 +39,16 @@ export default {
         alert("Password must be at least 6 characters long.");
         return;
       }
-      const response = await axios.post(`/reset/password/${this.id}?token=${this.token}`,{password:this.password});
+      const response = await api.post(`/reset/password/${this.id}?token=${this.token}`, { password: this.password });
       console.log(response);
-      
+
     },
   },
 };
 </script>
 
- <style scoped>
- #app {
+<style scoped>
+#app {
   margin-top: 20%;
   display: flex;
   justify-content: center;
@@ -118,8 +105,8 @@ export default {
   transition: 0.3s ease-in-out;
 }
 
-.input-field:focus + .input-label,
-.input-field:not(:placeholder-shown) + .input-label {
+.input-field:focus+.input-label,
+.input-field:not(:placeholder-shown)+.input-label {
   top: -10px;
   font-size: 12px;
   color: #007bff;
@@ -143,5 +130,5 @@ export default {
 
 .submit-btn:active {
   background-color: #003f7f;
-} 
+}
 </style>

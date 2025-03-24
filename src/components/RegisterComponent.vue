@@ -34,7 +34,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '@/api';
 
 export default {
   name: "RegisterComponent",
@@ -48,7 +48,7 @@ export default {
   methods: {
     async register() {
       try {
-        const response = await axios.post('register', {
+        const response = await api.post('register', {
           name: this.name,
           email: this.email,
           password: this.password

@@ -3,17 +3,29 @@
   <Message :message="emitdata" @close="emitdata = ''" :backgroundColor="'rgba(76, 175, 80, 0.25)'"
     :textColor="'#004d40'" :positionType="'fixed'" />
   <message :message="emitlikemessage" @close="emitlikemessage = ''" />
-  <BreadcrumbComponent :maincategory="maincategory" :category="category" :subcategory="subcategory" class="bread" />
-  <div v-if="products.length > 0">
-    <div class="main-content">
 
-      <div :class="{ 'products-wrapper': isSidebarCollapsed, 'products-wrapper-collapsed': !isSidebarCollapsed }">
-        <ProductCardComponent v-for="(item, index) in products" :key="index" :initialproduct="item"
-          @show-comments="showCommentsModal(item.id)" @cart-updated="handleCartUpdated"
-          @liked-message="handleunauthorizedlike" @cart-message="handleunauthorizedcart" />
+  <div class="container">
+
+    <div class="category-container">
+      <ProductViewCategory @maincategories="handlemain" @categories="handlecat" @subcategories="handlesub"
+        class="category-modal" ref="productviewcategory" />
+    </div>
+    <div class="products-container">
+      <div v-if="products.length > 0">
+        <BreadcrumbComponent :maincategory="emitselectedmainCategory" :category="emitselectedCategory"
+          :subcategory="emitselectedsubCategory" class="bread" @item-removed="handleremoved" />
+
+        <div class="main-content">
+
+          <div class="'products-wrapper products-wrapper-collapsed">
+            <ProductCardComponent v-for="(item, index) in products" :key="index" :initialproduct="item"
+              @cart-updated="handleCartUpdated" @liked-message="handleunauthorizedlike"
+              @cart-message="handleunauthorizedcart" />
+          </div>
+          <CustomPagination v-if="products.length > 0 && pagination.total > 1" :currentPage="pagination.current_page"
+            :totalPages="pagination.total" class="pagination" />
+        </div>
       </div>
-      <CustomPagination v-if="products.length > 0 && pagination.total > 1" :currentPage="pagination.current_page"
-        :totalPages="pagination.total" class="pagination" />
     </div>
   </div>
 
@@ -23,24 +35,19 @@
 
 <script>
 import ProductCardComponent from '../../components/ProductCardComponent.vue';
-import axios from 'axios';
 import Message from '@/components/Message/MessageComponent.vue';
 import BreadcrumbComponent from '@/components/BreadcrumbComponent.vue';
 import CustomPagination from '@/components/CustomPagination.vue';
+import ProductViewCategory from './ProductViewCategory.vue';
+import api from '@/api';
 export default {
   name: 'HomeView',
   components: {
     ProductCardComponent,
     BreadcrumbComponent,
     Message,
-    CustomPagination
-
-  },
-  props: {
-    isSidebarCollapsed: {
-      type: Boolean,
-      required: true,
-    },
+    CustomPagination,
+    ProductViewCategory
   },
 
   data() {
@@ -53,9 +60,12 @@ export default {
       selectmax: 0,
       searchname: '',
       maincategories: [],
-      selectedmainCategory: null,
-      selectedCategory: null,
-      selectedsubCategory: null,
+      selectedmainCategory: [],
+      emitselectedmainCategory: [],
+      selectedCategory: [],
+      emitselectedCategory: [],
+      selectedsubCategory: [],
+      emitselectedsubCategory: [],
       emitdata: null,
       emitlikemessage: null,
       emitcartmessage: null,
@@ -88,6 +98,7 @@ export default {
         }, 3000);
       }
     },
+
     '$route.query': {
       handler: 'fetchProducts',
       immediate: true,
@@ -102,21 +113,13 @@ export default {
       this.selectedCategory = queryParams.get('category') || '';
       this.selectedsubCategory = queryParams.get('subcategory') || '';
       this.Section = queryParams.get('section') || '';
-      this.selectmin = queryParams.get('min');
-      this.selectmax = queryParams.get('max');
+      this.selectmin = queryParams.get('min') || '';
+      this.selectmax = queryParams.get('max') || '';
 
-
-      const token = localStorage.getItem('token');
-      const lang = this.$router.currentRoute.value.params.lang;
       try {
+        const response = await api.get('display', {
 
-        const response = await axios.get('display', {
-
-          headers: {
-            'Authorization': `Bearer ${token}`
-          },
           params: {
-            lang: lang,
             searchname: this.searchname,
             maincategory: this.selectedmainCategory,
             category: this.selectedCategory,
@@ -134,61 +137,53 @@ export default {
             current_page: response.data.all.meta.current_page || 1,
             total: response.data.all.meta.last_page
           };
+
         } else if (this.Section == "discount") {
           this.products = response.data.discount.data;
           this.pagination = {
             current_page: response.data.discount.meta.current_page || 1,
             total: response.data.discount.meta.last_page
           };
-        } else if (this.Section == "highrate") {
-          this.products = response.data.highrate.data;
-          this.pagination = {
-            current_page: response.data.highrate.meta.current_page || 1,
-            total: response.data.highrate.meta.last_page
-          };
         }
 
-        await this.fetchCategoryNames();
+
       } catch (error) {
         console.error('Error fetching products:', error);
       }
     },
-    async fetchCategoryNames() {
-      try {
-        const requests = [];
+    handlemain(maincategory) {
+      if (maincategory.length) {
+        this.emitselectedmainCategory = maincategory;
 
-        if (this.selectedmainCategory) {
-          requests.push(axios.get(`maincategory/${this.selectedmainCategory}`));
-        } else {
-          this.maincategory = {};
-        }
+      } else {
+        this.emitselectedmainCategory = [];
+      }
+    },
+    handlecat(category) {
+      if (category) {
+        this.emitselectedCategory = category;
 
-        if (this.selectedCategory) {
-          requests.push(axios.get(`category/${this.selectedCategory}`));
-        } else {
-          this.category = {};
-        }
+      } else {
+        this.emitselectedCategory = [];
+      }
+    },
+    handlesub(subcategory) {
+      this.emitselectedsubCategory = subcategory
+    },
 
-        if (this.selectedsubCategory) {
-          requests.push(axios.get(`subcategory/${this.selectedsubCategory}`));
-        } else {
-          this.subcategory = {};
-        }
+    handleremoved(data) {
+      const categoryArray = this.$refs.productviewcategory[data.category];
 
-        const [mainResponse, categoryResponse, subcategoryResponse] = await Promise.all(requests);
-
-        if (this.selectedmainCategory) this.maincategory = mainResponse?.data || {};
-        if (this.selectedCategory) this.category = categoryResponse?.data || {};
-        if (this.selectedsubCategory) this.subcategory = subcategoryResponse?.data || {};
-
-      } catch (error) {
-        console.error("Error fetching category names:", error);
+      if (categoryArray && data.index >= 0 && data.index < categoryArray.length) {
+        categoryArray.splice(data.index, 1);
+        this.$refs.productviewcategory.performSearch();
+      } else {
+        console.error('Invalid index or category array not found.');
       }
     },
 
 
     handleCartUpdated(cartData) {
-      console.log('Cart updated:', cartData.message);
       this.emitdata = cartData.message;
     },
     handleunauthorizedlike(likedmessage) {
@@ -200,23 +195,41 @@ export default {
     changePage(page) {
       this.$router.push({ path: '/product/all', query: { ...this.$route.query, page } });
     },
-
   },
-
-
 };
 </script>
 <style scoped>
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 15px;
+  gap: 20px;
+}
+
+.category-container {
+  flex: 1;
+  max-width: 250px;
+  margin-top: 15px;
+  padding: 10px;
+}
+
+.products-container {
+  flex: 3;
+  padding: 10px;
+}
+
+.main-content {
+  overflow: hidden;
+}
+
 .page-container {
   display: flex;
   flex-direction: column;
   min-height: 80vh;
-  /* Ensures enough height */
 }
 
 .content-wrapper {
   flex-grow: 1;
-  /* Pushes pagination to the bottom */
 }
 
 .products-wrapper-collapsed {
@@ -240,6 +253,14 @@ export default {
 }
 
 @media (min-width: 390px) and (max-width: 574px) {
+  .category-modal {
+    display: none;
+  }
+
+  .category-container {
+    display: none;
+  }
+
   .products-wrapper {
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;

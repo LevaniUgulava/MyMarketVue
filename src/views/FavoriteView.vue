@@ -10,10 +10,10 @@
 
     <div v-if="apiLoaded && products.length === 0" class="empty-favorites">
       <i class="fas fa-heart-circle-plus empty-icon"></i>
-      <p class="empty-text">{{ $t("favorite.message") }}</p>
+      <p class="empty-text">თქვენ ჯერ არ მოგიწონებიათ პროდუქტი</p>
       <p class="empty-subtext">დამატეთ ყველა პროდუქტი, რაც თქვენ გაინტერესებთ</p>
       <div class="empty-actions">
-        <a href="/" class="primary-btn">{{ $t("favorite.btn") }}</a>
+        <a href="/" class="primary-btn">დაათვალიერეთ პროდუქტები</a>
         <a href="/" class="secondary-btn">მოინახულე ჩვენი მაღაზია</a>
       </div>
     </div>
@@ -27,7 +27,7 @@
 <script>
 import ProductCardComponent from '../components/ProductCardComponent.vue';
 import { Bootstrap5Pagination } from 'laravel-vue-pagination';
-import axios from 'axios';
+import api from '@/api';
 
 export default {
   name: 'FavoriteView',
@@ -50,10 +50,9 @@ export default {
   },
   methods: {
     async fetchFavorites() {
-      const token = localStorage.getItem('token');
       try {
-        const response = await axios.get('likeproduct', {
-          headers: { Authorization: `Bearer ${token}` },
+        const response = await api.get('likeproduct', {
+          tokenRequired: true
         });
         this.products = response.data.data;
       } catch (error) {
@@ -74,7 +73,6 @@ export default {
 
 <style>
 .favorites-container {
-  max-width: 1200px;
   padding: 20px;
 }
 

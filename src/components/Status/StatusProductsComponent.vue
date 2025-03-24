@@ -41,7 +41,7 @@
 </template>
 
 <script>
-import axios from "axios";
+import api from "@/api";
 import { Bootstrap5Pagination } from "laravel-vue-pagination";
 
 export default {
@@ -55,19 +55,17 @@ export default {
       products: [],
       eligibleProductIds: [],
       filteredProducts: [],
-      selectedProducts: [], 
+      selectedProducts: [],
       pagination: {},
-      discount:null
+      discount: null
     };
   },
   methods: {
     async fetchEligibleProducts() {
-      const token = localStorage.getItem("token");
       try {
-        const response = await axios.get(`admin/eligible/display/${this.id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        const response = await api.get(`admin/eligible/display/${this.id}`, {
+          tokenRequired: true
+
         });
         this.eligibleProductIds = response.data.status.eligible_products.map((product) => product.id);
       } catch (error) {
@@ -75,12 +73,10 @@ export default {
       }
     },
     async fetchAllProducts(page = 1) {
-      const token = localStorage.getItem("token");
       try {
-        const response = await axios.get(`/admindisplay?page=${page}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        const response = await api.get(`/admindisplay?page=${page}`, {
+          tokenRequired: true
+
         });
         this.products = response.data.data;
         this.pagination = response.data.meta;
@@ -102,19 +98,17 @@ export default {
       this.display(page);
     },
     async addSelected() {
-        const token = localStorage.getItem("token");
       try {
-        const response = await axios.post(`admin/eligible/create/${this.id}`,{ids:this.selectedProducts,discount:this.discount}, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        const response = await api.post(`admin/eligible/create/${this.id}`, { ids: this.selectedProducts, discount: this.discount }, {
+          tokenRequired: true
+
         });
         this.display();
         console.log(response)
       } catch (error) {
         console.error("Error fetching eligible products:", error);
       }
-      
+
     },
   },
   mounted() {

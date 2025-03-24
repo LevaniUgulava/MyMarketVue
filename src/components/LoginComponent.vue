@@ -1,29 +1,30 @@
 <template>
   <div id="app">
-      <head>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-</head>
+
+    <head>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    </head>
     <div class="login-card">
       <div class="login-content">
         <h2>Welcome Back!</h2>
         <p>Please login to your account</p>
         <router-link to='/ka/register' class="registerlink">Register</router-link>
-<form @submit.prevent="login" method="post" id="loginform">
-  <div class="input-container">
-    <input v-model="email" type="text" name="email" id="email" required placeholder=" " />
-    <label for="email">Email</label>
-  </div>
-  <div class="input-container">
-    <input v-model="password" type="password" name="password" id="password" required placeholder=" " />
-    <label for="password">Password</label>
-  </div>
-  <button :disabled="!email || !password">Login</button>
-  <a href="/forget/password" class="forget">forget password?</a>
-  <div class="social-login">
-    <FacebookComponentVue />
-    <GoogleComponent />
-  </div>
-</form>
+        <form @submit.prevent="login" method="post" id="loginform">
+          <div class="input-container">
+            <input v-model="email" type="text" name="email" id="email" required placeholder=" " />
+            <label for="email">Email</label>
+          </div>
+          <div class="input-container">
+            <input v-model="password" type="password" name="password" id="password" required placeholder=" " />
+            <label for="password">Password</label>
+          </div>
+          <button :disabled="!email || !password">Login</button>
+          <a href="/forget/password" class="forget">forget password?</a>
+          <div class="social-login">
+            <FacebookComponentVue />
+            <GoogleComponent />
+          </div>
+        </form>
 
       </div>
       <div class="image-content">
@@ -38,14 +39,14 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '@/api';
 import FacebookComponentVue from './FacebookComponent.vue';
 import GoogleComponent from './GoogleComponent.vue';
 
 
 export default {
   name: "LoginComponent",
-    components: {
+  components: {
     FacebookComponentVue,
     GoogleComponent
   },
@@ -58,7 +59,7 @@ export default {
   methods: {
     async login() {
       try {
-        const response = await axios.post('login', {
+        const response = await api.post('login', {
           email: this.email,
           password: this.password
         });
@@ -67,7 +68,7 @@ export default {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('roles', response.data.roles[0]);
         localStorage.setItem('userid', response.data.id);
- 
+
 
         this.$router.push("/ka");
       } catch (error) {
@@ -80,12 +81,13 @@ export default {
 
 <style scoped>
 #app {
- margin-top:10%;
- display: flex;
- justify-content: center;
- align-items: center;
+  margin-top: 10%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
-.forget{
+
+.forget {
   margin: 5px;
   text-decoration: none;
 }
@@ -132,7 +134,7 @@ form {
 }
 
 
- .input-container {
+.input-container {
   position: relative;
   margin-bottom: 20px;
   width: 100%;
@@ -160,8 +162,8 @@ label {
   transition: all 0.3s ease;
 }
 
-input:focus + label,
-input:not(:placeholder-shown) + label {
+input:focus+label,
+input:not(:placeholder-shown)+label {
   top: -10px;
   font-size: 12px;
   color: #333;
@@ -218,44 +220,55 @@ button:disabled {
   font-size: 14px;
   color: #666;
 }
+
 @media (min-width: 375px) and (max-width: 430px) {
-.login-content {
-  padding: 10px;
-  width: 60%;
-}
-.image-content {
-  width: 40%;
-  padding: 10px;
-}
-p{
-  font-size: 0.5rem;
-}
-h2{
+  .login-content {
+    padding: 10px;
+    width: 60%;
+  }
+
+  .image-content {
+    width: 40%;
+    padding: 10px;
+  }
+
+  p {
+    font-size: 0.5rem;
+  }
+
+  h2 {
     font-size: 1rem;
-}
-.registerlink{
+  }
+
+  .registerlink {
     font-size: 0.6rem;
-}
-label{
-      font-size: 0.7rem;
-}
-input{
-  width:100%;
-  height: 35px;
-}
-button{
- padding: 5px 10px;
-  font-size: 0.8rem;
-}
-.card p{
-  font-size: 0.5rem;
-}
-.card h3{
-  font-size: 0.8rem;
-}
-.card{
-  margin-bottom: 20px;
-}
+  }
+
+  label {
+    font-size: 0.7rem;
+  }
+
+  input {
+    width: 100%;
+    height: 35px;
+  }
+
+  button {
+    padding: 5px 10px;
+    font-size: 0.8rem;
+  }
+
+  .card p {
+    font-size: 0.5rem;
+  }
+
+  .card h3 {
+    font-size: 0.8rem;
+  }
+
+  .card {
+    margin-bottom: 20px;
+  }
 
 }
 </style>

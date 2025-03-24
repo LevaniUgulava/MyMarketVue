@@ -32,23 +32,21 @@
 </template>
 
 <script>
-import axios from "axios";
+import api from "@/api";
 export default {
   name: "SingleStatusComponent",
   props: ["id"],
   data() {
     return {
-      data: {}, 
+      data: {},
     };
   },
   methods: {
     async display() {
-      const token = localStorage.getItem("token");
       try {
-        const response = await axios.get(`admin/userstatus/${this.id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        const response = await api.get(`admin/userstatus/${this.id}`, {
+          tokenRequired: true
+
         });
         this.data = response.data.status;
       } catch (error) {
@@ -57,7 +55,7 @@ export default {
     },
   },
   mounted() {
-    this.display(); 
+    this.display();
   },
 };
 </script>

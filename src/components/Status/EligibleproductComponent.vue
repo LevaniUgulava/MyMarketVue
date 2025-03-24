@@ -48,24 +48,21 @@
 </template>
 
 <script>
-import axios from "axios";
+import api from "@/api";
 export default {
   name: "EligibleproductComponent",
   props: ["id"],
   data() {
     return {
       data: {},
-      selectedProducts: [], 
+      selectedProducts: [],
     };
   },
   methods: {
     async display() {
-      const token = localStorage.getItem("token");
       try {
-        const response = await axios.get(`admin/eligible/display/${this.id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        const response = await api.get(`admin/eligible/display/${this.id}`, {
+          tokenRequired: true
         });
         this.data = response.data.status;
         console.log(response.data);
@@ -77,12 +74,10 @@ export default {
       this.$router.push({ name: "productseligible", params: { id: this.id } });
     },
     async deleteSelected() {
-         const token = localStorage.getItem("token");
       try {
-        const response = await axios.post(`admin/eligible/delete/${this.id}`,{id:this.selectedProducts}, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        const response = await api.post(`admin/eligible/delete/${this.id}`, { id: this.selectedProducts }, {
+          tokenRequired: true
+
         });
         this.display();
         console.log(response)

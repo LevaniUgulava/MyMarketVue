@@ -1,7 +1,7 @@
 <template>
   <div class="cart-container" v-if="mycarts.length > 0">
     <div class="product-section">
-      <h3>{{ $t("cart.shoppingcart") }}</h3>
+      <h3>კალათა</h3>
       <div class="card" v-for="(item, index) in mycarts" :key="index">
         <div class="action-buttons">
           <span class="close" @click="deleteCart(item.id, item.size)">
@@ -54,7 +54,7 @@
     <div class="payment-section">
       <div class="checkout">
         <h3>სულ: {{ allprice }} <i class="fa-solid fa-lari-sign"></i></h3>
-        <button class="checkbtn" @click="checkout">{{ $t("cart.checkout") }}</button>
+        <button class="checkbtn" @click="checkout">გადახდა</button>
       </div>
     </div>
   </div>
@@ -75,9 +75,9 @@
 </template>
 
 <script>
-import axios from 'axios';
 import 'vue3-carousel/dist/carousel.css';
 import { Carousel, Slide } from 'vue3-carousel';
+import api from '@/api';
 
 export default {
   name: 'ShoppingCart',
@@ -104,7 +104,6 @@ export default {
 
     async checkout() {
       try {
-        const token = localStorage.getItem("token");
         const guest_token = localStorage.getItem("guest_token") || crypto.randomUUID();
         if (!localStorage.getItem("guest_token")) {
           localStorage.setItem("guest_token", guest_token);
@@ -122,8 +121,8 @@ export default {
           total_price: item.total_price
         }));
 
-        await axios.post("/temporder", { products: mappedcart }, {
-          headers: { "Authorization": `Bearer ${token}` }
+        await api.post("/temporder", { products: mappedcart }, {
+          tokenRequired: true
         });
 
         this.$router.push({ name: "checkout" });
@@ -141,8 +140,8 @@ export default {
       }
 
       try {
-        const response = await axios.get('mycart', {
-          headers: { 'Authorization': `Bearer ${token}` }
+        const response = await api.get('mycart', {
+          tokenRequired: true
         });
 
         this.mycarts = response.data.products;
@@ -162,8 +161,8 @@ export default {
 
     async updateQuantity(id, action, size) {
       try {
-        await axios.post(`quantity/${id}/${action}`, { size }, {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem("token")}` }
+        await api.post(`quantity/${id}/${action}`, { size }, {
+          tokenRequired: true
         });
         this.getCart();
       } catch (error) {
@@ -177,8 +176,8 @@ export default {
       if (!item) return;
 
       try {
-        await axios.post(`/size/${itemId}`, { size: item.size, newsize: selectedSize }, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        await api.post(`/size/${itemId}`, { size: item.size, newsize: selectedSize }, {
+          tokenRequired: true
         });
 
         this.updateSelectedColor(itemId);
@@ -196,8 +195,8 @@ export default {
       const color = this.selectedColor[itemId] || "Select...";
 
       try {
-        await axios.post(`/color/${itemId}`, { size, color }, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        await api.post(`/color/${itemId}`, { size, color }, {
+          tokenRequired: true
         });
       } catch (error) {
         console.error("Error updating color:", error);
@@ -206,9 +205,9 @@ export default {
 
     async deleteCart(id, size) {
       try {
-        await axios.post(`delete/${id}/cart`, {}, {
+        await api.post(`delete/${id}/cart`, {}, {
           params: { size },
-          headers: { 'Authorization': `Bearer ${localStorage.getItem("token")}` }
+          tokenRequired: true
         });
         this.getCart();
       } catch (error) {

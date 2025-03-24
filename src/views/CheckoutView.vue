@@ -53,7 +53,7 @@
     </div>
 </template>
 <script>
-import axios from 'axios';
+import api from '@/api';
 
 
 export default {
@@ -94,13 +94,12 @@ export default {
         async getTemp() {
             try {
                 const guest_token = localStorage.getItem("guest_token");
-                const auth_token = localStorage.getItem("token");
 
-                const response = await axios.get("get/temporder", {
+                const response = await api.get("get/temporder", {
                     headers: {
-                        "Authorization": `Bearer ${auth_token}`,
                         "guest_token": guest_token
-                    }
+                    },
+                    tokenRequired: true
                 });
                 this.cart = response.data;
 
@@ -112,21 +111,19 @@ export default {
         async deleteTemp() {
             try {
                 const guest_token = localStorage.getItem("guest_token");
-                const auth_token = localStorage.getItem("token");
-                await axios.delete("delete/temporder", {
+                await api.delete("delete/temporder", {
                     headers: {
-                        "Authorization": `Bearer ${auth_token}`,
                         "Guest-Token": guest_token
-                    }
+                    },
+                    tokenRequired: true
                 });
             } catch (error) {
                 console.log("Error fetching temporary order:", error);
             }
         },
         async checkout() {
-            const token = localStorage.getItem('token');
             try {
-                const response = await axios.post('checkout', {
+                const response = await api.post('checkout', {
                     firstname: this.user.firstName,
                     lastname: this.user.lastName,
                     town: this.user.city,
@@ -136,9 +133,9 @@ export default {
                     shipping_cost: this.shippingCost
                 }, {
                     headers: {
-                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
-                    }
+                    },
+                    tokenRequired: true
                 });
                 response
                 this.deleteTemp();

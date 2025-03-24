@@ -72,7 +72,8 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '@/api';
+
 export default {
   props: {
     rate: {
@@ -107,12 +108,9 @@ export default {
     },
 
     async SentRate(id) {
-      const token = localStorage.getItem('token');
       try {
-        const response = await axios.post(`product/rate/${id}`, { rate: this.rating }, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+        const response = await api.post(`product/rate/${id}`, { rate: this.rating }, {
+          tokenRequired: true
         });
         console.log('Rating submitted successfully:', response.data);
       } catch (error) {

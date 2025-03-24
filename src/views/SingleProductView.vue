@@ -62,10 +62,15 @@
       <div class="left-section">
         <p class="price">
           {{ singleproduct.discountprice }} <i class="fa-solid fa-lari-sign"></i>
-          <span class="original-price">
+          <span class="original-price" v-if="singleproduct.discountstatus || singleproduct.discount">
             <s>{{ singleproduct.price }}</s>
           </span>
-          <span class="discount-square">-{{ singleproduct.discount }}%</span>
+          <span v-if="singleproduct.discountstatus" class="discount-square status-discount">-{{
+            singleproduct.discountstatus.discount
+            }}%</span>
+
+          <span v-else-if="singleproduct.discount" class="discount-square default-discount">-{{ singleproduct.discount
+          }}%</span>
         </p>
         <p class="delivery-info">
           <i class="fa-solid fa-truck"></i> საქართველოს ფოსტის გარანტია
@@ -87,10 +92,10 @@
 
 
 <script>
-import axios from 'axios';
 import 'vue3-carousel/dist/carousel.css';
 import Message from '@/components/Message/MessageComponent.vue';
 import Breadcrumb from '@/components/BreadcrumbComponent.vue';
+import api from '@/api';
 
 export default {
   props: ['id'],
@@ -134,7 +139,6 @@ export default {
   methods: {
     async redirect() {
       try {
-        const token = localStorage.getItem("token");
         const guest_token = localStorage.getItem("guest_token") || crypto.randomUUID();
 
         if (!localStorage.getItem("guest_token")) {
@@ -152,8 +156,8 @@ export default {
           retail_price: this.singleproduct.discountprice,
           total_price: quantity * this.singleproduct.discountprice,
         }];
-        await axios.post("/temporder", { products: data }, {
-          headers: { "Authorization": `Bearer ${token}` }
+        await api.post("/temporder", { products: data }, {
+          tokenRequired: true
         });
 
         this.$router.push({ name: "checkout" });
@@ -196,10 +200,9 @@ export default {
       this.cclick = true;
     },
     async getproduct() {
-      const token = localStorage.getItem('token');
       try {
-        const response = await axios.get(`display/${this.id}`, {
-          headers: { Authorization: `Bearer ${token}` },
+        const response = await api.get(`display/${this.id}`, {
+          tokenRequired: true
         });
         this.singleproduct = response.data.data;
         this.rate = response.data.data.MyRate;
@@ -215,15 +218,12 @@ export default {
       }
     },
     async addToCart() {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        this.errormessage = 'Not authorized';
-      }
+
       try {
-        const response = await axios.post(
+        const response = await api.post(
           `addcart/${this.id}`,
           { size: this.size, type: this.singleproduct.size_type, quantity: this.quantity },
-          { headers: { Authorization: `Bearer ${token}` } }
+          { tokenRequired: true }
         );
         this.message = response.data.message;
       } catch (error) {
@@ -238,10 +238,6 @@ export default {
 };
 </script>
 <style scoped>
-.bread {
-  margin-bottom: 30px;
-}
-
 .custom-line {
   border: none;
   height: 1px;
@@ -261,8 +257,7 @@ export default {
 
 .color-item,
 .size-item {
-  width: 60px;
-  height: 40px;
+  padding: 5px 10px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -326,7 +321,6 @@ ul li {
 }
 
 .discount-square {
-  background: #e60000;
   color: #fff;
   font-size: 14px;
   font-weight: bold;
@@ -335,7 +329,8 @@ ul li {
 }
 
 .status-discount {
-  background: #e60000;
+  background: gold;
+
 }
 
 .default-discount {
@@ -395,16 +390,16 @@ ul li {
 .product-page {
   display: flex;
   flex-direction: column;
-  max-width: 1200px;
+  width: 100%;
   margin: auto;
-  padding: 20px;
+  padding: 30px;
 }
 
 .product-container {
   display: flex;
   justify-content: space-between;
   width: 100%;
-  margin-top: 5%;
+  margin-top: 3%;
   gap: 30px;
 }
 

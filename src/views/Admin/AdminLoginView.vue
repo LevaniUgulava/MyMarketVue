@@ -10,38 +10,38 @@
     </div>
 </template>
 <script>
-import axios from 'axios'
+import api from '@/api';
 export default {
-    name:'AdminLoginView',
-data() {
-    return {
-        email:"",
-        password:""
+    name: 'AdminLoginView',
+    data() {
+        return {
+            email: "",
+            password: ""
 
-    }
-},
-    methods:{
-     async login(){
-        try{
-            const response = await axios.post('admin/login',{
-                email:this.email,
-                password:this.password
-            });
-            response.data.roles[0]
-            localStorage.setItem('name',response.data.name);
-            localStorage.setItem('roles',response.data.roles[0]);
-            localStorage.setItem('token',response.data.token);
-            this.$router.push("/admin/dashboard");
-
-        }catch(error){
-            console.log(error);
         }
-      
-     }
+    },
+    methods: {
+        async login() {
+            try {
+                const response = await api.post('admin/login', {
+                    email: this.email,
+                    password: this.password
+                });
+                response.data.roles[0]
+                localStorage.setItem('name', response.data.name);
+                localStorage.setItem('roles', response.data.roles[0]);
+                localStorage.setItem('token', response.data.token);
+                this.$router.push("/admin/dashboard");
+
+            } catch (error) {
+                console.log(error);
+            }
+
+        }
     }
-    
+
 }
 </script>
 <style lang="">
-    
+
 </style>

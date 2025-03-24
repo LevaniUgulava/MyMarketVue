@@ -25,8 +25,8 @@ import ProductCardComponent from '@/components/ProductCardComponent.vue';
 import CommentModal from '@/components/CommentModal.vue';
 import Message from 'primevue/message';
 import { Bootstrap5Pagination } from 'laravel-vue-pagination';
-import axios from 'axios';
 import CountDownComponent from '../CountDownComponent.vue';
+import api from '@/api';
 
 export default {
   name: 'ExclusivePage',
@@ -83,18 +83,14 @@ export default {
   methods: {
 
     async getExclusive() {
-      const token = localStorage.getItem('token');
       try {
         const [productsResponse, statusResponse] = await Promise.all([
-          axios.get('/exlusive', {
-            headers: {
-              "Authorization": `Bearer ${token}`,
-            },
+          api.get('/exlusive', {
+            tokenRequired: true
+
           }),
-          axios.get('/current/status', {
-            headers: {
-              "Authorization": `Bearer ${token}`,
-            },
+          api.get('/current/status', {
+            tokenRequired: true
           }),
         ]);
 
@@ -106,29 +102,6 @@ export default {
       }
     },
 
-    async showCommentsModal(id) {
-      try {
-        const { data } = await axios.get(`products/${id}/display`);
-        this.selectedProductComments = data;
-        this.selectedProduct = this.products.find((product) => product.id === id);
-        this.showModal = true;
-      } catch (error) {
-        console.error('Error fetching comments:', error);
-      }
-    },
-    async refreshComments(productId) {
-      try {
-        const { data } = await axios.get(`products/${productId}/display`);
-        this.selectedProductComments = data;
-      } catch (error) {
-        console.error('Error refreshing comments:', error);
-      }
-    },
-    closeModal() {
-      this.showModal = false;
-      this.selectedProduct = null;
-      this.selectedProductComments = [];
-    },
     handleCartUpdated(cartData) {
       this.emitdata = cartData.message;
     },

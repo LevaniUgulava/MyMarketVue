@@ -1,20 +1,20 @@
 <template>
   <div>
-    <h3 class="status-title">{{ $t("profile.status.title") }}</h3>
+    <h3 class="status-title">სტატუსის უპირატესობები</h3>
     <p class="status-description">
-      {{ $t("profile.status.desc") }}    </p>
+      გახსენით ექსკლუზიური ფასდაკლებები კონკრეტულ პროდუქტებზე თქვენი სტატუსის დონის მიხედვით.</p>
     <div class="status-bar">
       <div class="progress" :style="{ width: `${progressPercentage}%` }"></div>
     </div>
     <div class="status-info">
-      <span class="status-label">{{ $t("profile.status.CurrentStatus") }}: {{ CurrentStatus }}</span>
-      <span class="status-label">{{ $t("profile.status.NextStatus") }}: {{ NextStatus || 'None' }}</span>
+      <span class="status-label">მიმდინარე სტატუსი: {{ CurrentStatus }}</span>
+      <span class="status-label">შემდეგი სტატუსი: {{ NextStatus || 'None' }}</span>
     </div>
     <div class="status-details">
-      <p>{{ $t("profile.status.total") }}: {{ totalSpent }}</p>
-      <p>{{ $t("profile.status.toachieve") }}: {{ nextToAchieve }}</p>
+      <p>სულ დახარჯული: {{ totalSpent }}</p>
+      <p>შემდეგი სტატუსის მისაღწევად: {{ nextToAchieve }}</p>
       <p>
-        {{ $t("profile.status.left") }}:
+        შემდეგი სტატუსის მისაღწევად დარჩენილია:
         {{ remainingAmount > 0 ? remainingAmount : 'Achieved' }}
       </p>
     </div>
@@ -22,17 +22,17 @@
 </template>
 
 <script>
-import axios from "axios";
+import api from "@/api";
 export default {
   name: "UserStatusComponent",
   data() {
     return {
-      totalSpent: 0, 
+      totalSpent: 0,
       progressPercentage: 0,
-      CurrentStatus: null, 
-      NextStatus: null, 
-      nextToAchieve: 0, 
-      remainingAmount: 0, 
+      CurrentStatus: null,
+      NextStatus: null,
+      nextToAchieve: 0,
+      remainingAmount: 0,
     };
   },
   methods: {
@@ -67,12 +67,9 @@ export default {
       };
     },
     async getuserstatus() {
-      const token = localStorage.getItem("token");
       try {
-        const response = await axios.get("/userstatuses", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        const response = await api.get("/userstatuses", {
+          tokenRequired: true
         });
 
         const { user, statuses } = response.data;
@@ -119,7 +116,7 @@ export default {
 .status-bar {
   position: relative;
   width: 100%;
-  height: 15px;
+  height: 10px;
   background-color: #e6e6e6;
   border-radius: 15px;
   overflow: hidden;
@@ -128,7 +125,7 @@ export default {
 
 .progress {
   height: 100%;
-  background: linear-gradient(90deg, #4caf50, #8bc34a);
+  background: linear-gradient(135deg, #731decac, #b794e9);
   border-radius: 15px;
   transition: width 0.4s ease;
 }
@@ -153,20 +150,25 @@ export default {
 .status-details p {
   margin: 5px 0;
 }
+
 @media (min-width: 375px) and (max-width: 430px) {
-  .status-title{
+  .status-title {
     font-size: 0.8rem;
   }
-  .status-description{
+
+  .status-description {
     font-size: 0.6rem;
   }
-  .status-label{
+
+  .status-label {
     font-size: 0.5rem;
   }
-  .status-bar{
+
+  .status-bar {
     height: 10px;
   }
-  .status-details p{
+
+  .status-details p {
     font-size: 0.5rem;
   }
 }
