@@ -273,7 +273,7 @@ export default {
             } else {
                 this.filteredCategories = this.Categories;
                 this.filteredSubcategories = this.subCategories;
-                
+
                 this.filteredcolor = this.colors.reduce((unique, color) => {
                     if (!unique.some(c => c.color === color.color)) {
                         unique.push(color);
@@ -437,7 +437,7 @@ export default {
 
 .category-modal {
     width: 100%;
-    max-height: 100vh;
+    max-height: 100%;
     overflow-y: auto;
     border-radius: 8px;
 }

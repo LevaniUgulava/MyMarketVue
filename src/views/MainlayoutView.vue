@@ -62,7 +62,7 @@ export default {
   padding: 15px;
   font-size: 0.7rem;
   font-weight: bold;
-  z-index: 1050;
+  z-index: 1000;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -106,8 +106,6 @@ export default {
 
 .footer {
   width: 100%;
-  background-color: #333;
-  color: #fff;
   text-align: center;
   font-size: 0.9em;
   padding: 15px 0;

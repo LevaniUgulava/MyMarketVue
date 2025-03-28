@@ -1,4 +1,9 @@
 <template>
+  <transition name="fade-slide">
+    <div v-if="showTopButton" class="top-button">
+      <button @click="isModalVisible = true">ფილტრი</button>
+    </div>
+  </transition>
   <div class="sidebar">
     <ul>
       <li>
@@ -19,7 +24,7 @@
           <span>რჩეულები</span>
         </router-link>
       </li>
-      <li v-if="isAuthorized">
+      <li class="mobile-only">
         <router-link :to="{ path: `/orders` }" :class="{ active: $route.path === `/orders` }">
           <i class="fa-solid fa-bag-shopping outline-icon" :class="{ active: $route.path === `/orders` }"></i>
           <span>შეკვეთები</span>
@@ -33,14 +38,30 @@
       </li>
     </ul>
   </div>
+  <CategoryModal :isModalVisible="isModalVisible" @close-modal="isModalVisible = false" />
 </template>
 
 <script>
+import CategoryModal from './CategoryModal.vue';
+
 export default {
   props: {
     isMobile: Boolean,
   },
+  components: {
+    CategoryModal,
+  },
+  data() {
+    return {
+      showFilterButton: true,
+      lastScrollY: 0,
+      isModalVisible: false,
+    };
+  },
   computed: {
+    showTopButton() {
+      return this.$route.path.startsWith('/product') && this.showFilterButton;
+    },
     isActive() {
       return (
         this.$route.path === `/${this.$route.params.lang}/profile` ||
@@ -54,12 +75,68 @@ export default {
     },
     name() {
       return this.isAuthorized ? localStorage.getItem('name') : " შესვლა";
-    }
+    },
   },
-}; </script>
+  methods: {
+    handleButtonClick() {
+      console.log('Filter clicked!');
+    },
+    handleScroll() {
+      const currentY = window.scrollY;
+      if (currentY < this.lastScrollY - 10) {
+        this.showFilterButton = true;
+      } else if (currentY > this.lastScrollY + 10) {
+        this.showFilterButton = false;
+      }
+      this.lastScrollY = currentY;
+    },
+  },
+  mounted() {
+    window.addEventListener('scroll', this.handleScroll);
+  },
+  beforeUnmount() {
+    window.removeEventListener('scroll', this.handleScroll);
+  },
+};
+</script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Raleway:wght@400;500;700&display=swap');
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.4s ease;
+}
+
+.fade-slide-enter-from,
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.fade-slide-enter-to,
+.fade-slide-leave-from {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.top-button {
+  position: fixed;
+  bottom: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+}
+
+.top-button button {
+  padding: 8px 15px;
+  background-color: #7a1fff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+
 
 .sidebar {
   width: 100%;
@@ -74,7 +151,6 @@ export default {
   justify-content: space-around;
   align-items: center;
   padding: 5px 0;
-  font-family: 'Raleway', sans-serif;
 }
 
 .sidebar ul {
@@ -104,7 +180,6 @@ export default {
 .user-section.active {
   background-color: #7a1fff1a;
   color: #873ef5;
-  font-weight: bold;
 }
 
 .user-section.active span {
@@ -130,6 +205,9 @@ export default {
   border-radius: 8px;
   font-weight: 500;
   color: #333;
+  -webkit-tap-highlight-color: transparent;
+  /* disables grey flash */
+  -webkit-touch-callout: none;
   background-color: rgba(255, 255, 255, 0.9);
 }
 
@@ -184,7 +262,6 @@ export default {
   }
 
   .sidebar ul li a.active {
-    background-color: #7a1fff1a;
     color: #873ef5;
     font-weight: bold;
   }

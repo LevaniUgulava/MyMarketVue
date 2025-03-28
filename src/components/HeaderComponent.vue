@@ -14,14 +14,15 @@
         <button @click="performSearch" class="srchbtn"><i class="fa-solid fa-magnifying-glass"></i></button>
       </div>
 
-      <div class="search-container-mobile">
-        <input type="text" class="searchname-mobile" v-model="searchname" placeholder="ძიება..." />
+      <div class="search-container-mobile" ref="searchContainer" @click.stop>
+        <transition name="search-transition">
+          <input v-if="isOpen" ref="searchInput" type="text" class="searchname-mobile" v-model="searchname"
+            @blur="closeOnBlur" @keyup.enter="submitSearch" placeholder="ძიება..." />
+        </transition>
         <button @click="toggleSearch" class="srchbtn-mobile">
-          <i class="fa-solid fa-magnifying-glass"></i>
+          <i class="fas fa-search"></i>
         </button>
       </div>
-
-
 
 
 
@@ -42,7 +43,7 @@
 
         <div class="btnredirect">
           <router-link :to="{ path: `/orders` }" class="redirect-button"
-            :class="{ 'active': $route.path === `orders` }">
+            :class="{ 'active': $route.path === `/orders` }">
             <i class="fa-solid fa-bag-shopping outline-icon"></i>
             <span>შეკვეთები</span>
           </router-link>
@@ -61,9 +62,9 @@
       <div>
       </div>
       <div class="user-section">
-        <router-link v-if="notLogin" to="/login">შესვლა</router-link>
+        <button class="login" v-if="notLogin" @click="Loginmodal">შესვლა <i class="fa-solid fa-user"></i></button>
         <div v-else class="dropdown-wrapper">
-          <button @click="toggleDropdown" class="dropdown"> {{ displayName }}</button>
+          <button @click="toggleDropdown" class="login"> {{ name }} <i class="fa-solid fa-user"></i></button>
           <ul v-if="isOpen" class="dropdown-menu">
             <li v-for="item in kaitems" :key="item" @click="selectItem(item)">
               {{ item }}
@@ -79,6 +80,10 @@
       <SmallSections />
     </div>
 
+    <LoginComponent :open="this.loginmodal" @close="closeloginmodal" @openregister="Registermodal" />
+
+    <RegisterComponent :open="this.registermodal" @close="closeregistermodal" @openlogin="Loginmodal" />
+
   </div>
 </template>
 
@@ -86,13 +91,18 @@
 import CategoryModal from './CategoryModal.vue';
 import SmallSections from '@/components/Status/SmallSections.vue';
 import api from '@/api';
+import LoginComponent from './LoginComponent.vue';
+import RegisterComponent from './RegisterComponent.vue';
+
 
 export default {
 
   name: 'HeaderComponent',
   components: {
     CategoryModal,
-    SmallSections
+    SmallSections,
+    LoginComponent,
+    RegisterComponent
   },
   props: {
     isMobile: Boolean,
@@ -100,8 +110,10 @@ export default {
   data() {
     return {
       isOpen: false,
+      loginmodal: localStorage.getItem("loginmodal") === "true",
+      registermodal: localStorage.getItem("registermodal") === "true",
       isInputVisible: false,
-      displayName: 'Login',
+      name: localStorage.getItem("name") || '',
       searchname: '',
       selectedmainCategory: "",
       selectedCategory: '',
@@ -123,17 +135,37 @@ export default {
   },
 
   mounted() {
-    const name = localStorage.getItem('name');
-    if (!this.notLogin) {
-      this.displayName = name || 'User';
-    }
-    this.selectItem();
     this.NamesforSearch();
+    document.addEventListener('click', this.handleClickOutside);
+
   },
   watch: {
     searchname() {
       this.Suggestion();
     },
+    loginmodal(newVal) {
+      console.log("Loginmodal state changed:", newVal);
+      localStorage.setItem("loginmodal", newVal);
+      if (newVal) {
+        document.body.classList.add('no-scroll');
+      } else {
+        document.body.classList.remove('no-scroll');
+      }
+    },
+    registermodal(newVal) {
+      console.log("Loginmodal state changed:", newVal);
+      localStorage.setItem("registermodal", newVal);
+      if (newVal) {
+        document.body.classList.add('no-scroll');
+      } else {
+        document.body.classList.remove('no-scroll');
+      }
+    },
+    name(newValue) {
+      localStorage.setItem("name", newValue);
+    }
+
+
   },
 
   methods: {
@@ -145,6 +177,18 @@ export default {
       this.$nextTick(() => {
         this.SuggestionNames = [];
       });
+    },
+    Loginmodal() {
+      this.loginmodal = !this.loginmodal;
+    },
+    closeloginmodal() {
+      this.loginmodal = false;
+    },
+    Registermodal() {
+      this.registermodal = !this.registermodal;
+    },
+    closeregistermodal() {
+      this.registermodal = false;
     },
 
     openModal() {
@@ -169,7 +213,7 @@ export default {
           localStorage.removeItem('token');
           localStorage.removeItem('name');
           localStorage.removeItem('roles');
-          this.$router.push(`/login`);
+
         } catch (error) {
           console.error('Logout failed', error);
         }
@@ -193,9 +237,35 @@ export default {
       });
     },
     toggleSearch() {
-      const container = document.querySelector('.search-container-mobile');
-      container.classList.toggle('active');
+      this.isOpen = !this.isOpen;
+      this.$nextTick(() => {
+        if (this.isOpen && this.$refs.searchInput) {
+          this.$refs.searchInput.focus();
+        }
+      });
     },
+    closeOnBlur() {
+      setTimeout(() => {
+        this.isOpen = false;
+      }, 150); // Delay so it doesn't close before button click
+    },
+    handleClickOutside(event) {
+      const container = this.$refs.searchContainer;
+      if (container && !container.contains(event.target)) {
+        this.isOpen = false;
+      }
+    },
+    submitSearch() {
+      if (!this.searchname.trim()) {
+        alert("გთხოვთ ჩაწერეთ საძიებო სიტყვა 🙏");
+        return;
+      }
+      // Redirect or call search
+      this.$router.push({ path: '/product', query: { searchname: this.searchname } });
+      this.isOpen = false;
+    },
+
+
 
 
     searchCategory(data) {
@@ -217,6 +287,9 @@ export default {
       this.SuggestionNames = this.Searchnames.filter((name) => name.toLowerCase().includes(this.searchname.toLowerCase()));
     }
   },
+  beforeUnmount() {
+    document.removeEventListener('click', this.handleClickOutside);
+  },
 
 
 };
@@ -236,9 +309,14 @@ body {
   border-top: 1px solid #e0e0e0;
 }
 
+.no-scroll {
+  overflow: hidden;
+}
+
 .redirects {
   display: flex;
   gap: 15px;
+  margin: auto;
   justify-content: center;
   align-items: center;
 }
@@ -277,6 +355,26 @@ body {
 
 .redirect-button.active i {
   color: #62389c;
+}
+
+.login {
+  display: flex;
+  padding: 15px 25px;
+  background-color: transparent;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 6px;
+  gap: 10px;
+  margin-bottom: 5px;
+  cursor: pointer;
+  color: #551A8b;
+}
+
+.login i {
+  font-size: 1rem;
+}
+
+.login:hover {
+  border-color: #c8c5c5;
 }
 
 .outline-icon {
@@ -341,7 +439,7 @@ body {
 
 .sticky-header {
   position: fixed;
-  top: 20px;
+  top: 30px;
   width: 100vw;
   z-index: 1000;
   min-height: 60px;
@@ -391,7 +489,7 @@ nav ul.main-nav li {
 
 nav a {
   text-decoration: none;
-  /* Teal */
+  font-size: 14px;
 }
 
 h1 {
@@ -409,16 +507,6 @@ h1 {
   position: relative;
 }
 
-.dropdown {
-  padding: 8px 35px;
-  width: 100%;
-  cursor: pointer;
-  border: none;
-  background: none;
-  font-weight: bold;
-  color: #7a1dff;
-  /* Teal */
-}
 
 .dropdown-menu {
   position: absolute;
@@ -426,7 +514,7 @@ h1 {
   top: 100%;
   left: 0;
   padding: 0;
-  margin: 0;
+  margin-top: -5px;
   list-style: none;
   background: #ffffff;
   border: 1px solid #ccc;
@@ -475,7 +563,7 @@ h1 {
 
 .search-container input {
   flex-grow: 1;
-  padding: 12px 18px;
+  padding: 12px 10px;
   height: 30px;
   font-size: 16px;
   border: none;
@@ -491,24 +579,27 @@ h1 {
 }
 
 .srchbtn {
-  background: transparent;
+  background: #62389c;
   border: none;
   cursor: pointer;
   font-size: 18px;
   padding: 8px;
-  color: #4155c5;
+  height: 40px;
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+  color: white;
   transition: color 0.3s;
   position: absolute;
 }
 
 .srchbtn {
-  right: 10px;
+  right: 0px;
 }
 
 
 
 .srchbtn:hover {
-  color: #7a1dff;
+  color: #b997e9;
   font-size: 19px;
 
 }
@@ -517,72 +608,74 @@ h1 {
   display: none;
 }
 
-@media (max-width: 768px) {
+.search-transition-enter-active,
+.search-transition-leave-active {
+  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
 
+.search-transition-enter-from,
+.search-transition-leave-to {
+  transform: scaleX(0.5);
+  opacity: 0;
+}
+
+.search-transition-enter-to,
+.search-transition-leave-from {
+  transform: scaleX(1);
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
   .search-container-mobile {
-    position: absolute;
-    top: 15px;
-    right: 20px;
     display: flex;
     align-items: center;
-    transition: 0.4s ease-in-out;
+    position: relative;
+    justify-content: flex-end;
+    width: 240px;
+    height: 30px;
   }
 
   .srchbtn-mobile {
-    background-color: #7a1dff;
-    border: none;
-    cursor: pointer;
+    position: absolute;
+    right: -20px;
+    top: 0;
+    width: 30px;
     height: 30px;
-    font-size: 14px;
-    border-radius: 5px;
+    background-color: #62389c;
+    border: none;
     color: white;
-    transition: 0.3s ease-in-out;
+    border-radius: 5px;
     z-index: 2;
+    font-size: 14px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .searchname-mobile {
+    position: absolute;
+    right: 10px;
+    top: 0;
+    height: 30px;
+    width: 200px;
+    padding: 0 10px;
     font-size: 13px;
     border: 1px solid #ccc;
     border-radius: 5px;
-    height: 30px;
-    padding-left: 10px;
-    padding-right: 10px;
-    width: 0;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateX(100%);
-    transition: width 0.4s ease-in-out, opacity 0.4s ease-in-out, transform 0.65s ease-in-out, visibility 0s 0.4s;
-    margin-right: 0;
-  }
-
-  .search-container-mobile.active .searchname-mobile {
-    width: 200px;
-    opacity: 1;
-    visibility: visible;
-    border: 1px solid #7a1dff;
-    border-top-right-radius: 0px;
-    border-bottom-right-radius: 0px;
-    transform: translateX(0);
-  }
-
-  .searchname-mobile {
+    background-color: white;
+    transform-origin: right;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
     outline: none;
+    z-index: 1;
   }
 
-  .search-container-mobile.active .srchbtn-mobile {
-    color: white;
-    background-color: #7a1fff;
-    border-top-left-radius: 0px;
-    border-bottom-left-radius: 0px;
-    padding: 5px;
+  .search-container {
+    display: none;
   }
 
-  .search-container-mobile .searchname-mobile {
-    width: 0;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateX(100%);
-  }
 
   .sticky-header {
     top: 0;
@@ -618,7 +711,6 @@ h1 {
   }
 
 
-
   .search-container input {
     width: 100%;
     margin: 2px;
@@ -627,15 +719,13 @@ h1 {
 
   .srchbtn,
   .catbtn {
-    width: 45px;
-    height: 30px;
+    width: 50px;
+    height: 40px;
     font-size: 1rem;
   }
 
   .user-section {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
+    display: none;
   }
 
   nav {
@@ -645,9 +735,7 @@ h1 {
   }
 
   .dropdown {
-
     display: none;
-
   }
 
 }

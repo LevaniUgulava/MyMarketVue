@@ -1,37 +1,48 @@
 <template>
-  <div id="app">
+  <div v-if="open" class="overlay"></div>
 
-    <head>
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    </head>
-    <div class="login-card">
-      <div class="login-content">
-        <h2>Welcome Back!</h2>
-        <p>Please login to your account</p>
-        <router-link to='/ka/register' class="registerlink">Register</router-link>
-        <form @submit.prevent="login" method="post" id="loginform">
-          <div class="input-container">
-            <input v-model="email" type="text" name="email" id="email" required placeholder=" " />
-            <label for="email">Email</label>
-          </div>
-          <div class="input-container">
-            <input v-model="password" type="password" name="password" id="password" required placeholder=" " />
-            <label for="password">Password</label>
-          </div>
-          <button :disabled="!email || !password">Login</button>
-          <a href="/forget/password" class="forget">forget password?</a>
-          <div class="social-login">
-            <FacebookComponentVue />
-            <GoogleComponent />
-          </div>
-        </form>
 
-      </div>
-      <div class="image-content">
-        <img src="https://via.placeholder.com/300" alt="Sample Image">
-        <div class="card">
-          <h3>Welcome to Our Service</h3>
-          <p>Enjoy our features by logging in.</p>
+  <div v-if="open" class="modal">
+    <div class="login-wrapper">
+      <div class="login-card">
+        <button class="close" @click="closeModal">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <div class="login-content">
+          <h2>ავტორიზაცია</h2>
+          <div class="dotted-line">
+            <span></span>
+          </div>
+          <form @submit.prevent="login" method="post" id="loginform">
+            <div class="input-container">
+              <input v-model="email" type="text" name="email" id="email" required placeholder="" />
+              <label for="email">ელ.ფოსტა</label>
+
+            </div>
+            <div class="input-container">
+              <input v-model="password" type="password" name="password" id="password" required placeholder="" />
+              <label for="email">პაროლი</label>
+            </div>
+            <button class="loginbtn">შესვლა</button>
+            <div class="links">
+              <span class="link">
+                დაგავიწყდა პაროლი? <a href="/forget/password" class="forget">პაროლის აღდგენა</a>
+              </span>
+              <span class="link">
+                არ გაქვს ანგარიში? <a @click="openregistermodal" class="forget">რეგისტრაცია</a>
+              </span>
+            </div>
+
+            <div class="dotted-line">
+              <span>გააგრძელეთ</span>
+            </div>
+
+            <div class="social-login">
+              <FacebookComponentVue class="fb" />
+              <GoogleComponent class="google" />
+            </div>
+          </form>
         </div>
       </div>
     </div>
@@ -43,9 +54,9 @@ import api from '@/api';
 import FacebookComponentVue from './FacebookComponent.vue';
 import GoogleComponent from './GoogleComponent.vue';
 
-
 export default {
   name: "LoginComponent",
+  props: ['open'],
   components: {
     FacebookComponentVue,
     GoogleComponent
@@ -69,86 +80,123 @@ export default {
         localStorage.setItem('roles', response.data.roles[0]);
         localStorage.setItem('userid', response.data.id);
 
+        this.$router.push("/");
 
-        this.$router.push("/ka");
+        // this.closeModal();
+
+
       } catch (error) {
         console.error(error);
       }
     },
+    closeModal() {
+      this.$emit('close');
+    },
+    openregistermodal() {
+      this.$emit('openregister');
+
+      this.closeModal();
+    }
   }
 }
 </script>
 
 <style scoped>
-#app {
-  margin-top: 10%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.forget {
-  margin: 5px;
-  text-decoration: none;
-}
-
-.login-card {
-  display: flex;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  max-width: 900px;
-}
-
-.login-content {
-  padding: 20px;
-  width: 400px;
+.links {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  margin-top: 25px;
+  gap: 10px;
 }
 
-h2 {
-  font-size: 24px;
-  margin-bottom: 10px;
-}
-
-p {
+span {
+  color: #7c7878;
   font-size: 14px;
-  margin-bottom: 20px;
-  color: #666;
 }
 
-.registerlink {
-  text-decoration: none;
-  color: #0000ff;
-  margin-bottom: 20px;
-}
-
-form {
-  width: 100%;
+.dotted-line {
   display: flex;
-  flex-direction: column;
+  margin-top: 30px;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  align-items: center;
+  text-align: center;
+  width: 100%;
 }
 
+.dotted-line::before,
+.dotted-line::after {
+  content: "";
+  flex-grow: 1;
+  border-bottom: 1.5px dotted #dbdbdb;
+  margin: 0 5px;
+}
+
+.dotted-line span {
+  font-size: 12px;
+  border: 1px solid #dbdbdb;
+  padding: 5px;
+  border-radius: 5px;
+  color: #4e4c4c;
+}
+
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 999;
+}
+
+.modal {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  bottom: 10px;
+  width: 50vh;
+  border-radius: 10px;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
 
 .input-container {
   position: relative;
-  margin-bottom: 20px;
   width: 100%;
+  margin-bottom: 20px;
+}
+
+.login-content {
+  position: relative;
+  bottom: 10px;
+}
+
+#loginform {
+  position: relative;
+  top: 20px;
 }
 
 input {
   width: 100%;
-  padding: 10px;
-  font-size: 14px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
+  padding: 12px;
+  font-size: 16px;
+  height: 50px;
+  border: 1px solid #dbdbdb;
+  border-radius: 10px;
   outline: none;
-  background: none;
-  transition: all 0.3s ease;
+  background: #f9f9f9;
+  transition: 0.3s;
+}
+
+input:focus+label,
+input:not(:placeholder-shown)+label {
+  top: -10px;
+  font-size: 12px;
+  color: #333;
+  padding: 0 5px;
 }
 
 label {
@@ -162,113 +210,84 @@ label {
   transition: all 0.3s ease;
 }
 
-input:focus+label,
-input:not(:placeholder-shown)+label {
-  top: -10px;
-  font-size: 12px;
-  color: #333;
-  background-color: #fff;
-  padding: 0 5px;
-}
-
-
-button {
-  padding: 10px;
+.loginbtn {
+  padding: 12px;
   font-size: 16px;
   cursor: pointer;
-  border-radius: 5px;
+  border-radius: 8px;
   border: none;
-  background-color: #0000ff;
+  background-color: #62389c;
   color: white;
+  width: 100%;
+  font-weight: 500;
+  transition: background-color 0.3s;
 }
 
-button:disabled {
-  background-color: grey;
-  cursor: not-allowed;
-}
-
-.image-content {
-  width: 500px;
+h2 {
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-  background: #f8f8f8;
-  padding: 20px;
+  font-size: 1.5rem;
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
 }
 
-.image-content img {
-  max-width: 100%;
-  border-radius: 10px;
-  margin-bottom: 20px;
+.loginbtn:hover {
+  background-color: #4b6ee6;
 }
 
-.card {
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  text-align: center;
-}
 
-.card h3 {
-  margin-bottom: 10px;
-  font-size: 18px;
-}
-
-.card p {
+.forget {
+  text-decoration: none;
+  color: #0000ff;
   font-size: 14px;
-  color: #666;
+  margin-left: 10px;
 }
 
-@media (min-width: 375px) and (max-width: 430px) {
-  .login-content {
-    padding: 10px;
-    width: 60%;
-  }
+.social-login {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  width: 100%;
+  justify-content: center;
+}
 
-  .image-content {
-    width: 40%;
-    padding: 10px;
-  }
+.fb,
+.google {
+  flex: 1;
+}
 
-  p {
-    font-size: 0.5rem;
-  }
+.login-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  border-radius: 10px;
+  height: 100%;
+}
 
-  h2 {
-    font-size: 1rem;
-  }
+.login-card {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-right: 2px solid #ccc;
+  width: 100%;
+  max-width: 50vh;
+  height: 100%;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+}
 
-  .registerlink {
-    font-size: 0.6rem;
-  }
-
-  label {
-    font-size: 0.7rem;
-  }
-
-  input {
-    width: 100%;
-    height: 35px;
-  }
-
-  button {
-    padding: 5px 10px;
-    font-size: 0.8rem;
-  }
-
-  .card p {
-    font-size: 0.5rem;
-  }
-
-  .card h3 {
-    font-size: 0.8rem;
-  }
-
-  .card {
-    margin-bottom: 20px;
-  }
+.close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 40%;
+  font-size: 24px;
+  z-index: 1000;
 
 }
 </style>

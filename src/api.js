@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://192.168.0.103:8001/api',
+  baseURL: 'http://192.168.0.106:8001/api',
   timeout: 5000,
 });
 
@@ -32,7 +32,6 @@ api.interceptors.response.use(response => {
     localStorage.removeItem('token');
     localStorage.removeItem('roles');
     localStorage.removeItem('userid');
-    window.location.href = '/login'; 
   }
 
   return Promise.reject(error);

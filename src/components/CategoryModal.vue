@@ -1,14 +1,14 @@
 <template lang="html">
-  <div v-if="isModalVisible" class="modal-overlay" @touchstart="startTouch" @touchmove="onTouchMove"
-    @touchend="endTouch">
-    <div class="modal-content" :style="{ transform: `translateY(${modalTranslateY}px)` }">
-      <!-- Lever for dragging the modal -->
-      <div class="modal-lever"></div>
-      <div class="modal-body" @touchstart.stop @touchmove.stop>
-        <ProductViewCategory />
+  <transition name="modal-fade">
+    <div v-if="isModalVisible" class="modal-overlay" @touchstart.passive="startTouch" @touchmove.passive="onTouchMove" @touchend="endTouch">
+      <div class="modal-content" :style="{ transform: `translateY(${modalTranslateY}px)` }">
+        <div class="modal-lever"></div>
+        <div class="modal-body" ref="scrollableBody">
+          <ProductViewCategory />
+        </div>
       </div>
     </div>
-  </div>
+  </transition>
 </template>
 
 <script>
@@ -24,6 +24,7 @@ export default {
       modalTranslateY: 0,
       maxTranslateY: 0,
       isDragging: false,
+      currentScroll: 0,
     };
   },
   props: {
@@ -35,68 +36,77 @@ export default {
   watch: {
     isModalVisible(newValue) {
       if (newValue) {
-        this.modalTranslateY = 0;  // Reset position when modal opens
-        document.body.style.overflow = 'hidden';  // Disable body scroll when modal is open
+        this.modalTranslateY = 0;
+        document.body.style.overflow = 'hidden';
       } else {
-        document.body.style.overflow = 'auto'; // Re-enable body scroll when modal is closed
+        document.body.style.overflow = 'auto';
       }
     },
   },
   methods: {
     startTouch(event) {
-      this.isDragging = true;
-      document.body.style.overflow = 'hidden'; // Disable scrolling on body while dragging the modal
+      const scrollable = this.$refs.scrollableBody;
+      this.currentScroll = scrollable.scrollTop;
+      this.isDragging = this.currentScroll <= 0;
       this.touchStart = event.touches[0].clientY;
-      this.maxTranslateY = window.innerHeight * 0.8; // Max translate Y value (80% screen height)
+      this.maxTranslateY = window.innerHeight * 0.8;
     },
-
     onTouchMove(event) {
-      const touchMove = event.touches[0].clientY;
-      const deltaY = touchMove - this.touchStart;
+      const currentY = event.touches[0].clientY;
+      const deltaY = currentY - this.touchStart;
+      const scrollable = this.$refs.scrollableBody;
 
-      event.preventDefault();  // Prevent scrolling while dragging the modal
-
-      // Allow dragging the modal down within the maximum limit
-      if (deltaY > 0 && deltaY <= this.maxTranslateY) {
+      if (this.isDragging && scrollable.scrollTop <= 0 && deltaY > 0) {
+        event.preventDefault();
         this.modalTranslateY = deltaY;
       }
     },
-
-    endTouch() {
-      // Close the modal if swiped enough or reset position
-      if (this.modalTranslateY > 0) {
+    endTouch(event) {
+      const touchEnd = event.changedTouches[0].clientY;
+      const deltaY = touchEnd - this.touchStart;
+      if (deltaY > 60 && this.isDragging) {
         this.closeModal();
       } else {
         this.resetModalPosition();
       }
-
       this.isDragging = false;
-      document.body.style.overflow = 'auto'; // Re-enable scrolling after dragging
     },
-
     closeModal() {
-      this.$emit('close-modal', false); // Emit event to close the modal
+      this.$emit('close-modal', false);
     },
-
     resetModalPosition() {
-      this.modalTranslateY = 0; // Reset position if swipe was not enough to close
+      this.modalTranslateY = 0;
     },
   },
 };
 </script>
 
 <style scoped lang="css">
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.4s ease, background-color 0.4s ease;
+}
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+  background-color: rgba(0, 0, 0, 0);
+}
+.modal-fade-enter-to,
+.modal-fade-leave-from {
+  opacity: 1;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
   display: flex;
   justify-content: center;
   align-items: flex-end;
   z-index: 9999;
   backdrop-filter: blur(10px);
-  overflow-y: auto;
-  animation: slideUp 0.5s ease-out;
+  overflow: hidden;
+  touch-action: manipulation;
 }
 
 .modal-content {
@@ -108,48 +118,32 @@ export default {
   max-height: 80vh;
   position: relative;
   box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.15);
-  transition: transform 0.3s ease-in-out;
-  animation: fadeIn 0.4s ease-in-out;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  display: flex;
+  flex-direction: column;
 }
 
 .modal-lever {
   width: 60px;
-  height: 4px;
-  background-color: #ccc;
+  height: 5px;
+  background-color: #bbb;
   border-radius: 4px;
   margin: 10px auto;
   cursor: grab;
   user-select: none;
+  transition: background-color 0.3s ease;
+}
+
+.modal-lever:active {
+  background-color: #888;
 }
 
 .modal-body {
   overflow-y: auto;
-  max-height: 60vh;
+  flex: 1;
   padding-right: 10px;
-  touch-action: none;
-}
-
-@keyframes slideUp {
-  from {
-    transform: translateY(100%);
-    opacity: 0;
-  }
-
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  scroll-behavior: smooth;
 }
 </style>
