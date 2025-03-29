@@ -52,13 +52,13 @@ export default {
     margin: 0;
     width: 100%;
     max-width: 100%;
-    height: 60vh;
+    height: 65vh;
     overflow: hidden;
 }
 
 .carousel {
     width: 100%;
-    height: 95%;
+    height: 90%;
     margin-top: 30px;
 }
 

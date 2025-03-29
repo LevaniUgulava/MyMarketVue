@@ -65,7 +65,7 @@
         <button class="login" v-if="notLogin" @click="Loginmodal">შესვლა <i class="fa-solid fa-user"></i></button>
         <div v-else class="dropdown-wrapper">
           <button @click="toggleDropdown" class="login"> {{ name }} <i class="fa-solid fa-user"></i></button>
-          <ul v-if="isOpen" class="dropdown-menu">
+          <ul v-if="isOpendropdown" class="dropdown-menu">
             <li v-for="item in kaitems" :key="item" @click="selectItem(item)">
               {{ item }}
             </li>
@@ -74,7 +74,6 @@
       </div>
     </nav>
 
-    <CategoryModal :isModalVisible="isModalVisible" @close-modal="closeModal" @search-category="searchCategory" />
     <div class="small-sections-wrapper">
 
       <SmallSections />
@@ -88,7 +87,6 @@
 </template>
 
 <script>
-import CategoryModal from './CategoryModal.vue';
 import SmallSections from '@/components/Status/SmallSections.vue';
 import api from '@/api';
 import LoginComponent from './LoginComponent.vue';
@@ -99,7 +97,6 @@ export default {
 
   name: 'HeaderComponent',
   components: {
-    CategoryModal,
     SmallSections,
     LoginComponent,
     RegisterComponent
@@ -110,6 +107,7 @@ export default {
   data() {
     return {
       isOpen: false,
+      isOpendropdown: false,
       loginmodal: localStorage.getItem("loginmodal") === "true",
       registermodal: localStorage.getItem("registermodal") === "true",
       isInputVisible: false,
@@ -198,10 +196,10 @@ export default {
       this.isModalVisible = false;
     },
     toggleDropdown() {
-      this.isOpen = !this.isOpen;
+      this.isOpendropdown = !this.isOpendropdown;
     },
     async selectItem(item) {
-      this.isOpen = false;
+      this.isOpendropdown = false;
       if (item === 'პროფილი') {
         this.$router.push(`/profile`);
       } else if (item === 'გასვლა') {
@@ -599,9 +597,7 @@ h1 {
 
 
 .srchbtn:hover {
-  color: #b997e9;
   font-size: 19px;
-
 }
 
 .search-container-mobile {

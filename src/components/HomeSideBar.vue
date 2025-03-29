@@ -45,9 +45,6 @@
 import CategoryModal from './CategoryModal.vue';
 
 export default {
-  props: {
-    isMobile: Boolean,
-  },
   components: {
     CategoryModal,
   },
@@ -140,7 +137,7 @@ export default {
 
 .sidebar {
   width: 100%;
-  height: 60px;
+  height: 65px;
   background-color: #f0f4f5;
   color: #333;
   position: fixed;
@@ -165,7 +162,6 @@ export default {
   flex: 1;
   text-align: center;
   margin: 15px 0;
-  border-radius: 8px;
   overflow: hidden;
 }
 
@@ -202,11 +198,9 @@ export default {
   align-items: center;
   gap: 10px;
   padding: 12px;
-  border-radius: 8px;
   font-weight: 500;
   color: #333;
   -webkit-tap-highlight-color: transparent;
-  /* disables grey flash */
   -webkit-touch-callout: none;
   background-color: rgba(255, 255, 255, 0.9);
 }
@@ -221,12 +215,10 @@ export default {
   color: #7a1fff;
 }
 
-/* Mobile-only style */
 .mobile-only {
   display: block;
 }
 
-/* No hover effects or active transformation */
 @media (max-width: 768px) {
   .sidebar {
     width: 100%;

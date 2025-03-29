@@ -6,7 +6,7 @@
     </div>
     <HeaderComponentVue class="header" :isMobile="isMobile" @search="handleSearch" />
 
-    <HomeSideBarVue class="sidebar" :isMobile="isMobile" />
+    <HomeSideBarVue class="sidebar" v-if="isMobile" />
 
     <div class="main-content">
       <router-view v-slot="{ Component }">
@@ -100,7 +100,7 @@ export default {
   width: 100%;
   box-sizing: border-box;
   min-height: calc(100vh - 60px);
-  margin-top: 120px;
+  margin-top: 130px;
   overflow-y: auto;
 }
 

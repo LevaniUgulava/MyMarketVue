@@ -6,6 +6,7 @@
 
   <div>
     <SwipeCarousel />
+    <BrandComponent />
     <section v-for="(category, idx) in categories" :key="idx" class="category-section">
 
       <section class="collection-section" v-if="sections.length > 0">
@@ -50,11 +51,13 @@ import ProductCardComponent from '@/components/ProductCardComponent.vue';
 import Message from '@/components/Message/MessageComponent.vue';
 import SwipeCarousel from '@/components/SwipeCarousel.vue';
 import api from '@/api';
+import BrandComponent from '@/components/BrandComponent.vue';
 export default {
   components: {
     ProductCardComponent,
     SwipeCarousel,
     Message,
+    BrandComponent
   },
   data() {
     return {
@@ -197,7 +200,7 @@ button:hover {
 }
 
 .collection-section {
-  margin-top: 20px;
+  margin-top: 10px;
   padding: 20px;
   border-radius: 12px;
 }

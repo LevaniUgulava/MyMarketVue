@@ -51,11 +51,17 @@
             </ul>
           </div>
           <p class="section-title">დამატებითი ინფორმაცია:</p>
-          <ul>
-            <li>მასალა:</li>
-            <li>მომწოდებელი:</li>
-            <li>მწარმოებელი:</li>
+          <ul class="additional-ul">
+            <li v-for="(item, index) in additionalinfo" :key="index">
+              <span v-for="([key, value], innerIndex) in Object.entries(item)" :key="innerIndex" class="dotted-line">
+                <span class="key">{{ key }}</span>
+                <span class="dots"></span>
+                <span class="value">{{ value }}</span>
+              </span>
+            </li>
           </ul>
+
+
         </div>
       </div>
 
@@ -106,6 +112,7 @@ export default {
   },
   data() {
     return {
+      additionalinfo: [],
       singleproduct: null,
       message: null,
       errormessage: null,
@@ -205,12 +212,11 @@ export default {
           tokenRequired: true
         });
         this.singleproduct = response.data.data;
-        this.rate = response.data.data.MyRate;
+        this.additionalinfo = JSON.parse(this.singleproduct.additionalinfo);
 
         this.allcolors = this.singleproduct.size.flatMap(element =>
           element.details
         );
-        console.log(this.allcolors);
 
       } catch (error) {
         this.errormessage = "An error occurred while loading the data.";
@@ -238,12 +244,42 @@ export default {
 };
 </script>
 <style scoped>
+.additional-ul{
+  width: 50%;
+}
 .custom-line {
   border: none;
   height: 1px;
   background-color: #ccc;
   margin: 20px 0;
   margin-top: 10%;
+}
+
+.dotted-line {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.key {
+  margin-right: 10px;
+  /* flex-grow: 1; */
+  text-align: left;
+  white-space: nowrap;
+  /* Prevent text from wrapping */
+
+}
+
+.dots {
+  flex-grow: 1;
+  border-bottom: 1px dotted black;
+  margin-right: 10px;
+}
+
+.value {
+  text-align: left;
+  white-space: nowrap;
+
 }
 
 

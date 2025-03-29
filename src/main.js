@@ -8,7 +8,7 @@ import "primevue/resources/primevue.min.css";
 import "primeicons/primeicons.css";
 import vue3GoogleLogin from "vue3-google-login";
 
-axios.defaults.baseURL = "http://192.168.0.103:8001/api/";
+axios.defaults.baseURL = "http://192.168.0.106:8001/api/";
 
 const app = createApp(App);
 

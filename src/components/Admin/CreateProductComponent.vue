@@ -55,7 +55,6 @@
         </select>
       </div>
 
-      <!-- Size Inputs -->
       <div v-if="form.size_type === 'numeric'" class="form-group">
         <label>Numeric Sizes</label>
         <select v-if="numericbased.length > 0" v-model="form.Sizes" multiple>
@@ -68,9 +67,13 @@
           <label>
             <h4>{{ size }} ზომის დეტალები</h4>
             <label>ფერების რაოდენობა</label>
-            <button @click.prevent="decrease(index)">-</button>
-            <p>{{ colorquantity[index] }}</p>
-            <button @click.prevent="increase(index)">+</button>
+
+            <div class="quantity-control">
+              <button class="quantity" @click.prevent="decrease(index)">-</button>
+              <p>{{ colorquantity[index] }}</p>
+              <button class="quantity" @click.prevent="increase(index)">+</button>
+            </div>
+
           </label>
           <div v-for="(item, colorindex) in Array.from({ length: colorquantity[index] || 1 })"
             :key="'size-' + index + '-color-' + colorindex">
@@ -79,13 +82,6 @@
           </div>
         </div>
       </div>
-
-      <!-- <div v-if="form.size_type === 'letter-based'" class="form-group">
-        <label>Letter Sizes</label>
-        <select v-if="letterbased.length > 0" v-model="form.Sizes" multiple>
-          <option v-for="size in letterbased" :key="size.id" :value="size">{{ size }}</option>
-        </select>
-      </div> -->
       <div v-if="form.size_type === 'letter-based'" class="form-group">
         <label>Letter Sizes</label>
         <select v-if="numericbased.length > 0" v-model="form.Sizes" multiple>
@@ -93,30 +89,49 @@
         </select>
       </div>
 
-      <!-- <div v-if="form.size_type === 'letter-based' && form.Sizes.length > 0" class="size-input-group">
-        <div v-for="(size, index) in form.Sizes" :key="index" class="size-detail">
-          <label>{{ size }} Quantity</label>
-          <input type="text" v-model="form.quantity[index]" placeholder="Enter Quantity" :key="index" required>
-          <label>{{ size }} Color</label>
-          <input type="text" v-model="form.color[index]" placeholder="Enter Color" :key="index" required>
-        </div>
-      </div> -->
-
       <div v-if="form.size_type === 'letter-based' && form.Sizes.length > 0" class="size-input-group">
         <div v-for="(size, index) in form.Sizes" :key="index" class="size-detail">
           <label>
             <h4>{{ size }} ზომის დეტალები</h4>
             <label>ფერების რაოდენობა</label>
-            <button @click.prevent="decrease(index)">-</button>
-            <p>{{ colorquantity[index] }}</p>
-            <button @click.prevent="increase(index)">+</button>
+
+            <div class="quantity-control">
+              <button class="quantity" @click.prevent=" decrease(index)">-</button>
+              <p>{{ colorquantity[index] }}</p>
+              <button class="quantity" @click.prevent=" increase(index)">+</button>
+            </div>
           </label>
           <div v-for="(item, colorindex) in Array.from({ length: colorquantity[index] || 1 })"
             :key="'size-' + index + '-color-' + colorindex">
-            <input type="number" v-model="form.quantity[index][colorindex]" placeholder="შეიყვანეთ რაოდენობა" required>
-            <input type="text" v-model="form.color[index][colorindex]" placeholder="შეიყვანეთ ფერი" required>
+            <input type="number" v-model="form.quantity[index][colorindex]" placeholder="შეიყვანეთ სახელი" required>
+            <input type="text" v-model="form.color[index][colorindex]" placeholder="შეიყვანეთ ინფორმაცია" required>
           </div>
         </div>
+      </div>
+
+      <button class="additional-button" @click.prevent="toggleAdditionalInfo">დამატებით
+        ინფორმაცია?</button>
+
+      <div class="form-group" v-if="isAdditionalinfo">
+        <h4> დამატებითი ინფორმაცია</h4>
+
+        <label>
+          <label>რაოდენობა</label>
+          <div class="quantity-control">
+            <button class="quantity" @click.prevent="infocolumn--">-</button>
+            <p>{{ infocolumn }}</p>
+            <button class="quantity" @click.prevent="infocolumn++">+</button>
+          </div>
+
+        </label>
+        <div v-for="(item, index) in infocolumn" :key="index" class="seperate-additional">
+          <input :disabled="islockedin" type="text" v-model="additionalname[index]" placeholder="შეიყვანეთ რაოდენობა"
+            required>
+          <input :disabled="islockedin" type="text" v-model="additionaldescription[index]" placeholder="შეიყვანეთ ფერი"
+            required>
+        </div>
+        <button class="additional-button" @click.prevent="toggleisLockedin">ჩაკეტე</button>
+
       </div>
 
       <div class="form-group">
@@ -141,6 +156,12 @@ export default {
   },
   data() {
     return {
+      additionalname: JSON.parse(localStorage.getItem('additionalname')) || [],
+      additionaldescription: JSON.parse(localStorage.getItem('additionaldescription')) || [],
+      infocolumn: 1,
+      islockedin: localStorage.getItem("islockedin") === "true" || false,
+      isAdditionalinfo: localStorage.getItem("isAdditionalinfo") === "true" || false,
+      Additionalinfo: [],
       maincategories: [],
       categories: [],
       subcategories: [],
@@ -158,7 +179,7 @@ export default {
         size_type: '',
         Sizes: [],
         quantity: [],
-        color: []
+        color: [],
       },
     };
   },
@@ -191,6 +212,26 @@ export default {
   },
 
   methods: {
+    toggleAdditionalInfo() {
+      this.isAdditionalinfo = !this.isAdditionalinfo;  // Toggle the boolean value
+      localStorage.setItem('isAdditionalinfo', this.isAdditionalinfo); // Save the updated boolean to localStorage
+    },
+    toggleisLockedin() {
+      this.islockedin = !this.islockedin;
+      localStorage.setItem('islockedin', this.islockedin);
+      for (let i = 0; i < this.infocolumn; i++) {
+        localStorage.setItem(`additionalname[${i}]`, this.additionalname[i]);
+        localStorage.setItem(`additionaldescription[${i}]`, this.additionaldescription[i]);
+      }
+      localStorage.setItem('additionalname', JSON.stringify(this.additionalname));
+      localStorage.setItem('additionaldescription', JSON.stringify(this.additionaldescription));
+    },
+    convertTojson() {
+      const data = this.additionalname.map((name, index) => ({
+        [name]: this.additionaldescription[index],
+      }));
+      return JSON.stringify(data);
+    },
     decrease(index) {
       if (this.colorquantity[index] > 1) {
         this.colorquantity[index] -= 1;
@@ -260,6 +301,8 @@ export default {
           });
         }
       });
+      const addadditionalinfo = this.convertTojson();
+      formData.append('additionalinfo', addadditionalinfo);
 
       if (this.form.image) {
         for (let i = 0; i < this.form.image.length; i++) {
@@ -297,9 +340,50 @@ export default {
   max-width: 100%;
   margin: 0 auto;
   padding: 40px;
-  /* background: #ffffff; */
   border-radius: 12px;
-  /* box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); */
+}
+
+.seperate-additional {
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  margin-top: 20px;
+}
+
+.seperate-additional input {
+  display: flex;
+  margin-top: 10px;
+}
+
+.quantity-control {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.quantity {
+  padding: 10px;
+  border: 1.5px solid #ddd;
+  border-radius: 5px;
+  background-color: transparent;
+}
+
+
+
+.additional-button {
+  display: flex;
+  padding: 10px 20px;
+  background-color: #407236;
+  color: white;
+  border: none;
+  width: 50%;
+  margin: 10px auto;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
 .product-form {
