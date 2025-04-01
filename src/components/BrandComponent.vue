@@ -3,11 +3,12 @@
         <div @click="handle(item.id)" v-for="(item, index) in brands" :key="index" class="section">
             <div class="seperate-section">
                 <img class="image" :src="item.image" alt="brand logo" />
-                <span class="name">{{ item.name }}</span>
             </div>
+            <span class="name">{{ item.name }}</span>
         </div>
     </div>
 </template>
+
 
 <script>
 export default {
@@ -43,24 +44,21 @@ export default {
 }
 
 .name {
-    font-size: 12px;
-    font-weight: 500;
-    margin-top: -10px;
-    align-items: center;
-    color: #333;
-    transition: font-size 0.5s ease;
+    display: flex;
+    justify-content: center;
+    transition: color 0.3s ease;
 }
 
 .seperate-section {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    padding: 10px 15px;
-    border-radius: 50%;
+    align-items: center;
+    padding: 5px 5px;
+    border-radius: 30%;
     background-color: transparent;
     border: 1.5px solid #e0e0e0;
-    width: 90px;
-    height: 90px;
+    width: auto;
+    height: auto;
     justify-content: center;
     transition: background-color 0.8s ease, border 0.8s ease;
 }
@@ -71,11 +69,10 @@ export default {
 }
 
 .seperate-section:hover .image {
-    width: 65px;
+    width: 63px;
 }
 
 .seperate-section:hover .name {
-    font-size: 12px;
     color: #333;
 }
 
@@ -93,7 +90,11 @@ export default {
 }
 
 .section {
+    display: flex;
+    flex-direction: column;
     cursor: pointer;
+    height: 120px;
+    justify-content: center;
     font-weight: 500;
     color: #333;
     transition: color 0.3s ease;

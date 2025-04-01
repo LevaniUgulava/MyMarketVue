@@ -134,6 +134,17 @@ const routes = [
         name: "Admincategory",
         component: () =>
           import("@/components/Admin/ManageCategoryComponent.vue"),
+      
+      },
+      {
+        path:"mainrelation",
+        component: () =>
+          import("@/components/Admin/MainCategoryRelation.vue"),
+      },
+       {
+        path:"categoryrelation",
+        component: () =>
+          import("@/components/Admin/CategoryRelation.vue"),
       },
       {
         path: "collection",

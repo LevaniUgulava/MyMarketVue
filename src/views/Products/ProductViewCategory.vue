@@ -35,8 +35,7 @@
                 </svg>
             </h3>
             <div v-if="!collapsed.category">
-                <div class="checkbox-container" v-for="(category, catIndex) in filteredCategories || []"
-                    :key="catIndex">
+                <div class="checkbox-container" v-for="(category, catIndex) in filteredCategory || []" :key="catIndex">
                     <input type="checkbox" :id="'category-' + category.id" v-model="selectedCategories"
                         :value="category" @change="performSearch" />
                     <label :for="'category-' + category.id">{{ category.name }}</label>
@@ -58,7 +57,7 @@
                 </svg>
             </h3>
             <div v-if="!collapsed.subcategory">
-                <div class="checkbox-container" v-for="(subcategory, subIndex) in filteredSubcategories || []"
+                <div class="checkbox-container" v-for="(subcategory, subIndex) in filteredsubCategory || []"
                     :key="subIndex">
                     <input type="checkbox" :id="'subcategory-' + subcategory.id" v-model="selectedsubCategories"
                         :value="subcategory" @change="performSearch" />
@@ -137,8 +136,8 @@
                 </svg>
             </h3>
             <div v-if="!collapsed.color">
-                <div class="checkbox-container" v-for="(color, colorIndex) in filteredcolor" :key="colorIndex">
-                    <input type="checkbox" :id="'color-' + color.id" v-model="selectedColors" :value="color"
+                <div class="checkbox-container" v-for="(color, colorIndex) in colors" :key="colorIndex">
+                    <input type="checkbox" :id="'color-' + color.id" v-model="selectedColors" :value="color.color"
                         @change="performSearch" />
                     <label :for="'color-' + color.id">{{ color.color }}</label>
                 </div>
@@ -147,10 +146,9 @@
     </div>
 </template>
 
-
 <script>
 import api from '@/api';
-
+import { mapMutations, mapGetters } from 'vuex';
 export default {
     data() {
         return {
@@ -169,8 +167,8 @@ export default {
             selectedMainCategories: [],
             selectedCategories: [],
             selectedsubCategories: [],
-            autoSelectedMainCategoryIds: [],
-            autoSelectedCategoryIds: [],
+
+
             priceRange: {
                 min: null,
                 max: "",
@@ -183,6 +181,46 @@ export default {
         };
     },
     methods: {
+        loadsavefilter() {
+            this.selectedMainCategories = this.getMainCategory;
+            this.selectedCategories = this.getCategory;
+            this.selectedsubCategories = this.getSubCategory;
+            this.priceRange = this.getPriceRange;
+            this.selectedColors = this.getColors;
+            this.selectedSizes = this.getSizes;
+        },
+        resetFilters() {
+            this.selectedMainCategories = [];
+            this.selectedCategories = [];
+            this.selectedsubCategories = [];
+            this.selectedColors = [];
+            this.selectedSizes = [];
+            this.priceRange = { min: null, max: "" };
+
+            this.setMainCategory([]);
+            this.setCategory([]);
+            this.setSubCategory([]);
+            this.setColors([]);
+            this.setPriceRange([]);
+            this.setSizes([]);
+            localStorage.removeItem('selectedMainCategories');
+            localStorage.removeItem('selectedCategories');
+            localStorage.removeItem('selectedsubCategories');
+            localStorage.removeItem('selectedColors');
+            localStorage.removeItem('priceRange');
+            localStorage.removeItem('selectedSizes');
+            this.performSearch();
+
+        },
+        ...mapMutations('categories', [
+            'setMainCategory',
+            'setCategory',
+            'setSubCategory',
+            'setPriceRange',
+            'setColors',
+            'setSizes'
+        ]),
+
         toggleSection(section) {
             this.collapsed[section] = !this.collapsed[section];
         },
@@ -210,120 +248,33 @@ export default {
                 this.subCategories = responseee.data;
                 this.colors = responsecolor.data
                 this.sizes = responsesize.data;
-                this.filterCategoriesAndSubcategories();
             } catch (error) {
                 console.error('Failed to fetch categories:', error);
             }
-            this.loadSavedFilters();
-
-        },
-        resetFilters() {
-            this.selectedMainCategories = [];
-            this.selectedCategories = [];
-            this.selectedsubCategories = [];
-            this.priceRange = { min: null, max: "" };
-            this.selectedColors = [];
-            localStorage.removeItem('selectedMainCategories');
-            localStorage.removeItem('selectedCategories');
-            localStorage.removeItem('selectedsubCategories');
-            localStorage.removeItem('priceRange');
-            localStorage.removeItem('selectedColors');
-            localStorage.removeItem('selectedSizes');
-            this.performSearch();
-        },
-
-        filterCategoriesAndSubcategories() {
-            const selectedMainCategoryIds = this.selectedMainCategories.map(category => category.id);
-
-            if (selectedMainCategoryIds.length > 0) {
-                this.filteredCategories = this.Categories.filter(category =>
-                    selectedMainCategoryIds.includes(category.maincategory_id)
-                );
-                this.filteredSubcategories = this.subCategories.filter(subcategory =>
-                    selectedMainCategoryIds.includes(subcategory.maincategory_id) ||
-                    this.selectedCategories.map(cat => cat.id).includes(subcategory.category_id)
-                );
-                this.filteredcolor = this.colors
-                    .filter(color => {
-                        if (selectedMainCategoryIds.length > 0 && this.selectedCategories.length === 0 && this.selectedsubCategories.length === 0) {
-                            return selectedMainCategoryIds.includes(color.maincategory_id);
-                        }
-
-                        if (selectedMainCategoryIds.length > 0 && this.selectedCategories.length > 0 && this.selectedsubCategories.length === 0) {
-                            return selectedMainCategoryIds.includes(color.maincategory_id) &&
-                                this.selectedCategories.map(cat => cat.id).includes(color.category_id);
-                        }
-
-                        if (selectedMainCategoryIds.length > 0 && this.selectedCategories.length > 0 && this.selectedsubCategories.length > 0) {
-                            return selectedMainCategoryIds.includes(color.maincategory_id) &&
-                                this.selectedCategories.map(cat => cat.id).includes(color.category_id) &&
-                                this.selectedsubCategories.map(sub => sub.id).includes(color.subcategory_id);
-                        }
-
-                        return true;
-                    })
-                    .reduce((unique, color) => {
-                        if (!unique.some(c => c.color === color.color)) {
-                            unique.push(color);
-                        }
-                        return unique;
-                    }, []);
-
-
-            } else {
-                this.filteredCategories = this.Categories;
-                this.filteredSubcategories = this.subCategories;
-
-                this.filteredcolor = this.colors.reduce((unique, color) => {
-                    if (!unique.some(c => c.color === color.color)) {
-                        unique.push(color);
-                    }
-                    return unique;
-                }, []);
-            }
-        },
-        loadSavedFilters() {
-            const savedMainCategories = localStorage.getItem('selectedMainCategories');
-            const savedCategories = localStorage.getItem('selectedCategories');
-            const savedsubCategories = localStorage.getItem('selectedsubCategories');
-            const savedPriceRange = localStorage.getItem('priceRange');
-            const savedColors = localStorage.getItem('selectedColors');
-            const savedSizes = localStorage.getItem('selectedSizes');
-
-
-            if (savedMainCategories) this.selectedMainCategories = JSON.parse(savedMainCategories);
-            if (savedCategories) this.selectedCategories = JSON.parse(savedCategories);
-            if (savedsubCategories) this.selectedsubCategories = JSON.parse(savedsubCategories);
-            if (savedPriceRange) this.priceRange = JSON.parse(savedPriceRange);
-            if (savedColors) this.selectedColors = JSON.parse(savedColors);
-            if (savedSizes) this.selectedSizes = JSON.parse(savedSizes);
 
         },
 
-        saveFilters() {
-            localStorage.setItem('selectedMainCategories', JSON.stringify(this.selectedMainCategories));
-            localStorage.setItem('selectedCategories', JSON.stringify(this.selectedCategories));
-            localStorage.setItem('selectedsubCategories', JSON.stringify(this.selectedsubCategories));
-            localStorage.setItem('priceRange', JSON.stringify(this.priceRange));
-            localStorage.setItem('selectedColors', JSON.stringify(this.selectedColors));
-            localStorage.setItem('selectedSizes', JSON.stringify(this.selectedSizes));
-
+        setCategroies() {
+            this.setMainCategory(this.selectedMainCategories);
+            this.setCategory(this.selectedCategories);
+            this.setSubCategory(this.selectedsubCategories);
+            this.setPriceRange(this.priceRange);
+            this.setSizes(this.selectedSizes);
+            this.setColors(this.selectedColors);
         },
-        emitfilter() {
-            this.$emit("maincategories", this.selectedMainCategories);
-            this.$emit("categories", this.selectedCategories);
-            this.$emit("subcategories", this.selectedsubCategories);
-            this.$emit("colors", this.selectedColors);
 
-        },
 
         performSearch() {
-            console.log(this.selectedColors);
+            this.setCategroies();
+
             const currentQuery = { ...this.$route.query };
 
             const maincategoryParam = this.selectedMainCategories.map(q => q.id).join(",");
             const categoryParam = this.selectedCategories.map(q => q.id).join(",");
             const subcategoryParam = this.selectedsubCategories.map(q => q.id).join(",");
+            const sizesParm = this.selectedSizes.join(",");
+            const colorsParam = this.selectedColors.join(',');
+
 
             this.$router.push({
                 path: `/product`,
@@ -334,73 +285,49 @@ export default {
                     subcategory: subcategoryParam || '',
                     min: this.priceRange.min || '',
                     max: this.priceRange.max || '',
+                    sizes: sizesParm || '',
+                    colors: colorsParam || '',
                     page: 1,
                 },
             });
-
-            if (this.selectedCategories.length > 0) {
-                const autoMain = this.mainCategories.filter(main =>
-                    this.selectedCategories.some(cat => cat.maincategory_id === main.id)
-                );
-                this.selectedMainCategories = [
-                    ...new Set([
-                        ...this.selectedMainCategories,
-                        ...autoMain.filter(m => !this.selectedMainCategories.some(mc => mc.id === m.id))
-                    ])
-                ];
-            }
-
-            if (this.selectedsubCategories.length > 0) {
-                const autoMain = this.mainCategories.filter(main =>
-                    this.selectedsubCategories.some(sub => sub.maincategory_id === main.id)
-                );
-                const autoCats = this.Categories.filter(cat =>
-                    this.selectedsubCategories.some(sub => sub.category_id === cat.id)
-                );
-
-                this.selectedMainCategories = [
-                    ...new Set([
-                        ...this.selectedMainCategories,
-                        ...autoMain.filter(m => !this.selectedMainCategories.some(mc => mc.id === m.id))
-                    ])
-                ];
-                this.selectedCategories = [
-                    ...new Set([
-                        ...this.selectedCategories,
-                        ...autoCats.filter(c => !this.selectedCategories.some(sc => sc.id === c.id))
-                    ])
-                ];
-            }
-
-            if (this.selectedMainCategories.length === 0) {
-                this.selectedCategories = [];
-                this.selectedsubCategories = [];
-            }
-            this.emitfilter();
-            this.filterCategoriesAndSubcategories();
-            this.saveFilters();
-        },
-
-        clearAutoSelections() {
-            this.selectedMainCategories = this.selectedMainCategories.filter(mc => !this.autoSelectedMainCategoryIds.includes(mc.id));
-            this.selectedCategories = this.selectedCategories.filter(c => !this.autoSelectedCategoryIds.includes(c.id));
         },
     },
-    watch: {
-        selectedMainCategories() {
-            this.filterCategoriesAndSubcategories();
+
+    computed: {
+        ...mapGetters('categories', [
+            'getMainCategory',
+            'getCategory',
+            'getSubCategory',
+            'getPriceRange',
+            'getColors',
+            'getSizes'
+        ]),
+        filteredCategory() {
+            if (this.selectedMainCategories.length) {
+                return this.Categories.filter((category) => {
+                    return category.maincategory_id.some(id => this.selectedMainCategories.some(maincategory => maincategory.id === id));
+                });
+            } else {
+                return this.Categories;
+            }
+
         },
-        selectedCategories() {
-            this.filterCategoriesAndSubcategories();
-        },
-        selectedsubCategories() {
-            this.filterCategoriesAndSubcategories();
-        },
+        filteredsubCategory() {
+            if (this.selectedCategories.length) {
+                return this.subCategories.filter((subcategory) => {
+                    return subcategory.category_id.some(id => this.selectedCategories.some(maincategory => maincategory.id === id));
+                });
+            } else {
+                return this.subCategories
+            }
+
+        }
+
     },
+
     mounted() {
         this.fetchCategories();
-        this.loadSavedFilters()
-        this.emitfilter();
+        this.loadsavefilter();
     },
 };
 </script>
@@ -437,7 +364,7 @@ export default {
 
 .category-modal {
     width: 100%;
-    max-height: 100%;
+    height: 80vh;
     overflow-y: auto;
     border-radius: 8px;
 }
@@ -500,13 +427,11 @@ export default {
     transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
-/* Checkbox checked state */
 .checkbox-container input[type="checkbox"]:checked+label:before {
     background-color: #171717;
     border-color: #171717;
 }
 
-/* Checkbox checked state inner tick mark */
 .checkbox-container input[type="checkbox"]:checked+label:after {
     content: "✔";
     position: absolute;
@@ -516,7 +441,6 @@ export default {
     font-size: 10px;
 }
 
-/* Hover effect */
 .checkbox-container label:hover:before {
     border-color: #888;
 }
@@ -554,8 +478,14 @@ div>div {
 
 @media (min-width: 390px) and (max-width: 574px) {
     .category-modal {
-        background-color: white;
+        /* background-color: white; */
         height: 80%;
     }
+
+    .checkbox-container label:before {
+        width: 20px;
+        height: 20px;
+    }
+
 }
 </style>

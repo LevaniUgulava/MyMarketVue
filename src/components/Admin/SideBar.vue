@@ -1,21 +1,18 @@
 <template>
+
   <head>
     <!-- Other head content -->
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   </head>
 
   <div class="container">
     <div class="sidebar">
-      <h1>Admin Panel</h1>
       <ul>
-        <li><a href="/admin/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-        <li><a href="/admin/orders"><i class="fas fa-box"></i> Orders</a></li>
+        <li><a href="/admin/dashboard"><i class="fas fa-tachometer-alt"></i> მთავარი</a></li>
+        <li><a href="/admin/orders"><i class="fas fa-box"></i> შეკვეთები</a></li>
         <li>
           <button @click="toggleDropproduct" class="dropdown">
-            <i class="fas fa-boxes"></i> Manage Product 
+            <i class="fas fa-boxes"></i>პროდუქტების მართვა
           </button>
           <ul v-if="isOpenproduct" class="dropdown-menu">
             <li v-for="item in itemsproduct" :key="item" @click="selectItemproduct(item)">
@@ -23,13 +20,13 @@
             </li>
           </ul>
         </li>
-        <li><a href="/admin/statuses"><i class="fas fa-user-check"></i>Status and Eligible</a></li>
-        <li><a href="/admin/collection"><i class="fas fa-layer-group"></i> Collection</a></li>
-        <li><a href="/admin/category"><i class="fas fa-tags"></i> Manage Categories</a></li>
+        <li><a href="/admin/statuses"><i class="fas fa-user-check"></i>სტატუსების მართვა</a></li>
+        <li><a href="/admin/collection"><i class="fas fa-layer-group"></i> კოლექციები</a></li>
+        <li><a href="/admin/category"><i class="fas fa-tags"></i>კატეგორიების მართვა</a></li>
 
-        <li v-if="isadmin"><a href="/admin/roles"><i class="fas fa-user-cog"></i> Manage Roles</a></li>
-        <li><a href="/admin/logs"><i class="fas fa-clipboard-list"></i> Site Log</a></li>
-        <li><a href="#other"><i class="fas fa-ellipsis-h"></i> Other</a></li>
+        <li v-if="isadmin"><a href="/admin/roles"><i class="fas fa-user-cog"></i>როლების მართვა</a></li>
+        <li><a href="/admin/logs"><i class="fas fa-clipboard-list"></i>ჩანაწერები</a></li>
+        <li><a href="#other"><i class="fas fa-ellipsis-h"></i>სხვა</a></li>
       </ul>
     </div>
 
@@ -45,7 +42,7 @@ export default {
     return {
       isOpencategory: false,
       isOpenproduct: false,
-      itemsproduct: ["Create", "Discount", "Actions"],
+      itemsproduct: ["დამატება", "ფასდაკლებები", "მოქმედებები"],
       isadmin: localStorage.getItem("roles") === "admin"
     };
   },
@@ -54,11 +51,11 @@ export default {
       this.isOpenproduct = !this.isOpenproduct;
     },
     selectItemproduct(item) {
-      if (item === "Create") {
+      if (item === "დამატება") {
         this.$router.push("/admin/create");
-      } else if (item === "Actions") {
+      } else if (item === "მოქმედებები") {
         this.$router.push("/admin/actions");
-      } else if (item === "Discount") {
+      } else if (item === "ფასდაკლებები") {
         this.$router.push("/admin/discount");
       }
     }
@@ -83,18 +80,13 @@ export default {
   padding: 20px;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
   height: 100vh;
+  font-size: 1rem;
   overflow-y: auto;
-}
-
-.sidebar h1 {
-  font-size: 1.8em;
-  margin-bottom: 20px;
-  text-align: center;
-  font-weight: bold;
 }
 
 .sidebar ul {
   list-style-type: none;
+  font-size: 12px;
   padding: 0;
 }
 
@@ -103,16 +95,16 @@ export default {
 }
 
 .sidebar ul li a,
-.sidebar ul li  button {
+.sidebar ul li button {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 12px;
   color: inherit;
   text-decoration: none;
+  font-size: 13px;
   background: none;
   border: none;
-  font: inherit;
   cursor: pointer;
   border-radius: 5px;
   transition: background-color 0.3s ease;
@@ -158,5 +150,4 @@ export default {
   padding: 20px;
   overflow-y: auto;
 }
-
 </style>

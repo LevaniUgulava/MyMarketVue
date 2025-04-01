@@ -9,88 +9,96 @@
             {{ formatSection(computedSection) }}
         </span>
 
-        <template v-if="isArray(maincategory) && maincategory.length">
+        <template v-if="getMainCategory && getMainCategory.length">
             <span class="separator"> / </span>
-            <span v-for="(item, index) in maincategory" :key="index" class="clickable background">
-                {{ item.name }} <i @click.prevent="remove(index, 'selectedMainCategories')"
-                    class="fa-solid fa-xmark"></i>
+            <span v-for="(item, index) in getMainCategory" :key="index" class="clickable background">
+                {{ item.name }}
+                <i @click.prevent="remove(index, 'selectedMainCategories')" class="fa-solid fa-xmark"></i>
             </span>
         </template>
-        <template v-else-if="isObject(maincategory)">
+
+        <template v-if="maincategory && maincategory.name">
             <span class="separator"> / </span>
-            <span class="clickable" @click="navigate({ section: computedSection, maincategory: maincategory.id })">
+            <span class="clickable">
                 {{ maincategory.name }}
             </span>
         </template>
 
-        <template v-if="isArray(category) && category.length">
+        <template v-if="getCategory && getCategory.length">
             <span class="separator"> / </span>
-            <span v-for="(item, index) in category" :key="index" class="clickable background">
-                {{ item.name }} <i @click.prevent="remove(index, 'selectedCategories')"
-                    class="fa-solid fa-xmark"></i>
+            <span v-for="(item, index) in getCategory" :key="index" class="clickable background">
+                {{ item.name }}
+                <i @click.prevent="remove(index, 'selectedCategories')" class="fa-solid fa-xmark"></i>
             </span>
         </template>
-        <template v-else-if="isObject(category)">
+        <template v-if="category && category.name">
             <span class="separator"> / </span>
-            <span class="clickable"
-                @click="navigate({ section: computedSection, maincategory: getMainCategoryId(), category: category.id })">
+            <span class="clickable">
                 {{ category.name }}
             </span>
         </template>
 
-        <template v-if="isArray(subcategory) && subcategory.length">
+        <template v-if="getSubCategory && getSubCategory.length">
             <span class="separator"> / </span>
-            <span v-for="(item, index) in subcategory" :key="index" class="clickable background">
-                {{ item.name }} <i @click.prevent="remove(index, 'selectedsubCategories')"
-                    class="fa-solid fa-xmark"></i>
+            <span v-for="(item, index) in getSubCategory" :key="index" class="clickable background">
+                {{ item.name }}
+                <i @click.prevent="remove(index, 'selectedsubCategories')" class="fa-solid fa-xmark"></i>
             </span>
         </template>
-        <template v-else-if="isObject(subcategory)">
+        <template v-if="subcategory && subcategory.name">
             <span class="separator"> / </span>
-            <span class="clickable"
-                @click="navigate({ section: computedSection, maincategory: getMainCategoryId(), category: getCategoryId(), subcategory: subcategory.id })">
+            <span class="clickable">
                 {{ subcategory.name }}
             </span>
         </template>
-
         <span v-if="name" class="separator"> / </span>
         <span v-if="name" class="product-name">{{ name }}</span>
     </div>
 </template>
-
 <script>
+import { mapGetters } from 'vuex';
 
 export default {
-    props: {
-        maincategory: {
-            type: [Object, Array],
-            default: () => []
-        },
-        category: {
-            type: [Object, Array],
-            default: () => []
-        },
-        subcategory: {
-            type: [Object, Array],
-            default: () => []
-        },
-        name: {
-            type: String,
-            default: ""
-        }
-    },
     computed: {
         computedSection() {
             return this.$route.query.section || localStorage.getItem('section') || "all";
-        }
+        },
+        ...mapGetters('categories', [
+            'getMainCategory',
+            'getCategory',
+            'getSubCategory',
+        ]),
     },
+    props: {
+        maincategory: {
+            type: Object,
+            required: false,
+            default: () => ({})
+        },
+        category: {
+            type: Object,
+            required: false,
+            default: () => ({})
+
+        },
+        subcategory: {
+            type: Object,
+            required: false,
+            default: () => ({})
+        },
+        name: {
+            type: String,
+            required: false
+        }
+
+    },
+
     methods: {
         remove(index, category) {
             const data = {
                 category: category,
                 index: index
             };
-
             this.$emit("item-removed", data);
         },
         navigate(params) {
@@ -103,7 +111,6 @@ export default {
             this.$router.push({ path: `/` });
         },
         formatSection(section) {
-
             switch (section) {
                 case "all":
                     return "ყველა პროდუქტი";
@@ -113,22 +120,9 @@ export default {
                     return section;
             }
         },
-        getMainCategoryId() {
-            return this.isArray(this.maincategory) && this.maincategory.length > 0 ? this.maincategory[0].id : null;
-        },
-        getCategoryId() {
-            return this.isArray(this.category) && this.category.length > 0 ? this.category[0].id : null;
-        },
-        isArray(value) {
-            return Array.isArray(value);
-        },
-        isObject(value) {
-            return typeof value === "object" && value != 0;
-        },
     },
 };
 </script>
-
 
 <style scoped>
 .breadcrumb {
@@ -139,7 +133,6 @@ export default {
     font-weight: bold;
     color: #333;
     gap: 10px;
-    /* Added gap between elements */
 }
 
 .separator {

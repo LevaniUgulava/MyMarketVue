@@ -104,7 +104,7 @@ import Breadcrumb from '@/components/BreadcrumbComponent.vue';
 import api from '@/api';
 
 export default {
-  props: ['id'],
+  props: ['id', 'section'],
   components: {
     Breadcrumb,
     Message,
@@ -244,9 +244,10 @@ export default {
 };
 </script>
 <style scoped>
-.additional-ul{
+.additional-ul {
   width: 50%;
 }
+
 .custom-line {
   border: none;
   height: 1px;

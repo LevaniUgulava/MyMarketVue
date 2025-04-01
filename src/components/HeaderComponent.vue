@@ -62,9 +62,10 @@
       <div>
       </div>
       <div class="user-section">
-        <button class="login" v-if="notLogin" @click="Loginmodal">შესვლა <i class="fa-solid fa-user"></i></button>
+        <button class="login" v-if="!isAuthenticated" @click="Loginmodal">შესვლა <i
+            class="fa-solid fa-user"></i></button>
         <div v-else class="dropdown-wrapper">
-          <button @click="toggleDropdown" class="login"> {{ name }} <i class="fa-solid fa-user"></i></button>
+          <button @click="toggleDropdown" class="login"> {{ getUser }} <i class="fa-solid fa-user"></i></button>
           <ul v-if="isOpendropdown" class="dropdown-menu">
             <li v-for="item in kaitems" :key="item" @click="selectItem(item)">
               {{ item }}
@@ -91,7 +92,7 @@ import SmallSections from '@/components/Status/SmallSections.vue';
 import api from '@/api';
 import LoginComponent from './LoginComponent.vue';
 import RegisterComponent from './RegisterComponent.vue';
-
+import { mapActions, mapGetters } from 'vuex';
 
 export default {
 
@@ -111,7 +112,6 @@ export default {
       loginmodal: localStorage.getItem("loginmodal") === "true",
       registermodal: localStorage.getItem("registermodal") === "true",
       isInputVisible: false,
-      name: localStorage.getItem("name") || '',
       searchname: '',
       selectedmainCategory: "",
       selectedCategory: '',
@@ -127,11 +127,9 @@ export default {
   },
 
   computed: {
-    notLogin() {
-      return !localStorage.getItem('token');
-    },
+    ...mapGetters('auth', ['isAuthenticated']),
+    ...mapGetters('auth', ['getUser'])
   },
-
   mounted() {
     this.NamesforSearch();
     document.addEventListener('click', this.handleClickOutside);
@@ -142,7 +140,6 @@ export default {
       this.Suggestion();
     },
     loginmodal(newVal) {
-      console.log("Loginmodal state changed:", newVal);
       localStorage.setItem("loginmodal", newVal);
       if (newVal) {
         document.body.classList.add('no-scroll');
@@ -151,7 +148,6 @@ export default {
       }
     },
     registermodal(newVal) {
-      console.log("Loginmodal state changed:", newVal);
       localStorage.setItem("registermodal", newVal);
       if (newVal) {
         document.body.classList.add('no-scroll');
@@ -198,23 +194,15 @@ export default {
     toggleDropdown() {
       this.isOpendropdown = !this.isOpendropdown;
     },
+    ...mapActions("auth", {
+      logoutAction: 'logout',
+    }),
     async selectItem(item) {
       this.isOpendropdown = false;
       if (item === 'პროფილი') {
         this.$router.push(`/profile`);
       } else if (item === 'გასვლა') {
-        try {
-          await api.post('logout', {}, {
-            tokenRequired: true
-
-          });
-          localStorage.removeItem('token');
-          localStorage.removeItem('name');
-          localStorage.removeItem('roles');
-
-        } catch (error) {
-          console.error('Logout failed', error);
-        }
+        this.logoutAction();
       }
     },
     performSearch() {

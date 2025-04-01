@@ -1,7 +1,7 @@
 <template>
     <div class="carousel-container">
-        <swiper :modules="[Autoplay, Navigation, Pagination, EffectFade]" :slides-per-view="1" :loop="true"
-            :autoplay="{ delay: 30000, disableOnInteraction: false }" :pagination="{ clickable: true }"
+        <swiper :modules="[Autoplay, Navigation, EffectFade]" :slides-per-view="1" :loop="true"
+            :autoplay="{ delay: 3000, disableOnInteraction: false }" :pagination="{ clickable: true }"
             :navigation="true" :effect="'fade'" class="carousel">
             <swiper-slide v-for="(image, index) in images" :key="index">
                 <img :src="image" class="carousel-image" alt="carousel slide" />
@@ -12,7 +12,7 @@
 
 <script>
 import { Swiper, SwiperSlide } from "swiper/vue";
-import { Autoplay, Navigation, Pagination, EffectFade } from "swiper/modules";
+import { Autoplay, Navigation, EffectFade } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
@@ -27,7 +27,6 @@ export default {
         return {
             Autoplay,
             Navigation,
-            Pagination,
             EffectFade,
         };
     },
@@ -52,7 +51,7 @@ export default {
     margin: 0;
     width: 100%;
     max-width: 100%;
-    height: 65vh;
+    height: 60vh;
     overflow: hidden;
 }
 
@@ -70,7 +69,6 @@ export default {
 
 .swiper-button-prev,
 .swiper-button-next {
-    display: none;
     width: 50px;
     height: 50px;
     border-radius: 50%;
@@ -82,11 +80,8 @@ export default {
 
 .swiper-button-prev::after,
 .swiper-button-next::after {
-    display: none;
-
-    background-color: #fff;
     padding: 15px 20px;
-    font-size: 15px;
+    font-size: 20px;
     border-radius: 25px;
     color: black;
     transition: background-color 0.3s ease, color 0.3s ease;

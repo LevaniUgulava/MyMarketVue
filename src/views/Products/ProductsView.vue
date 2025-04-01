@@ -29,8 +29,6 @@
     </div>
   </div>
 
-
-
 </template>
 
 <script>
@@ -61,6 +59,8 @@ export default {
       searchname: '',
       maincategories: [],
       selectedmainCategory: [],
+      selectedColors: [],
+      selectedSizes: [],
       emitselectedmainCategory: [],
       selectedCategory: [],
       emitselectedCategory: [],
@@ -115,6 +115,9 @@ export default {
       this.Section = queryParams.get('section') || '';
       this.selectmin = queryParams.get('min') || '';
       this.selectmax = queryParams.get('max') || '';
+      this.selectedColors = queryParams.get('colors') || '';
+      this.selectedSizes = queryParams.get('sizes') || ''
+
 
       try {
         const response = await api.get('display', {
@@ -127,6 +130,8 @@ export default {
             section: this.Section,
             min: this.selectmin,
             max: this.selectmax,
+            sizes: this.selectedSizes,
+            colors: this.selectedColors,
             page: page,
           },
         });
@@ -211,6 +216,7 @@ export default {
   max-width: 250px;
   margin-top: 15px;
   padding: 10px;
+  overflow-y: auto;
 }
 
 .products-container {

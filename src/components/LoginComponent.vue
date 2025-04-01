@@ -50,9 +50,9 @@
 </template>
 
 <script>
-import api from '@/api';
 import FacebookComponentVue from './FacebookComponent.vue';
 import GoogleComponent from './GoogleComponent.vue';
+import { mapActions } from 'vuex';
 
 export default {
   name: "LoginComponent",
@@ -68,33 +68,26 @@ export default {
     }
   },
   methods: {
+    ...mapActions('auth', {
+      loginAction: 'login',
+    }),
     async login() {
       try {
-        const response = await api.post('login', {
+        await this.loginAction({
           email: this.email,
-          password: this.password
+          password: this.password,
         });
-
-        localStorage.setItem('name', response.data.name);
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('roles', response.data.roles[0]);
-        localStorage.setItem('userid', response.data.id);
-
-        this.$router.push("/");
-
-        // this.closeModal();
-
-
+        this.closeModal();
       } catch (error) {
         console.error(error);
       }
     },
+
     closeModal() {
       this.$emit('close');
     },
     openregistermodal() {
       this.$emit('openregister');
-
       this.closeModal();
     }
   }

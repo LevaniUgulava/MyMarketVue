@@ -1,9 +1,6 @@
 <template>
   <div class="layout-container">
-    <div class="banner">
-      რეგისტრაციის შემთხვევაში თქვენ შეგეძლებათ მიიღოთ სტატუსები, რაც საშუალებას გაძლევთ კონკრეტულ პროდუქტზე ექკლუზიურ
-      ფასდაკლების მიღებას
-    </div>
+    <SwiperContent class="banner" />
     <HeaderComponentVue class="header" :isMobile="isMobile" @search="handleSearch" />
 
     <HomeSideBarVue class="sidebar" v-if="isMobile" />
@@ -22,13 +19,14 @@
 import HeaderComponentVue from '@/components/HeaderComponent.vue';
 import HomeSideBarVue from '@/components/HomeSideBar.vue';
 import FooterComponentVue from '@/components/FooterComponent.vue';
-
+import SwiperContent from '@/components/SwiperContent.vue';
 export default {
   name: 'MainLayout',
   components: {
     HeaderComponentVue,
     HomeSideBarVue,
     FooterComponentVue,
+    SwiperContent
   },
   data() {
     return {

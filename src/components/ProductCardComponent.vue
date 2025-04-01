@@ -55,7 +55,7 @@ export default {
     async addToCart(id) {
       const token = localStorage.getItem('token');
       if (!token) {
-        this.$emit('cart-message', { ka: "არ არის ავტორიზირებული", en: "Not Authorized" });
+        this.$emit('cart-message',  "არ არის ავტორიზირებული");
         return;
       }
       try {

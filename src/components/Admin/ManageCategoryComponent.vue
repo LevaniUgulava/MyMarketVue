@@ -1,23 +1,31 @@
 <template>
     <div>
-        <!-- Main Categories -->
-        <div v-if="!showMainCategory">
-            <button @click="toggleMainCategory">Show Main Categories</button>
-        </div>
-        <div v-else>
-            <button @click="toggleMainCategory">Close Main Categories</button>
+        <div class="buttons">
+            <button @click="toggleMainCategory" :class="{ active: showMainCategory }">
+                მთავარი კატეგორია
+            </button>
+
+            <button @click="toggleCategory" :class="{ active: showCategory }">
+                კატეგორია
+            </button>
+
+            <button @click="toggleSubCategory" :class="{ active: showSubCategory }">
+                ქვეკატეგორია
+            </button>
+            <button @click="redirectmain">
+                მთავარი კატეგოორიის კავშირები
+            </button>
+            <button @click="redirectcat">
+                კატეგოორიის კავშირები
+            </button>
         </div>
 
         <div class="container" v-if="showMainCategory">
             <h1>Add Main Category</h1>
             <form @submit.prevent="createMainCategory" class="form">
-                <input
-                    class="maincategoryinput"
-                    type="text"
-                    v-model="mainCategoryName"
-                    placeholder="Enter main category name"
-                />
-                <button type="submit" class="add">Add</button>
+                <input class="maincategoryinput" type="text" v-model="mainCategoryName"
+                    placeholder="Enter main category name" />
+                <button type="submit" class="add">დამატება</button>
             </form>
 
             <table class="category-table">
@@ -37,29 +45,13 @@
         </div>
 
         <!-- Categories -->
-        <div v-if="!showCategory">
-            <button @click="toggleCategory">Show Categories</button>
-        </div>
-        <div v-else>
-            <button @click="toggleCategory">Close Categories</button>
-        </div>
+
 
         <div class="container" v-if="showCategory">
             <h1>Add Category</h1>
-            <select v-model="selectedMainCategory" @change="filterCategories">
-                <option value="">Select a main category...</option>
-                <option v-for="category in mainCategories" :key="category.id" :value="category.id">
-                    {{ category.name }}
-                </option>
-            </select>
             <form @submit.prevent="createCategory" class="form">
-                <input
-                    class="maincategoryinput"
-                    type="text"
-                    v-model="categoryName"
-                    placeholder="Enter category name"
-                />
-                <button type="submit" class="add">Add</button>
+                <input class="maincategoryinput" type="text" v-model="categoryName" placeholder="Enter category name" />
+                <button type="submit" class="add">დამატება</button>
             </form>
 
             <table class="category-table">
@@ -67,10 +59,10 @@
                     <th>Name</th>
                     <th>Action</th>
                 </tr>
-                <tr v-if="filteredCategories.length === 0">
+                <tr v-if="categories.length === 0">
                     <td colspan="2">No categories available.</td>
                 </tr>
-                <tr v-for="category in filteredCategories" :key="category.id">
+                <tr v-for="category in categories" :key="category.id">
                     <td>{{ category.name }}</td>
                     <td>
                         <button @click="deleteCategory(category.id)" class="btn btn-danger">
@@ -82,35 +74,14 @@
         </div>
 
         <!-- Subcategories -->
-        <div v-if="!showSubCategory">
-            <button @click="toggleSubCategory">Show Subcategories</button>
-        </div>
-        <div v-else>
-            <button @click="toggleSubCategory">Close Subcategories</button>
-        </div>
+
 
         <div class="container" v-if="showSubCategory">
             <h1>Add Subcategory</h1>
-            <select v-model="selectedMainCategoryForSub" @change="filterCategoriesForSub">
-                <option value="">Select a main category...</option>
-                <option v-for="category in mainCategories" :key="category.id" :value="category.id">
-                    {{ category.name }}
-                </option>
-            </select>
-            <select v-model="selectedCategoryForSub" @change="filterSubCategories">
-                <option value="">Select a category...</option>
-                <option v-for="category in filteredCategories" :key="category.id" :value="category.id">
-                    {{ category.name }}
-                </option>
-            </select>
             <form @submit.prevent="createSubCategory" class="form">
-                <input
-                    class="maincategoryinput"
-                    type="text"
-                    v-model="subcategoryName"
-                    placeholder="Enter subcategory name"
-                />
-                <button type="submit" class="add">Add</button>
+                <input class="maincategoryinput" type="text" v-model="subcategoryName"
+                    placeholder="Enter subcategory name" />
+                <button type="submit" class="add">დამატება</button>
             </form>
 
             <table class="category-table">
@@ -118,10 +89,10 @@
                     <th>Name</th>
                     <th>Action</th>
                 </tr>
-                <tr v-if="filteredSubcategories.length === 0">
+                <tr v-if="subcategories.length === 0">
                     <td colspan="2">No subcategories available.</td>
                 </tr>
-                <tr v-for="subcategory in filteredSubcategories" :key="subcategory.id">
+                <tr v-for="subcategory in subcategories" :key="subcategory.id">
                     <td>{{ subcategory.name }}</td>
                     <td>
                         <button @click="deleteSubCategory(subcategory.id)" class="btn btn-danger">
@@ -150,7 +121,7 @@ export default {
             subcategories: [],
             filteredSubcategories: [],
             showCategory: false,
-            showMainCategory: true,
+            showMainCategory: false,
             showSubCategory: false,
             selectedMainCategory: '',
             selectedMainCategoryForSub: '',
@@ -163,19 +134,26 @@ export default {
             if (this.showMainCategory) {
                 this.getMainCategory();
             }
+            this.showCategory = false;
+            this.showSubCategory = false;
         },
         toggleCategory() {
             this.showCategory = !this.showCategory;
             if (this.showCategory) {
                 this.getCategory();
             }
+            this.showMainCategory = false;
+            this.showSubCategory = false;
         },
         toggleSubCategory() {
             this.showSubCategory = !this.showSubCategory;
             if (this.showSubCategory) {
                 this.getSubCategory();
             }
+            this.showMainCategory = false;
+            this.showCategory = false;
         },
+
         async createMainCategory() {
             const token = localStorage.getItem('token');
             try {
@@ -223,7 +201,7 @@ export default {
             try {
                 const response = await axios.post(
                     'admin/categories/category/create',
-                    { name: this.categoryName, maincategory_id: this.selectedMainCategory },
+                    { name: this.categoryName },
                     {
                         headers: {
                             'Authorization': `Bearer ${token}`
@@ -241,7 +219,7 @@ export default {
             try {
                 const response = await axios.get('category');
                 this.categories = response.data;
-                this.filterCategories(); // Filter categories initially
+
             } catch (error) {
                 console.log(error);
             }
@@ -254,8 +232,6 @@ export default {
                         'Authorization': `Bearer ${token}`
                     }
                 });
-                this.categories = this.categories.filter(category => category.id !== id);
-                this.filterCategories();
             } catch (error) {
                 console.log(error);
             }
@@ -265,7 +241,7 @@ export default {
             try {
                 const response = await axios.post(
                     'admin/categories/subcategory/create',
-                    { name: this.subcategoryName, maincategory_id: this.selectedMainCategoryForSub, category_id: this.selectedCategoryForSub },
+                    { name: this.subcategoryName },
                     {
                         headers: {
                             'Authorization': `Bearer ${token}`
@@ -283,7 +259,6 @@ export default {
             try {
                 const response = await axios.get('subcategory');
                 this.subcategories = response.data;
-                this.filterSubCategories(); // Filter subcategories initially
             } catch (error) {
                 console.log(error);
             }
@@ -296,52 +271,36 @@ export default {
                         'Authorization': `Bearer ${token}`
                     }
                 });
-                this.subcategories = this.subcategories.filter(subcategory => subcategory.id !== id);
-                this.filterSubCategories();
             } catch (error) {
                 console.log(error);
             }
         },
-        filterCategories() {
-            if (this.selectedMainCategory) {
-                this.filteredCategories = this.categories.filter(
-                    category => category.maincategory_id === this.selectedMainCategory
-                );
-            } else {
-                this.filteredCategories = this.categories; // Show all categories
-            }
+
+        redirectmain() {
+            this.$router.push('/admin/mainrelation');
         },
-        filterCategoriesForSub() {
-            this.filteredCategories = this.categories.filter(
-                category => category.maincategory_id === this.selectedMainCategoryForSub
-            );
-            this.selectedCategoryForSub = '';
-            this.filterSubCategories(); // Reset subcategories
-        },
-        filterSubCategories() {
-            if (this.selectedCategoryForSub) {
-                this.filteredSubcategories = this.subcategories.filter(
-                    subcategory => subcategory.category_id === this.selectedCategoryForSub
-                );
-            } else {
-                this.filteredSubcategories = this.subcategories; // Show all subcategories
-            }
-        },
+        redirectcat() {
+            this.$router.push('/admin/categoryrelation');
+
+        }
     },
     mounted() {
         this.getMainCategory();
         this.getCategory();
+        this.getSubCategory();
     },
 };
 </script>
 <style scoped>
+.buttons {
+    display: flex;
+    gap: 10px;
+}
+
 .container {
     padding: 20px;
-    max-width: 800px;
     margin: 0 auto;
-    background-color: #ffffff;
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 h1 {
@@ -356,6 +315,13 @@ h1 {
     flex-direction: column;
     align-items: center;
     margin-bottom: 20px;
+}
+
+.buttons button.active {
+    background-color: #000000;
+    color: white;
+
+    border: none;
 }
 
 .maincategoryinput {
@@ -373,7 +339,7 @@ h1 {
     height: 40px;
     width: 100%;
     max-width: 600px;
-    background-color: #4CAF50;
+    background-color: #010101;
     color: white;
     border: none;
     border-radius: 5px;
@@ -383,9 +349,7 @@ h1 {
     transition: background-color 0.3s;
 }
 
-.add:hover {
-    background-color: #45a049;
-}
+
 
 .category-table {
     width: 100%;
@@ -395,7 +359,8 @@ h1 {
     background-color: #fdfdfd;
 }
 
-.category-table th, .category-table td {
+.category-table th,
+.category-table td {
     border: 1px solid #ddd;
     padding: 10px;
     text-align: left;
@@ -438,9 +403,9 @@ h1 {
 button {
     padding: 10px 20px;
     margin: 10px 0;
-    background-color: #007bff;
-    color: white;
-    border: none;
+    background-color: white;
+    border: 1.5px solid #ddd;
+    color: #3b3838;
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s;
@@ -448,7 +413,8 @@ button {
 }
 
 button:hover {
-    background-color: #0056b3;
+    border: 1.5px solid #767373;
+
 }
 
 select {
