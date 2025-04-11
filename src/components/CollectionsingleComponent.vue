@@ -3,20 +3,28 @@
     <Message v-if="emitdata" closable class="message">{{ emitdata }}</Message>
     <Message v-if="emitlikemessage" closable class="message" severity="error">{{ emitlikemessage }}</Message>
     <Message v-if="emitcartmessage" closable class="message" severity="error">{{ emitcartmessage }}</Message>
+    <div class="container">
 
-    <Breadcrumb class="bread" :maincategory="[]" :category="[]" :subcategory="[]" :name="title" />
+      <div class="category-container">
+        <ProductViewCategory @maincategories="handlemain" @categories="handlecat" @subcategories="handlesub"
+          class="category-modal" ref="productviewcategory" />
+      </div>
 
-    <div v-if="products.length > 0">
-      <div class="products-wrapper">
-        <ProductCardComponent v-for="(item) in products" :key="item.id" :initialproduct="item"
-          @cart-updated="handleCartUpdated" @liked-message="handleunauthorizedlike"
-          @cart-message="handleunauthorizedcart" />
+      <div class="product-container">
+        <Breadcrumb class="bread" :maincategory="[]" :category="[]" :subcategory="[]" :name="title" />
+
+        <div v-if="products.length > 0">
+          <div class="products-wrapper">
+            <ProductCardComponent v-for="(item) in products" :key="item.id" :initialproduct="item"
+              @cart-updated="handleCartUpdated" @liked-message="handleunauthorizedlike"
+              @cart-message="handleunauthorizedcart" />
+          </div>
+        </div>
       </div>
     </div>
 
 
 
-    <Bootstrap5Pagination :data="pagination" @pagination-change-page="changePage" />
   </div>
 
 
@@ -25,16 +33,16 @@
 <script>
 import ProductCardComponent from '../components/ProductCardComponent.vue';
 import Message from 'primevue/message';
-import { Bootstrap5Pagination } from 'laravel-vue-pagination';
 import api from '@/api';
 import Breadcrumb from '@/components/BreadcrumbComponent.vue';
+import ProductViewCategory from '@/views/Products/ProductViewCategory.vue';
 export default {
   name: 'FavoriteView',
   components: {
     ProductCardComponent,
     Message,
     Breadcrumb,
-    Bootstrap5Pagination,
+    ProductViewCategory
   },
   props: ["id"],
   data() {
@@ -118,8 +126,28 @@ export default {
 </script>
 
 <style scoped>
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 15px;
+  gap: 20px;
+}
+
+.category-container {
+  flex: 1;
+  max-width: 250px;
+  margin-top: 15px;
+  padding: 10px;
+  overflow-y: auto;
+}
+
 .bread {
-  padding: 30px;
+  margin-top: 15px;
+}
+
+.products-container {
+  flex: 3;
+  padding: 10px;
 }
 
 .loading-spinner {
@@ -200,7 +228,7 @@ export default {
 
 .products-wrapper {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   width: 100%;
 }
 

@@ -1,8 +1,8 @@
 <template>
   <div class="product-page" v-if="singleproduct">
-    <Message :message="message" @close="message = ''" :backgroundColor="'rgba(76, 175, 80, 0.25)'"
-      :textColor="'#004d40'" />
-    <Message :message="errormessage" @close="errormessage = ''" />
+
+    <Message v-if="message" :message="message" @close="message = ''" />
+    <Message v-if="errormessage" :message="errormessage" @close="errormessage = ''" />
 
     <Breadcrumb class="bread" :maincategory="singleproduct.MainCategory" :category="singleproduct.Category"
       :subcategory="singleproduct.SubCategory" :name="singleproduct.name" />
@@ -28,7 +28,10 @@
           <div>
             <ul>
               <li>
-                ზომები:
+                <div class="message-container">
+                  <span>ზომები:</span>
+                  <span v-if="messageofsize" class="message">{{ messageofsize }}</span>
+                </div>
                 <div class="size-container">
                   <div v-for="item in singleproduct.size"
                     :class="['size-item', { active: clicked && selectedSize === item.size }]" :key="item.size"
@@ -38,18 +41,20 @@
                 </div>
               </li>
               <li>
-                ფერი:
-
+                <div class="message-container">
+                  <span>ფერი:</span>
+                  <span v-if="messageofcolor" class="message">{{ messageofcolor }}</span>
+                </div>
                 <div class="color-container">
                   <div v-for="(item, index) in (clicked ? sizecolors : allcolors)" :key="index"
                     :class="['color-item', { active: cclick && selectedColor === item }]" @click="colorclick(item)">
                     {{ item.color }}
                   </div>
                 </div>
-
               </li>
             </ul>
           </div>
+
           <p class="section-title">დამატებითი ინფორმაცია:</p>
           <ul class="additional-ul">
             <li v-for="(item, index) in additionalinfo" :key="index">
@@ -60,8 +65,6 @@
               </span>
             </li>
           </ul>
-
-
         </div>
       </div>
 
@@ -73,26 +76,48 @@
           </span>
           <span v-if="singleproduct.discountstatus" class="discount-square status-discount">-{{
             singleproduct.discountstatus.discount
-            }}%</span>
+          }}%</span>
 
           <span v-else-if="singleproduct.discount" class="discount-square default-discount">-{{ singleproduct.discount
-          }}%</span>
-        </p>
-        <p class="delivery-info">
-          <i class="fa-solid fa-truck"></i> საქართველოს ფოსტის გარანტია
+            }}%</span>
         </p>
         <div class="quantity-control">
+          <div class="increment-wrapper">
+            <div v-if="quantitydemessage" class="popup-message">
+              {{ quantitydemessage }}
+              <div class="arrow-down"></div>
+            </div>
+          </div>
           <button class="quantitybtn" @click="updatequantity('decrement')">-</button>
+
           <span class="quantity">{{ quantity }}</span>
-          <button class="quantitybtn" @click="updatequantity('increment')">+</button>
+
+          <div class="increment-wrapper">
+            <div v-if="quantitymessage" class="popup-message">
+              {{ quantitymessage }}
+              <div class="arrow-down"></div>
+            </div>
+            <button class="quantitybtn" @click="updatequantity('increment')">+</button>
+          </div>
         </div>
+
         <button class="buy" @click="redirect">ყიდვა</button>
         <button class="addbtn" @click="addToCart()">კალათაში დამატება</button>
-
       </div>
     </div>
-    <!-- <StarRatingComponent class="star" :rate="rate" :singleid="singleproduct.id" :getproduct="getproduct" /> -->
     <hr class="custom-line" />
+    <div class="similar">
+      <div class="title">
+        <span>მსგავსი პროდუქტები</span>
+
+      </div>
+      <div class="products-wrapper">
+        <ProductCardComponent v-for="(item, index) in similarproduct" :key="index" :initialproduct="item"
+          @cart-updated="handleCartUpdated" @liked-message="handleunauthorizedlike"
+          @cart-message="handleunauthorizedcart" />
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -102,19 +127,26 @@ import 'vue3-carousel/dist/carousel.css';
 import Message from '@/components/Message/MessageComponent.vue';
 import Breadcrumb from '@/components/BreadcrumbComponent.vue';
 import api from '@/api';
+import ProductCardComponent from '@/components/ProductCardComponent.vue';
 
 export default {
-  props: ['id', 'section'],
+  props: ['id'],
   components: {
     Breadcrumb,
     Message,
+    ProductCardComponent
 
   },
   data() {
     return {
       additionalinfo: [],
       singleproduct: null,
+      similarproduct: [],
       message: null,
+      quantitymessage: null,
+      quantitydemessage: null,
+      messageofcolor: null,
+      messageofsize: null,
       errormessage: null,
       quantity: 1,
       size: null,
@@ -130,6 +162,9 @@ export default {
     };
   },
   watch: {
+    id() {
+      this.getproduct();
+    },
     message(newVal) {
       if (newVal) {
         setTimeout(() => {
@@ -176,26 +211,42 @@ export default {
     },
 
     async updatequantity(action) {
-      switch (action) {
-        case 'increment':
-          if (this.selectedColorquantity === this.quantity) {
-            this.quantity;
-          } else {
-            this.quantity++
-          }
-          break;
-        case 'decrement':
-          if (this.quantity < 1) {
-            this.quantity;
-          } else {
-            this.quantity--
+      if (this.selectedColor && this.selectedSize) {
 
-          }
-          break;
-        default:
-          break;
+        switch (action) {
+          case 'increment':
+            if (this.selectedColorquantity === this.quantity) {
+              await this.showMessage("მაქსიმალური რაოდენობა", "quantitymessage");
+            } else {
+              this.quantity++
+            }
+
+            break;
+          case 'decrement':
+            if (this.quantity < 2) {
+              await this.showMessage("ნაკლები შეუძლებელია", "quantitydemessage");
+            } else {
+              this.quantity--
+            }
+            break;
+          default:
+            break;
+        }
+      } else {
+        if (!this.selectedSize) {
+          this.showMessage("აირჩიეთ ზომა", "messageofsize");
+        }
+        if (!this.selectedColor) {
+          this.showMessage("აირჩიეთ ფერი", "messageofcolor");
+        }
       }
     },
+    async showMessage(message, messageType) {
+      this[messageType] = message;
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      this[messageType] = '';
+    },
+
     handleClick(item) {
       this.selectedSize = item.size;
       this.sizecolors = item.details;
@@ -211,7 +262,12 @@ export default {
         const response = await api.get(`display/${this.id}`, {
           tokenRequired: true
         });
+        const res = await api.get(`/similar/${this.id}/products`, {
+          tokenRequired: true
+        });
+
         this.singleproduct = response.data.data;
+        this.similarproduct = res.data.data;
         this.additionalinfo = JSON.parse(this.singleproduct.additionalinfo);
 
         this.allcolors = this.singleproduct.size.flatMap(element =>
@@ -244,8 +300,86 @@ export default {
 };
 </script>
 <style scoped>
+.similar .title {
+  display: flex;
+  margin-top: 10px;
+}
+
+.similar span {
+  font-size: 20px;
+  font-weight: bolder;
+  margin: 0 30px auto;
+}
+
+.products-wrapper {
+  display: flex;
+  margin-top: 20px;
+  gap: 10px;
+}
+
+.message-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.message {
+  font-size: 14px;
+  color: #d9534f;
+  margin-left: 10px;
+  transition: opacity 0.3s ease;
+  opacity: 0;
+}
+
+.message-container .message {
+  opacity: 1;
+}
+
 .additional-ul {
   width: 50%;
+}
+
+.increment-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.popup-message {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #fff;
+  color: #333;
+  border: 1px solid #d1d1d1;
+  border-radius: 4px;
+  padding: 8px 10px;
+  font-size: 13px;
+  white-space: nowrap;
+  z-index: 999;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.popup-message .arrow-down {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid #d1d1d1;
+}
+
+.increment-wrapper:first-child .popup-message {
+  transform: translateX(-50%) translateY(-30%);
+}
+
+.increment-wrapper:first-child .arrow-down {
+  margin-left: 5px;
+
 }
 
 .custom-line {

@@ -56,13 +56,10 @@
           </router-link>
         </div>
       </div>
-
-
-
       <div>
       </div>
       <div class="user-section">
-        <button class="login" v-if="!isAuthenticated" @click="Loginmodal">შესვლა <i
+        <button class="login" v-if="!isAuthenticated" @click="openmodal('loginmodal')">შესვლა <i
             class="fa-solid fa-user"></i></button>
         <div v-else class="dropdown-wrapper">
           <button @click="toggleDropdown" class="login"> {{ getUser }} <i class="fa-solid fa-user"></i></button>
@@ -79,10 +76,18 @@
 
       <SmallSections />
     </div>
+    <LoginComponent :open="loginmodal" @close="() => closemodal('loginmodal')"
+      @openregister="() => openmodal('registermodal')" @openforget="() => openmodal('forgetmodal')" />
 
-    <LoginComponent :open="this.loginmodal" @close="closeloginmodal" @openregister="Registermodal" />
+    <RegisterComponent :open="registermodal" @close="() => closemodal('registermodal')"
+      @openlogin="() => openmodal('loginmodal')" />
 
-    <RegisterComponent :open="this.registermodal" @close="closeregistermodal" @openlogin="Loginmodal" />
+    <ForgetPassword :open="forgetmodal" @close="() => closemodal('forgetmodal')" @email="handleconfirmmail" />
+
+    <EmailConfirmation :open="confirmmodal" :email="confirmationemail" @close="() => closemodal('confirmmodal')"
+      @openresetmodal="() => openmodal('passwordmmodal')" />
+
+    <PasswordComponent :open="passwordmmodal" :email="confirmationemail" @close="() => closemodal('passwordmmodal')" />
 
   </div>
 </template>
@@ -92,7 +97,10 @@ import SmallSections from '@/components/Status/SmallSections.vue';
 import api from '@/api';
 import LoginComponent from './LoginComponent.vue';
 import RegisterComponent from './RegisterComponent.vue';
-import { mapActions, mapGetters } from 'vuex';
+import { mapActions, mapGetters, mapState, mapMutations } from 'vuex';
+import ForgetPassword from '@/views/Password/ForgetPassword.vue';
+import EmailConfirmation from '@/views/Password/EmailConfirmation.vue';
+import PasswordComponent from '@/views/Password/PasswordComponent.vue';
 
 export default {
 
@@ -100,7 +108,10 @@ export default {
   components: {
     SmallSections,
     LoginComponent,
-    RegisterComponent
+    RegisterComponent,
+    ForgetPassword,
+    EmailConfirmation,
+    PasswordComponent
   },
   props: {
     isMobile: Boolean,
@@ -109,14 +120,11 @@ export default {
     return {
       isOpen: false,
       isOpendropdown: false,
-      loginmodal: localStorage.getItem("loginmodal") === "true",
-      registermodal: localStorage.getItem("registermodal") === "true",
       isInputVisible: false,
       searchname: '',
       selectedmainCategory: "",
       selectedCategory: '',
       selectedsubCategory: '',
-      isModalVisible: false,
       Searchnames: [],
       SuggestionNames: [],
       emitmin: '',
@@ -128,7 +136,15 @@ export default {
 
   computed: {
     ...mapGetters('auth', ['isAuthenticated']),
-    ...mapGetters('auth', ['getUser'])
+    ...mapGetters('auth', ['getUser']),
+    ...mapState('modals', [
+      'loginmodal',
+      'registermodal',
+      'forgetmodal',
+      'confirmmodal',
+      'passwordmmodal',
+      'confirmationemail',
+    ]),
   },
   mounted() {
     this.NamesforSearch();
@@ -140,29 +156,48 @@ export default {
       this.Suggestion();
     },
     loginmodal(newVal) {
-      localStorage.setItem("loginmodal", newVal);
-      if (newVal) {
-        document.body.classList.add('no-scroll');
-      } else {
-        document.body.classList.remove('no-scroll');
-      }
+      this.noscroll(newVal)
+    },
+    passwordmmodal(newVal) {
+      this.noscroll(newVal)
+
     },
     registermodal(newVal) {
-      localStorage.setItem("registermodal", newVal);
-      if (newVal) {
-        document.body.classList.add('no-scroll');
-      } else {
-        document.body.classList.remove('no-scroll');
-      }
+      this.noscroll(newVal)
+
+    },
+    forgetmodal(newVal) {
+      this.noscroll(newVal)
+
+    },
+    confirmmodal(newVal) {
+      this.noscroll(newVal)
+
     },
     name(newValue) {
       localStorage.setItem("name", newValue);
     }
-
-
   },
 
   methods: {
+    ...mapMutations('modals', ['openmodal', 'closemodal', 'setemail']),
+
+    noscroll(newVal) {
+      if (newVal) {
+        document.body.classList.add('no-scroll');
+      } else {
+        document.body.classList.remove('no-scroll');
+      }
+    },
+    handleresetopen(data) {
+      this.setemail(data);
+      this.openmodal('passwordmmodal');
+    },
+    handleconfirmmail(data) {
+      this.setemail(data);
+      this.closemodal('forgetmodal');
+      this.openmodal('confirmmodal');
+    },
     redirect() {
       this.$router.push("/");
     },
@@ -172,25 +207,7 @@ export default {
         this.SuggestionNames = [];
       });
     },
-    Loginmodal() {
-      this.loginmodal = !this.loginmodal;
-    },
-    closeloginmodal() {
-      this.loginmodal = false;
-    },
-    Registermodal() {
-      this.registermodal = !this.registermodal;
-    },
-    closeregistermodal() {
-      this.registermodal = false;
-    },
 
-    openModal() {
-      this.isModalVisible = true;
-    },
-    closeModal() {
-      this.isModalVisible = false;
-    },
     toggleDropdown() {
       this.isOpendropdown = !this.isOpendropdown;
     },
@@ -233,7 +250,7 @@ export default {
     closeOnBlur() {
       setTimeout(() => {
         this.isOpen = false;
-      }, 150); // Delay so it doesn't close before button click
+      }, 150);
     },
     handleClickOutside(event) {
       const container = this.$refs.searchContainer;
@@ -369,7 +386,7 @@ body {
 }
 
 .outline-icon.active {
-  color: #7a1fff;
+  color: #62389c;
 }
 
 .suggestions-container {
@@ -527,7 +544,7 @@ h1 {
 }
 
 .dropdown:hover {
-  background-color: #7a1dff1a;
+  background-color: #62389c;
   border-radius: 10px;
   cursor: pointer;
 }
@@ -541,7 +558,7 @@ h1 {
   max-width: 500px;
   margin: auto;
   background: #fff;
-  border: 1px solid #b180f5;
+  border: 1px solid #6d45a5;
   border-radius: 8px;
   padding: 5px;
   position: relative;
@@ -556,12 +573,10 @@ h1 {
   outline: none;
   border-radius: 6px;
   width: 100%;
-  /* Keeps text aligned to the left */
 }
 
 .search-container input::placeholder {
   color: #aaa;
-  /* Ensures placeholder stays aligned */
 }
 
 .srchbtn {

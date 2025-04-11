@@ -9,7 +9,7 @@
     </div>
 
     <div v-if="apiLoaded && products.length === 0" class="empty-favorites">
-      <i class="fas fa-heart-circle-plus empty-icon"></i>
+      <i class="fa-solid fa-heart"></i>
       <p class="empty-text">თქვენ ჯერ არ მოგიწონებიათ პროდუქტი</p>
       <p class="empty-subtext">დამატეთ ყველა პროდუქტი, რაც თქვენ გაინტერესებთ</p>
       <div class="empty-actions">
@@ -18,7 +18,6 @@
       </div>
     </div>
 
-    <!-- Pagination -->
     <Bootstrap5Pagination v-if="apiLoaded && products.length > 0" :data="pagination"
       @pagination-change-page="changePage" />
   </div>
@@ -45,7 +44,7 @@ export default {
     return {
       products: [],
       pagination: {},
-      apiLoaded: false, // New state to track when API is finished loading
+      apiLoaded: false,
     };
   },
   methods: {
@@ -77,7 +76,6 @@ export default {
 }
 
 
-/* Empty State */
 .empty-favorites {
   display: flex;
   flex-direction: column;
@@ -88,41 +86,33 @@ export default {
   color: #333;
 }
 
-/* Empty State Icon */
-.empty-icon {
-  font-size: 4rem;
-  color: #9b51e0;
-  margin-bottom: 15px;
-}
 
-/* Empty State Text */
+
 .empty-text {
-  font-size: 1.5rem;
+  font-size: 14px;
   font-weight: bold;
   color: #333;
 }
 
 .empty-subtext {
-  font-size: 1rem;
+  font-size: 14px;
   color: #666;
   margin-top: 5px;
 }
 
-/* Empty State Buttons */
 .empty-actions {
   margin-top: 20px;
   display: flex;
   gap: 15px;
 }
 
-/* Primary CTA Button */
 .primary-btn {
   text-decoration: none;
   background-color: #9b51e0;
   color: white;
-  padding: 12px 24px;
+  padding: 10px 15px;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: 13px;
   font-weight: 600;
   transition: background-color 0.3s ease;
 }
@@ -131,13 +121,12 @@ export default {
   background-color: #7e3ae3;
 }
 
-/* Secondary CTA Button */
 .secondary-btn {
   text-decoration: none;
   color: #9b51e0;
-  font-size: 1rem;
+  font-size: 13px;
+  padding: 10px 15px;
   font-weight: 600;
-  padding: 12px 24px;
   border-radius: 8px;
   border: 2px solid #9b51e0;
   transition: background-color 0.3s ease, color 0.3s ease;

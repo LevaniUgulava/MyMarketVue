@@ -2,11 +2,7 @@
     <div>
         <div v-if="OrderProducts.length > 0 && !isLoading">
             <div class="filters">
-                <input 
-                    type="text" 
-                    v-model="searchQuery" 
-                    placeholder="Search by Order ID or User Name" 
-                />
+                <input type="text" v-model="searchQuery" placeholder="Search by Order ID or User Name" />
                 <select v-model="selectedStatus" class="status-select">
                     <option value="">All Statuses</option>
                     <option value="Pending">Pending</option>
@@ -22,40 +18,25 @@
                 <button @click="updateStatus" class="update-status-btn">Update Status</button>
             </div>
             <div class="orders">
-                <div 
-                    v-for="order in filteredOrders" 
-                    :key="order.order_id" 
-                    class="card"
-                >
+                <div v-for="order in filteredOrders" :key="order.order_id" class="card">
                     <div class="checkbox-container">
-                          <input 
-                            type="checkbox" 
-                            :value="order.order_id" 
-                            v-model="selectedOrders"
-                          />
-                         
+                        <input type="checkbox" :value="order.order_id" v-model="selectedOrders" />
+
                     </div>
                     <router-link :to="'orders/' + order.order_id" class="link">
-                    <div class="order-header">
-                        <h3>Order ID: {{ order.order_id }}</h3>
-                        <span 
-                            class="status" 
-                            :class="order.order_status"
-                        >
-                            {{ order.order_status }}
-                        </span>
-                    </div>
-                    <p>Paid: ${{ order.order_amount }}</p>
-                    <!-- <p>User: {{ order.user.name }}</p> -->
-                    <div class="products">
-                        <OrderComponentVue
-                            v-for="product in order.products" 
-                            :key="product.id"
-                            :product="product"
-                            :order_status="order.order_status"
-                        />
-                    </div>
-                  </router-link>
+                        <div class="order-header">
+                            <h3>Order ID: {{ order.order_id }}</h3>
+                            <span class="status" :class="order.order_status">
+                                {{ order.order_status }}
+                            </span>
+                        </div>
+                        <p>Paid: ${{ order.order_amount }}</p>
+                        <!-- <p>User: {{ order.user.name }}</p> -->
+                        <div class="products">
+                            <OrderComponentVue v-for="product in order.products" :key="product.id" :product="product"
+                                :order_status="order.order_status" />
+                        </div>
+                    </router-link>
                 </div>
 
             </div>
@@ -67,8 +48,8 @@
 </template>
 
 <script>
+import api from '@/api';
 import OrderComponentVue from '@/components/OrderComponent.vue';
-import axios from 'axios';
 
 export default {
     components: {
@@ -81,17 +62,17 @@ export default {
             searchQuery: '',
             selectedStatus: '',
             selectedOrders: [],
-            status:''
+            status: ''
         };
     },
     computed: {
         filteredOrders() {
             return this.OrderProducts.filter(order => {
-                const matchesQuery = 
-                    order.order_id.toString().includes(this.searchQuery) || 
+                const matchesQuery =
+                    order.order_id.toString().includes(this.searchQuery) ||
                     (order.user.name && order.user.name.toLowerCase().includes(this.searchQuery.toLowerCase()));
-                const matchesStatus = 
-                    !this.selectedStatus || 
+                const matchesStatus =
+                    !this.selectedStatus ||
                     order.order_status === this.selectedStatus;
 
                 return matchesQuery && matchesStatus;
@@ -100,12 +81,10 @@ export default {
     },
     methods: {
         async getOrders() {
-            const token = localStorage.getItem('token');
             try {
-                const response = await axios.get('admin/orders', {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
+                const response = await api.get('admin/orders', {
+                    tokenRequired: true
+
                 });
                 this.OrderProducts = response.data.orders;
             } catch (error) {
@@ -116,18 +95,16 @@ export default {
         },
 
         async updateStatus() {
-            const token = localStorage.getItem('token');
             try {
-                const response = await axios.post(
-                    '/admin/update/status', 
+                const response = await api.post(
+                    '/admin/update/status',
                     {
                         id: this.selectedOrders,
-                        status:this.status,
+                        status: this.status,
                     },
                     {
-                        headers: {
-                            "Authorization": `Bearer ${token}`,
-                        },
+                        tokenRequired: true
+
                     }
                 );
                 this.getOrders();
@@ -146,10 +123,11 @@ export default {
 </script>
 
 <style>
-.link{
+.link {
     text-decoration: none;
     color: #000000;
 }
+
 body {
     font-family: Arial, sans-serif;
     background-color: #f9f9f9;
@@ -185,7 +163,9 @@ body {
     align-items: center;
 }
 
-.filters input, .filters select, .update-status-btn {
+.filters input,
+.filters select,
+.update-status-btn {
     margin-top: 1%;
     padding: 10px;
     font-size: 1rem;

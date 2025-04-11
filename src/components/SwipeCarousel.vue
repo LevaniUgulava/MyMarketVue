@@ -1,10 +1,12 @@
 <template>
     <div class="carousel-container">
         <swiper :modules="[Autoplay, Navigation, EffectFade]" :slides-per-view="1" :loop="true"
-            :autoplay="{ delay: 3000, disableOnInteraction: false }" :pagination="{ clickable: true }"
+            :autoplay="{ delay: 5000, disableOnInteraction: false }" :pagination="{ clickable: true }"
             :navigation="true" :effect="'fade'" class="carousel">
             <swiper-slide v-for="(image, index) in images" :key="index">
-                <img :src="image" class="carousel-image" alt="carousel slide" />
+                <a :href="image.url" target="_blank" rel="noopener noreferrer">
+                    <img :src="image.media_url" class="carousel-image" alt="carousel slide" />
+                </a>
             </swiper-slide>
         </swiper>
     </div>
@@ -17,6 +19,7 @@ import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
 import "swiper/css/effect-fade";
+import api from "@/api";
 
 export default {
     components: {
@@ -32,38 +35,45 @@ export default {
     },
     data() {
         return {
-            images: [
-                "https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?w=1080&fit=max",
-                "https://images.unsplash.com/photo-1519682337058-a94d519337bc?w=1080&fit=max",
-                "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=1080&fit=max",
-                "https://images.unsplash.com/photo-1518770660439-4636190af475?w=1080&fit=max",
-                "https://images.unsplash.com/photo-1557683316-973673baf926?w=1080&fit=max"
-            ]
-
+            images: [],
         };
+    },
+    methods: {
+        async getbanner() {
+            try {
+                const response = await api.get('/banner/display');
+                this.images = response.data;
+                console.log(this.images);
+
+            } catch (error) {
+                console.log(error);
+            }
+        },
+    },
+    mounted() {
+        this.getbanner();
     },
 };
 </script>
 
+
 <style>
 .carousel-container {
-    padding: 0;
-    margin: 0;
+    padding: 10px;
+    margin-top: 20px;
     width: 100%;
-    max-width: 100%;
-    height: 60vh;
     overflow: hidden;
 }
 
 .carousel {
     width: 100%;
-    height: 90%;
-    margin-top: 30px;
+    height: 100%;
 }
 
 .carousel-image {
     width: 100%;
     height: 100%;
+    border-radius: 10px;
     object-fit: cover;
 }
 
@@ -98,17 +108,22 @@ export default {
 .swiper-button-prev:hover::after,
 .swiper-button-next:hover::after {
     display: block;
-
     background-color: black;
     color: white;
 }
 
-
-
-
 @media (max-width: 768px) {
-    .carousel-container {
-        height: 40vh;
+
+    .swiper-button-prev::after,
+    .swiper-button-next::after {
+        padding: 8px 10px;
+        font-size: 13px;
+    }
+
+
+    .swiper-button-prev,
+    .swiper-button-next {
+        width: 5px;       
     }
 }
 </style>

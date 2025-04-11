@@ -24,7 +24,8 @@
                         <button @click="deletecollection(collection.id)" class="action-btn delete-btn">
                             <i class="fa-solid fa-trash"></i> Delete
                         </button>
-                        <router-link :to="{ name: 'singlecollection', params: { id: collection.id } }" class="action-btn view-btn">
+                        <router-link :to="{ name: 'singlecollection', params: { id: collection.id } }"
+                            class="action-btn view-btn">
                             <i class="fa-solid fa-eye"></i> View
                         </router-link>
                     </td>
@@ -35,7 +36,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '@/api';
 export default {
     name: "CollectionComponent",
     data() {
@@ -46,19 +47,16 @@ export default {
     methods: {
         async getcollection() {
             try {
-                const response = await axios.get('collection/display');
+                const response = await api.get('collection/display');
                 this.collections = response.data;
             } catch (error) {
                 console.log(error);
             }
         },
         async deletecollection(id) {
-            const token = localStorage.getItem('token');
             try {
-                await axios.post(`admin/collection/delete/${id}`, {}, {
-                    headers: {
-                        "Authorization": `Bearer ${token}`
-                    }
+                await api.post(`admin/collection/delete/${id}`, {}, {
+                    tokenRequired: true
                 });
                 this.collections = this.collections.filter(collection => collection.id !== id);
             } catch (error) {
@@ -73,8 +71,6 @@ export default {
 </script>
 
 <style scoped>
-
-
 /* Table styling */
 table {
     width: 100%;
@@ -82,7 +78,8 @@ table {
     margin-top: 20px;
 }
 
-th, td {
+th,
+td {
     border: 1px solid #ddd;
     padding: 10px;
     text-align: left;

@@ -1,10 +1,13 @@
 <template>
-  <div v-if="message" :class="['message', messageType]" :style="{ backgroundColor: backgroundColor, color: textColor }">
-    <span>{{ message }}</span>
-    <button @click="removemessage">x</button>
+  <div class="messagecomponent">
+    <div>
+      {{ message }}
+    </div>
+    <div>
+      <i @click.prevent="$emit('close')" class="fa-solid fa-xmark"></i>
+    </div>
   </div>
 </template>
-
 
 <script>
 export default {
@@ -14,52 +17,38 @@ export default {
       type: String,
       required: true,
     },
-    backgroundColor: {
-      type: String,
-      default: "#f8d7da",
-    },
-    textColor: {
-      type: String,
-      default: "#721c24",
-    },
-  },
-  methods: {
-    removemessage() {
-      this.$emit("close");
-    },
   },
 };
-
 </script>
 
 <style scoped>
-.message {
-  background-color: #f8d7da;
-  color: #721c24;
-  padding: 1rem;
-  border-radius: 8px;
-  border: 1px solid #f5c6cb;
+.messagecomponent {
   display: flex;
-  justify-content: space-between;
-  align-items: center; 
-  margin: 1rem 0;
-  font-size: 1rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.message button {
-  background: transparent;
+  position: fixed;
+  top: 21%;
+  right: 0.1%;
+  color: white;
+  padding: 20px;
+  background-color: #62389c;
   border: none;
-  color: #721c24;
-  font-size: 1.2rem;
-  cursor: pointer;
-  padding: 0;
-  margin-left: 1rem;
-  transition: color 0.3s ease;
+  border-radius: 12px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 9999;
+  max-width: 400px;
+  width: auto;
+  font-size: 13px;
+  gap: 10px;
 }
 
-.message button:hover {
-  color: #d9534f; 
+.messagecomponent i {
+  cursor: pointer;
+}
+
+.messagecomponent div {
+  font-weight: 900;
+  text-transform: uppercase;
+  font-family: 'Roboto', sans-serif;
 }
 </style>

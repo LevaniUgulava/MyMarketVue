@@ -14,7 +14,7 @@ const routes = [
         name: "Home",
         component: () => import("@/views/Products/MainHomeView.vue"),
         meta:{
-          title:"მთავარი გვერდი",
+          title:"Lemale - მთავარი გვერდი",
           description:"გვერდი სადაც შეიძენთ ქალისა და კაცის ტანსაცმელს,ფეხსაცმელს,სათვალეს,შარვალი,კაბა,ორეული"
         }
       },
@@ -34,6 +34,10 @@ const routes = [
         path: "profile",
         name: "Profile",
         component: () => import("@/views/ProfileView.vue"),
+        meta: {
+          needsauth: true,
+        },
+        
       },
       {
         path: "product/:id",
@@ -194,6 +198,16 @@ const routes = [
         props: true,
       },
       {
+        path: "banner",
+        name: "banner",
+        component: () => import("@/components/Admin/banner/BannerComponent.vue"),
+      },
+      {
+        path: "/banner/create",
+        name: "bannercreate",
+        component: () => import("@/components/Admin/banner/BannerCreateComponent.vue"),
+      },
+      {
         path: "logs",
         name: "logs",
         component: () => import("@/views/Admin/LoggerView.vue"),
@@ -263,25 +277,32 @@ router.afterEach((to,from) => {
   }
 });
 
-
 router.beforeEach((to, from, next) => {
   const isAuthenticated = !!localStorage.getItem("token");
   const roles = localStorage.getItem("roles");
 
-  if (to.path.startsWith("/admin")) {
-    if (to.meta.needsauth) {
+  if (to.meta.needsauth) {
+    if (to.path.startsWith('/admin')) {
       if (isAuthenticated && roles !== "default") {
         next();
       } else {
         next(`/admin/login`);
       }
-    } else {
-      next();
+    }
+    else if (to.path.startsWith('/')) {
+      if (isAuthenticated) {
+        next();
+      } else {
+        localStorage.setItem("loginmodal", true);
+        
+       next(`/`);   
+    }
     }
   } else {
     next();
   }
 });
+
 
 
 export default router;

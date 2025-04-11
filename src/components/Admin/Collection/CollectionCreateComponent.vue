@@ -32,7 +32,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '@/api';
 export default {
     name: "CollectionComponent",
     data() {
@@ -52,7 +52,6 @@ export default {
         },
 
         async submitForm() {
-            const token = localStorage.getItem('token');
             const formData = new FormData();
             formData.append('title', this.form.title);
             formData.append('headerColor', this.form.headerColor);
@@ -64,14 +63,11 @@ export default {
             }
 
             try {
-                const response = await axios.post(
+                const response = await api.post(
                     'admin/collection/create',
                     formData,
                     {
-                        headers: {
-                            "Authorization": `Bearer ${token}`,
-                            "Content-Type": "multipart/form-data"
-                        }
+                        tokenRequired: true
                     }
                 );
 
@@ -102,7 +98,9 @@ label {
     display: block;
 }
 
-input[type="text"], input[type="number"], textarea {
+input[type="text"],
+input[type="number"],
+textarea {
     width: 100%;
     padding: 8px;
     border: 1px solid #ddd;

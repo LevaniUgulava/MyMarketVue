@@ -19,6 +19,7 @@ export default {
 <style>
 html {
   scroll-behavior: instant;
+
 }
 
 body {

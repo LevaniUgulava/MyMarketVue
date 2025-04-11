@@ -1,8 +1,5 @@
 <template>
-  <Message :message="emitdata" @close="emitdata = ''" :backgroundColor="'rgba(76, 175, 80, 0.25)'"
-    :textColor="'#004d40'" :positionType="'fixed'" />
-  <Message :message="emitlikemessage" @close="emitlikemessage = ''" />
-  <Message :message="emitcartmessage" @close="emitcartmessage = ''" />
+  <Message v-if="emitdata" :message="emitdata" @close="emitdata = ''" />
 
   <div>
     <SwipeCarousel />
@@ -16,7 +13,7 @@
             :class="{ 'reduce-height': sections.length > 4 && index === 1 }">
             <div class="grid-item-image" :style="{ backgroundImage: 'url(' + item.media_urls + ')' }">
               <div class="grid-item-text">
-                <label>{{ item.title }}</label>
+                <label class="collection-label">{{ item.title }}</label>
                 <p class="description">{{ item.description }}</p>
                 <span v-if="item.discount" class="discount">{{ item.discount }}%</span>
               </div>
@@ -93,7 +90,6 @@ export default {
           { key: 'discount', title: 'ფასდაკლებული პროდუქტი', products: productsResponse.data.discount.data },
         ]
         const sections = collectionResponse.data;
-        console.log(sections); // Debugging sections content
         this.sections = sections;
 
       } catch (error) {
@@ -105,16 +101,10 @@ export default {
       this.$router.push({ path: `/product`, query: { section: category } });
     },
 
-    handleunauthorizedlike(message) {
-      this.emitlikemessage = this.message[this.currentLanguage][message.message];
-    },
 
-    handleunauthorizedcart(message) {
-      this.emitcartmessage = this.message[this.currentLanguage][message.message];
-    },
 
     handleCartUpdated(message) {
-      this.emitdata = this.message[this.currentLanguage][message.message];
+      this.emitdata = message.message;
     },
   },
   mounted() {
@@ -155,7 +145,9 @@ export default {
 
 
 .section-header p {
-  font-weight: 500;
+  font-weight: 900;
+  text-transform: uppercase;
+  font-family: 'Roboto', sans-serif;
   cursor: pointer;
   margin-left: 40px;
 
@@ -200,7 +192,6 @@ button:hover {
 }
 
 .collection-section {
-  margin-top: 10px;
   padding: 20px;
   border-radius: 12px;
 }
@@ -217,7 +208,6 @@ button:hover {
 .collection-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  /* Show two items per row */
   gap: 20px;
   position: relative;
   width: 100%;
@@ -259,6 +249,9 @@ button:hover {
   color: #fff;
   padding: 20px;
   font-size: 1.2rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  font-family: 'Roboto', sans-serif;
   font-weight: bold;
   text-align: left;
 }
@@ -328,6 +321,9 @@ button:hover {
 }
 
 @media (max-width: 768px) {
+  .collection-label{
+    font-size: 13px;
+  }
   .product-availability {
     font-size: 0.7rem;
   }

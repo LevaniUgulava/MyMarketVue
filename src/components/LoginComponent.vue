@@ -27,7 +27,7 @@
             <button class="loginbtn">შესვლა</button>
             <div class="links">
               <span class="link">
-                დაგავიწყდა პაროლი? <a href="/forget/password" class="forget">პაროლის აღდგენა</a>
+                დაგავიწყდა პაროლი? <a @click="openforgetmodal" class="forget">პაროლის აღდგენა</a>
               </span>
               <span class="link">
                 არ გაქვს ანგარიში? <a @click="openregistermodal" class="forget">რეგისტრაცია</a>
@@ -88,6 +88,10 @@ export default {
     },
     openregistermodal() {
       this.$emit('openregister');
+      this.closeModal();
+    },
+    openforgetmodal() {
+      this.$emit('openforget');
       this.closeModal();
     }
   }

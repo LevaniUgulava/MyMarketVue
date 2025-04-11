@@ -3,11 +3,16 @@
         <span class="clickable" @click="navigatemain()">
             <i class="fa-solid fa-house outline-icon"></i>
         </span>
-        <span class="separator"> / </span>
 
-        <span v-if="computedSection" class="clickable" @click="navigate({ section: computedSection })">
-            {{ formatSection(computedSection) }}
-        </span>
+
+        <template v-if="computedSection">
+            <span class="separator"> / </span>
+            <span class="clickable" @click="navigate({ section: computedSection })">
+
+                {{ formatSection(computedSection) }}
+            </span>
+        </template>
+
 
         <template v-if="getMainCategory && getMainCategory.length">
             <span class="separator"> / </span>
@@ -61,7 +66,7 @@ import { mapGetters } from 'vuex';
 export default {
     computed: {
         computedSection() {
-            return this.$route.query.section || localStorage.getItem('section') || "all";
+            return this.$route.query.section || null;
         },
         ...mapGetters('categories', [
             'getMainCategory',
@@ -120,6 +125,9 @@ export default {
                     return section;
             }
         },
+    },
+    mounted() {
+        localStorage.setItem("section", this.$route.query.section);
     },
 };
 </script>

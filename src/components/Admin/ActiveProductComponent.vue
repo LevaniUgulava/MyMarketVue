@@ -35,9 +35,9 @@
                 <td>{{ product.name }}</td>
                 <td>{{ product.description }}</td>
                 <td>{{ product.price }} lari</td>
-                <td>{{ product.MainCategory }}</td>
-                <td>{{ product.Category }}</td>
-                <td>{{ product.SubCategory }}</td>
+                <td>{{ product.MainCategory.name }}</td>
+                <td>{{ product.Category.name }}</td>
+                <td>{{ product.SubCategory.name }}</td>
                 <td>
                     <img :src="product.image_urls" class="img">
                 </td>
@@ -68,31 +68,31 @@
 </template>
 
 <script>
-import axios from 'axios';
 import { Bootstrap5Pagination } from "laravel-vue-pagination";
 import CategoryModalVue from '../CategoryModal.vue';
+import api from '@/api';
 export default {
-    name: "ActiveProductComponent",
-     components: {
+  name: "ActiveProductComponent",
+  components: {
     Bootstrap5Pagination,
     CategoryModalVue
 
   },
-    data() {
-        return {
+  data() {
+    return {
       products: [],
-      isModalVisible:false,
+      isModalVisible: false,
       selectedProducts: [],
       pagination: {},
       message: '',
-      Searchname:'',
-      selectedmainCategory:null,
-      selectedCategory:null,
-      selectedsubCategory:null,
+      Searchname: '',
+      selectedmainCategory: null,
+      selectedCategory: null,
+      selectedsubCategory: null,
 
-        }
-    },
-    watch: {
+    }
+  },
+  watch: {
     '$route.query': {
       handler() {
         this.fetchProductData();
@@ -101,52 +101,50 @@ export default {
     }
   },
   methods: {
-       searchCategory(data) {
-      this.selectedmainCategory = data.maincategory; 
-      this.selectedCategory=data.category;
-      this.selectedsubCategory=data.subcategory;
+    searchCategory(data) {
+      this.selectedmainCategory = data.maincategory;
+      this.selectedCategory = data.category;
+      this.selectedsubCategory = data.subcategory;
 
     },
-      openModal(){
-       this.isModalVisible= true
+    openModal() {
+      this.isModalVisible = true
     },
-      closeModal(){
-       this.isModalVisible= false
+    closeModal() {
+      this.isModalVisible = false
     },
-      changePage(page) {
+    changePage(page) {
       this.$router.push({ path: '/admin/actions', query: { ...this.$route.query, page } });
     },
-performSearch() {
-  const currentQuery = { ...this.$route.query };
+    performSearch() {
+      const currentQuery = { ...this.$route.query };
       this.$router.push({
         path: '/admin/actions',
         query: {
           ...currentQuery,
-          searchname: this.Searchname,        
-          maincategory: this.selectedmainCategory, 
+          searchname: this.Searchname,
+          maincategory: this.selectedmainCategory,
           category: this.selectedCategory,
           subcategory: this.selectedsubCategory,
-          page: 1                             
+          page: 1
         }
       });
-},
+    },
     async fetchProductData() {
-      const token=localStorage.getItem('token');
-         const queryParams = new URLSearchParams(this.$route.query);
-    const page = parseInt(queryParams.get('page')) || 1;
+      const queryParams = new URLSearchParams(this.$route.query);
+      const page = parseInt(queryParams.get('page')) || 1;
       try {
-        const response = await axios.get(`admindisplay`,{
-            headers: {
-        Authorization: `Bearer ${token}` 
-                 },
-         params:{
-              page:page,
-              searchname:this.Searchname,
-              maincategory: this.selectedmainCategory,
+        const response = await api.get(`admindisplay`, {
+          tokenRequired: true,
+
+          params: {
+            page: page,
+            searchname: this.Searchname,
+            maincategory: this.selectedmainCategory,
             category: this.selectedCategory,
             subcategory: this.selectedsubCategory,
           }
-      
+
         });
         if (response.data && response.data.data) {
           this.products = response.data.data;
@@ -155,7 +153,7 @@ performSearch() {
             last_page: response.data.meta.last_page,
             per_page: response.data.meta.per_page,
             total: response.data.meta.total,
-            links: response.data.links 
+            links: response.data.links
           };
 
           console.log(response.data)
@@ -166,46 +164,42 @@ performSearch() {
         console.error('Error fetching product data:', error);
       }
     },
-        async notactive(id) {
-                const token=localStorage.getItem('token');
+    async notactive(id) {
 
-            try {
-                const response = await axios.post(`notactive/${id}`,{},{
-                   headers: {
-        Authorization: `Bearer ${token}` 
-                 },
-                });
-                const product = this.products.find(product => product.id === id);
-                if (product) {
-                    product.active = false;
-                }
-                console.log(response);
-            } catch (error) {
-                console.log(error);
-            }
-        },
-        async active(id) {
-                const token=localStorage.getItem('token');
+      try {
+        const response = await api.post(`notactive/${id}`, {}, {
+          tokenRequired: true
 
-            try {
-                const response = await axios.post(`active/${id}`,{},{
-                   headers: {
-        Authorization: `Bearer ${token}` 
-                 },
-                });
-                const product = this.products.find(product => product.id === id);
-                if (product) {
-                    product.active = true;
-                }
-                console.log(response);
-            } catch (error) {
-                console.log(error);
-            }
+        });
+        const product = this.products.find(product => product.id === id);
+        if (product) {
+          product.active = false;
         }
+        console.log(response);
+      } catch (error) {
+        console.log(error);
+      }
     },
-    created() {
-        this.fetchProductData();
-    },
+    async active(id) {
+
+      try {
+        const response = await api.post(`active/${id}`, {}, {
+          tokenRequired: true
+
+        });
+        const product = this.products.find(product => product.id === id);
+        if (product) {
+          product.active = true;
+        }
+        console.log(response);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  },
+  created() {
+    this.fetchProductData();
+  },
 }
 </script>
 
@@ -231,7 +225,8 @@ performSearch() {
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  width: 200px; /* Adjust width as needed */
+  width: 200px;
+  /* Adjust width as needed */
 }
 
 .discountbtn button,
@@ -251,45 +246,53 @@ performSearch() {
 .search-category button:hover {
   background-color: #0056b3;
 }
+
 table {
-    border-collapse: collapse;
-    width: 100%;
+  border-collapse: collapse;
+  width: 100%;
 }
 
-th, td {
-    padding: 8px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
+th,
+td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
 }
 
 
 .img {
-    width: 40px;
+  width: 40px;
 }
-.btnsuccess, .btnwarning {
-    border: none;
-    border-radius: 5px;
-    width: 30px;
-    height: 30px; /* Corrected to px */
-    cursor: pointer;
-    color: white;
+
+.btnsuccess,
+.btnwarning {
+  border: none;
+  border-radius: 5px;
+  width: 30px;
+  height: 30px;
+  /* Corrected to px */
+  cursor: pointer;
+  color: white;
 }
 
 .btnsuccess {
-    background-color: #28a745;
+  background-color: #28a745;
 }
 
 .btnsuccess:hover {
-    background-color: #218838; /* Hover color for success button */
+  background-color: #218838;
+  /* Hover color for success button */
 }
 
 .btnwarning {
-    background-color: #ffc107;
+  background-color: #ffc107;
 }
 
 .btnwarning:hover {
-    background-color: #e0a800; /* Hover color for warning button */
+  background-color: #e0a800;
+  /* Hover color for warning button */
 }
+
 .pagination {
   display: flex;
   list-style-type: none;
@@ -322,7 +325,8 @@ th, td {
 }
 
 /* Hover and Focus States */
-.page-link:hover, .page-link:focus {
+.page-link:hover,
+.page-link:focus {
   background-color: #0056b3;
   color: white;
   border-color: #0056b3;
@@ -348,5 +352,4 @@ th, td {
   border-color: #004085;
   color: white;
 }
-
 </style>

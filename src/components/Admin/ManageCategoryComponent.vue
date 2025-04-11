@@ -106,7 +106,8 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '@/api';
+
 
 export default {
     name: 'ManageCategoryComponent',
@@ -155,15 +156,13 @@ export default {
         },
 
         async createMainCategory() {
-            const token = localStorage.getItem('token');
             try {
-                const response = await axios.post(
+                const response = await api.post(
                     'admin/categories/maincategory/create',
                     { name: this.mainCategoryName },
                     {
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        }
+                        tokenRequired: true
+
                     }
                 );
                 response
@@ -175,19 +174,17 @@ export default {
         },
         async getMainCategory() {
             try {
-                const response = await axios.get('maincategory');
+                const response = await api.get('maincategory');
                 this.mainCategories = response.data;
             } catch (error) {
                 console.log(error);
             }
         },
         async deleteMainCategory(id) {
-            const token = localStorage.getItem('token');
             try {
-                await axios.post(`admin/categories/maincategory/delete/${id}`, {}, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                await api.post(`admin/categories/maincategory/delete/${id}`, {}, {
+                    tokenRequired: true
+
                 });
                 this.mainCategories = this.mainCategories.filter(category => category.id !== id);
                 this.categories = this.categories.filter(category => category.maincategory_id !== id);
@@ -197,15 +194,13 @@ export default {
             }
         },
         async createCategory() {
-            const token = localStorage.getItem('token');
             try {
-                const response = await axios.post(
+                const response = await api.post(
                     'admin/categories/category/create',
                     { name: this.categoryName },
                     {
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        }
+                        tokenRequired: true
+
                     }
                 );
                 response
@@ -217,7 +212,7 @@ export default {
         },
         async getCategory() {
             try {
-                const response = await axios.get('category');
+                const response = await api.get('category');
                 this.categories = response.data;
 
             } catch (error) {
@@ -225,27 +220,23 @@ export default {
             }
         },
         async deleteCategory(id) {
-            const token = localStorage.getItem('token');
             try {
-                await axios.post(`admin/categories/category/delete/${id}`, {}, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                await api.post(`admin/categories/category/delete/${id}`, {}, {
+                    tokenRequired: true
+
                 });
             } catch (error) {
                 console.log(error);
             }
         },
         async createSubCategory() {
-            const token = localStorage.getItem('token');
             try {
-                const response = await axios.post(
+                const response = await api.post(
                     'admin/categories/subcategory/create',
                     { name: this.subcategoryName },
                     {
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        }
+                        tokenRequired: true
+
                     }
                 );
                 response
@@ -257,19 +248,17 @@ export default {
         },
         async getSubCategory() {
             try {
-                const response = await axios.get('subcategory');
+                const response = await api.get('subcategory');
                 this.subcategories = response.data;
             } catch (error) {
                 console.log(error);
             }
         },
         async deleteSubCategory(id) {
-            const token = localStorage.getItem('token');
             try {
-                await axios.post(`admin/categories/subcategory/delete/${id}`, {}, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                await api.post(`admin/categories/subcategory/delete/${id}`, {}, {
+                    tokenRequired: true
+
                 });
             } catch (error) {
                 console.log(error);

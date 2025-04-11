@@ -146,7 +146,7 @@
   </div>
 </template>
 <script>
-import axios from 'axios';
+import api from '@/api';
 import Message from 'primevue/message';
 
 export default {
@@ -246,7 +246,7 @@ export default {
 
     async maincategory() {
       try {
-        const response = await axios.get('maincategory');
+        const response = await api.get('maincategory');
         this.maincategories = response.data;
       } catch (error) {
         console.log(error);
@@ -254,7 +254,7 @@ export default {
     },
     async category() {
       try {
-        const response = await axios.get('category');
+        const response = await api.get('category');
         this.categories = response.data;
       } catch (error) {
         console.log(error);
@@ -262,7 +262,7 @@ export default {
     },
     async subcategory() {
       try {
-        const response = await axios.get('subcategory');
+        const response = await api.get('subcategory');
         this.subcategories = response.data;
       } catch (error) {
         console.log(error);
@@ -270,7 +270,7 @@ export default {
     },
     async Getsize() {
       try {
-        const response = await axios.get('getSizes');
+        const response = await api.get('getSizes');
         this.letterbased = response.data.letterbased;
         this.numericbased = response.data.numericbased;
 
@@ -282,7 +282,6 @@ export default {
       this.form.image = event.target.files;
     },
     async createProduct() {
-      const token = localStorage.getItem('token');
       console.log('Form data before submission:', this.form);
       const formData = new FormData();
       formData.append('name', this.form.name);
@@ -311,11 +310,8 @@ export default {
       }
 
       try {
-        const response = await axios.post('addproduct', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            "Authorization": `Bearer ${token}`
-          },
+        const response = await api.post('addproduct', formData, {
+          tokenRequired: true
         });
         this.message = 'Product created successfully';
         console.log('Product created successfully:', response.data);

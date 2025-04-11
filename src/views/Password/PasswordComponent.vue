@@ -1,19 +1,40 @@
 <template>
-  <div id="app">
-    <div class="card">
-      <form @submit.prevent="sendPassword" method="post" class="form">
-        <div class="input-container">
-          <input v-model="password" type="password" name="password" id="password" required placeholder=" "
-            class="input-field" />
-          <label for="password" class="input-label">Password</label>
+  <div v-if="open" class="overlay"></div>
+
+
+  <div v-if="open" class="modal">
+    <div class="login-wrapper">
+      <div class="login-card">
+        <button class="close" @click="closeModal">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <div class="login-content">
+          <h2>პაროლის აღდგენა</h2>
+          <div class="dotted-line">
+            <span></span>
+          </div>
+          <form @submit.prevent="login" method="post" id="loginform">
+            <div class="input-container">
+              <input v-model="password" type="text" name="password" id="password" required placeholder="" />
+              <label for="password">შეიყვანეთ ახალი პაროლი</label>
+
+            </div>
+            <div class="input-container">
+              <input v-model="repeatpassword" type="password" name="repeatpassword" id="repeatpassword" required
+                placeholder="" />
+              <label for="repeatpassword">გაიმეორეთ პაროლი</label>
+            </div>
+            <button class="loginbtn">გაგრძელება</button>
+
+
+            <div class="dotted-line">
+              <span></span>
+            </div>
+
+          </form>
         </div>
-        <div class="input-container">
-          <input v-model="repeatpassword" type="password" name="repeatpassword" id="repeatpassword" required
-            placeholder=" " class="input-field" />
-          <label for="repeatpassword" class="input-label">Repeat Password</label>
-        </div>
-        <button type="submit" class="submit-btn">Send</button>
-      </form>
+      </div>
     </div>
   </div>
 </template>
@@ -22,7 +43,7 @@
 import api from '@/api';
 
 export default {
-  props: ['id', 'token'],
+  props: ['open', 'email'],
   data() {
     return {
       password: "",
@@ -43,92 +64,172 @@ export default {
       console.log(response);
 
     },
+    closeModal() {
+      this.$emit('close');
+    },
   },
 };
 </script>
 
 <style scoped>
-#app {
-  margin-top: 20%;
+span {
+  color: #7c7878;
+  font-size: 14px;
+}
+
+.dotted-line {
   display: flex;
-  justify-content: center;
+  margin-top: 30px;
   align-items: center;
+  justify-content: center;
+  position: relative;
+  align-items: center;
+  text-align: center;
+  width: 100%;
 }
 
-.card {
-  display: flex;
-  flex-direction: column;
-  background: #ffffff;
+.dotted-line::before,
+.dotted-line::after {
+  content: "";
+  flex-grow: 1;
+  border-bottom: 1.5px dotted #dbdbdb;
+  margin: 0 5px;
+}
+
+.dotted-line span {
+  font-size: 12px;
+  border: 1px solid #dbdbdb;
+  padding: 5px;
+  border-radius: 5px;
+  color: #4e4c4c;
+}
+
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 999;
+}
+
+.modal {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  bottom: 10px;
+  width: 50vh;
   border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  padding: 20px;
-  max-width: 400px;
-  width: 100%;
-}
-
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  width: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
 }
 
 .input-container {
   position: relative;
   width: 100%;
+  margin-bottom: 20px;
 }
 
-.input-field {
+.login-content {
+  position: relative;
+  bottom: 10px;
+}
+
+#loginform {
+  position: relative;
+  top: 20px;
+}
+
+input {
   width: 100%;
   padding: 12px;
   font-size: 16px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  height: 50px;
+  border: 1px solid #dbdbdb;
+  border-radius: 10px;
   outline: none;
-  transition: border-color 0.3s ease-in-out;
+  background: #f9f9f9;
+  transition: 0.3s;
 }
 
-.input-field:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
-}
-
-.input-label {
-  position: absolute;
-  top: 50%;
-  left: 12px;
-  transform: translateY(-50%);
-  font-size: 16px;
-  color: #aaa;
-  pointer-events: none;
-  transition: 0.3s ease-in-out;
-}
-
-.input-field:focus+.input-label,
-.input-field:not(:placeholder-shown)+.input-label {
+input:focus+label,
+input:not(:placeholder-shown)+label {
   top: -10px;
   font-size: 12px;
-  color: #007bff;
+  color: #333;
+  padding: 0 5px;
 }
 
-.submit-btn {
-  background-color: #365f8c;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  padding: 10px;
+label {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #aaa;
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.loginbtn {
+  padding: 12px;
   font-size: 16px;
-  font-weight: bold;
   cursor: pointer;
-  transition: background-color 0.3s ease-in-out;
+  border-radius: 8px;
+  border: none;
+  background-color: #62389c;
+  color: white;
+  width: 100%;
+  font-weight: 500;
+  transition: background-color 0.3s;
 }
 
-.submit-btn:hover {
-  background-color: #0056b3;
+h2 {
+  display: flex;
+  justify-content: center;
+  font-size: 16px;
+  font-family: 'Roboto', sans-serif;
 }
 
-.submit-btn:active {
-  background-color: #003f7f;
+.loginbtn:hover {
+  background-color: #4b6ee6;
+}
+
+.login-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  border-radius: 10px;
+  height: 100%;
+}
+
+.login-card {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-right: 2px solid #ccc;
+  width: 100%;
+  max-width: 50vh;
+  height: 100%;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 40%;
+  font-size: 24px;
+  z-index: 1000;
+
 }
 </style>

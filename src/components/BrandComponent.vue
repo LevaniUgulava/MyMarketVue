@@ -93,10 +93,21 @@ export default {
     display: flex;
     flex-direction: column;
     cursor: pointer;
-    height: 120px;
     justify-content: center;
     font-weight: 500;
     color: #333;
     transition: color 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    .image {
+        width: 50px;
+    }
+
+    .smallsection-container {
+        gap: 5px;
+        font-size: 11px;
+
+    }
 }
 </style>

@@ -21,7 +21,8 @@
           </ul>
         </li>
         <li><a href="/admin/statuses"><i class="fas fa-user-check"></i>სტატუსების მართვა</a></li>
-        <li><a href="/admin/collection"><i class="fas fa-layer-group"></i> კოლექციები</a></li>
+        <li><a href="/admin/collection"><i class="fas fa-layer-group"></i>კოლექციები და ბრენდები</a></li>
+        <li><a href="/admin/banner"><i class="fa-solid fa-flag"></i>ბანერები</a></li>
         <li><a href="/admin/category"><i class="fas fa-tags"></i>კატეგორიების მართვა</a></li>
 
         <li v-if="isadmin"><a href="/admin/roles"><i class="fas fa-user-cog"></i>როლების მართვა</a></li>

@@ -101,7 +101,6 @@ export default {
 .container {
   margin: 20px auto;
   padding: 20px;
-  max-width: 1200px;
 }
 
 /* Toggle Buttons (Now Styled as Minimalist Tabs) */

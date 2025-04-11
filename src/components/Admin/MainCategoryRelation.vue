@@ -37,7 +37,6 @@
 
 <script>
 import api from '@/api';
-import axios from 'axios';
 
 export default {
     data() {
@@ -61,7 +60,7 @@ export default {
     methods: {
         async getMainCategory() {
             try {
-                const response = await axios.get('maincategory');
+                const response = await api.get('maincategory');
                 this.mainCategories = response.data;
             } catch (error) {
                 console.log(error);
@@ -69,7 +68,7 @@ export default {
         },
         async getCategory() {
             try {
-                const response = await axios.get('category');
+                const response = await api.get('category');
                 this.categories = response.data;
             } catch (error) {
                 console.log(error);
@@ -80,7 +79,7 @@ export default {
         },
         async handleDrop(mainCategory) {
             try {
-                const response = await axios.post('admin/categories/assignRelation', { maincategory_id: mainCategory.id, category_id: this.draggedCategory.id }, { tokenRequired: true }
+                const response = await api.post('admin/categories/assignRelation', { maincategory_id: mainCategory.id, category_id: this.draggedCategory.id }, { tokenRequired: true }
                 );
                 console.log(response);
 

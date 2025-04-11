@@ -1,8 +1,6 @@
 <template>
-  <message :message="emitcartmessage" @close="emitcartmessage = ''" />
-  <Message :message="emitdata" @close="emitdata = ''" :backgroundColor="'rgba(76, 175, 80, 0.25)'"
-    :textColor="'#004d40'" :positionType="'fixed'" />
-  <message :message="emitlikemessage" @close="emitlikemessage = ''" />
+  <Message v-if="emitcartmessage" :message="emitcartmessage" @close="emitcartmessage = ''" />
+  <Message v-if="emitdata" :message="emitdata" @close="emitdata = ''" />
 
   <div class="container">
 
@@ -81,21 +79,21 @@ export default {
       if (newVal) {
         setTimeout(() => {
           this.emitdata = null;
-        }, 3000);
+        }, 500000000);
       }
     },
     emitlikemessage(newVal) {
       if (newVal) {
         setTimeout(() => {
           this.emitlikemessage = null;
-        }, 3000);
+        }, 5000);
       }
     },
     emitcartmessage(newVal) {
       if (newVal) {
         setTimeout(() => {
           this.emitcartmessage = null;
-        }, 3000);
+        }, 5000);
       }
     },
 

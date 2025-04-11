@@ -25,8 +25,8 @@
         </p>
       </div>
 
-      <div class="button-group">
-        <button class="add-btn" @click.prevent="addToCart(initialproduct.id)">
+      <div @click.prevent="addToCart(initialproduct.id)" class=" button-group">
+        <button class="add-btn">
           <i class="fa-solid fa-cart-plus"></i> დამატება
         </button>
       </div>
@@ -55,7 +55,7 @@ export default {
     async addToCart(id) {
       const token = localStorage.getItem('token');
       if (!token) {
-        this.$emit('cart-message',  "არ არის ავტორიზირებული");
+        this.$emit('cart-message', "არ არის ავტორიზირებული");
         return;
       }
       try {
@@ -197,7 +197,7 @@ h3 {
   justify-content: center;
   padding: 10px;
   border-radius: 8px;
-  background-color: #7a1dff1a;
+  background-color: #7e23fc1a;
   width: 200px;
   margin: 0 auto;
 }
@@ -209,7 +209,7 @@ button {
   font-family: 'Noto Sans Georgian', sans-serif;
   cursor: pointer;
   font-size: 12px;
-  color: #7a1dff;
+  color: #751bf2;
   transition: color 0.2s ease-in-out;
 }
 

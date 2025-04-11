@@ -29,13 +29,8 @@
         <p><strong>Size:</strong> {{ product.pivot.size }}</p>
         <p><strong>Total Price:</strong> ${{ product.pivot.total_price }}</p>
         <div v-if="product.image_urls.length > 0" class="product-images">
-          <img 
-            v-for="image in product.image_urls" 
-            :key="image" 
-            :src="image" 
-            alt="Product Image" 
-            class="product-image" 
-          />
+          <img v-for="image in product.image_urls" :key="image" :src="image" alt="Product Image"
+            class="product-image" />
         </div>
       </div>
     </div>
@@ -46,7 +41,7 @@
 </template>
 
 <script>
-import axios from "axios";
+import api from "@/api";
 
 export default {
   props: ["id"],
@@ -54,34 +49,32 @@ export default {
   data() {
     return {
       order: null,
-      isLoading: true, 
+      isLoading: true,
     };
   },
 
   methods: {
     formatDate(date) {
-      return new Date(date).toLocaleString(); 
+      return new Date(date).toLocaleString();
     },
 
     async getsingleorder() {
-      const token = localStorage.getItem("token");
       try {
-        const response = await axios.get(`admin/orders/${this.id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        const response = await api.get(`admin/orders/${this.id}`, {
+          tokenRequired: true
+
         });
         this.order = response.data.order;
       } catch (error) {
         console.error("Error fetching order:", error);
       } finally {
-        this.isLoading = false; 
+        this.isLoading = false;
       }
     },
   },
 
   mounted() {
-    this.getsingleorder(); 
+    this.getsingleorder();
   },
 };
 </script>
@@ -97,11 +90,13 @@ export default {
   border-radius: 8px;
 }
 
-h2, h3 {
+h2,
+h3 {
   margin-bottom: 10px;
 }
 
-.order-info, .user-info {
+.order-info,
+.user-info {
   margin-bottom: 20px;
 }
 

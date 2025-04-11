@@ -38,7 +38,6 @@
 
 <script>
 import api from '@/api';
-import axios from 'axios';
 
 export default {
     data() {
@@ -70,7 +69,7 @@ export default {
         },
         async getSubCategory() {
             try {
-                const response = await axios.get('subcategory', {
+                const response = await api.get('subcategory', {
                     tokenRequired: true
                 });
                 this.subcategories = response.data;

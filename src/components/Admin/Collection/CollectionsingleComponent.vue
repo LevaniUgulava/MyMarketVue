@@ -2,7 +2,8 @@
     <div>
         <h2>Collection Name: {{ collection.title }}</h2>
         <p><strong>Description:</strong> {{ collection.description }}</p>
-        <p><strong>Header Color:</strong> <span :style="{ backgroundColor: collection.headerColor, padding: '5px' }">{{ collection.headerColor }}</span></p>
+        <p><strong>Header Color:</strong> <span :style="{ backgroundColor: collection.headerColor, padding: '5px' }">{{
+            collection.headerColor }}</span></p>
         <p><strong>Discount:</strong> {{ collection.discount }}%</p>
 
         <h3>Added Product List</h3>
@@ -38,7 +39,7 @@
                     <th>Product ID</th>
                     <th>Product Name</th>
                     <th>Description</th>
-                    <th>Price</th>    
+                    <th>Price</th>
                     <th>discount</th>
                     <th>Add to Collection</th>
                 </tr>
@@ -50,7 +51,7 @@
                     <td>{{ product.description }}</td>
                     <td>{{ product.price }}</td>
                     <td>{{ product.discount }}</td>
-                    
+
                     <td>
                         <button @click="addProductToCollection(product.id)">Add</button>
                     </td>
@@ -62,7 +63,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '@/api';
 
 export default {
     name: 'SingleCollectionView',
@@ -75,12 +76,9 @@ export default {
     },
     methods: {
         async getsinglecollection() {
-            const token = localStorage.getItem('token');
             try {
-                const response = await axios.get(`/admin/collection/${this.id}`, {
-                    headers: {
-                        "Authorization": `Bearer ${token}`
-                    }
+                const response = await api.get(`/admin/collection/${this.id}`, {
+                    tokenRequired: true
                 });
                 this.collection = response.data.collection;
             } catch (error) {
@@ -88,15 +86,13 @@ export default {
             }
         },
         async getAllProducts() {
-            const token = localStorage.getItem('token');
             try {
-                const response = await axios.get(`admin/collection/display/products/${this.id}`, {
-                    headers: {
-                        "Authorization": `Bearer ${token}`
-                    },
+                const response = await api.get(`admin/collection/display/products/${this.id}`, {
+                    tokenRequired: true
+
                 });
 
-                this.allProducts = response.data.data.filter(product => 
+                this.allProducts = response.data.data.filter(product =>
                     !this.collection.products.some(p => p.id === product.id)
                 );
             } catch (error) {
@@ -104,24 +100,21 @@ export default {
             }
         },
 
-        async addProductToCollection(productid){
-                        const token = localStorage.getItem('token');
+        async addProductToCollection(productid) {
 
-            try{
-                const response=await axios.post(`admin/collection/addtocollection/${this.id}/product/${productid}`,{},{
-                    headers:{
-                        'Authorization':`Bearer ${token}`
-                    }
+            try {
+                const response = await api.post(`admin/collection/addtocollection/${this.id}/product/${productid}`, {}, {
+                    tokenRequired: true
                 });
                 this.getsinglecollection();
                 this.getAllProducts();
                 console.log(response)
-            }catch(error){
+            } catch (error) {
                 console.log(error);
             }
 
         }
-     
+
     },
     mounted() {
         this.getsinglecollection(); // Fetch collection data
@@ -138,7 +131,8 @@ table {
     margin-top: 20px;
 }
 
-th, td {
+th,
+td {
     border: 1px solid #ddd;
     padding: 8px;
     text-align: left;
