@@ -16,34 +16,53 @@
           </div>
           <form @submit.prevent="login" method="post" id="loginform">
             <div class="input-container">
-              <input v-model="email" type="text" name="email" id="email" required placeholder="" />
+              <span v-if="emailError" class="error-text">{{ emailError }}</span>
+              <input v-model="email" :class="{ 'input-error': emailError }" type="text" name="email" id="email"
+                placeholder=" " />
               <label for="email">ელ.ფოსტა</label>
-
             </div>
+
             <div class="input-container">
-              <input v-model="password" type="password" name="password" id="password" required placeholder="" />
-              <label for="email">პაროლი</label>
+              <span v-if="passwordError" class="error-text">{{ passwordError }}</span>
+
+              <input v-model="password" :class="{ 'input-error': passwordError }"
+                :type="isPassword ? 'password' : 'text'" name="password" id="password" placeholder=" " />
+              <label for="password">პაროლი</label>
+
+              <button type="button" class="toggle-password" @click="isPassword = !isPassword"
+                aria-label="Toggle password visibility">
+                <i :class="isPassword ? 'fa fa-eye' : 'fa fa-eye-slash'"></i>
+              </button>
             </div>
+
             <button class="loginbtn">შესვლა</button>
-            <div class="links">
-              <span class="link">
-                დაგავიწყდა პაროლი? <a @click="openforgetmodal" class="forget">პაროლის აღდგენა</a>
-              </span>
-              <span class="link">
-                არ გაქვს ანგარიში? <a @click="openregistermodal" class="forget">რეგისტრაცია</a>
-              </span>
-            </div>
-
-            <div class="dotted-line">
-              <span>გააგრძელეთ</span>
-            </div>
-
-            <div class="social-login">
-              <FacebookComponentVue class="fb" />
-              <GoogleComponent class="google" />
-            </div>
           </form>
+
+          <div class="links">
+            <span class="link">
+              დაგავიწყდა პაროლი? <a @click.prevent="openforgetmodal" class="forget">პაროლის აღდგენა</a>
+            </span>
+            <span class="link">
+              არ გაქვს ანგარიში? <a @click.prevent="openregistermodal" class="forget">რეგისტრაცია</a>
+            </span>
+          </div>
+
+          <div class="dotted-line">
+            <span>გააგრძელეთ</span>
+          </div>
+
+          <div class="social-login">
+            <FacebookComponentVue class="fb" />
+            <GoogleComponent class="google" />
+          </div>
         </div>
+        <div class="Error" v-if="ErrorName && ErrorText">
+          <strong>{{ ErrorName }}</strong>
+          <hr />
+          <p>{{ ErrorText }}</p>
+        </div>
+
+
       </div>
     </div>
   </div>
@@ -53,7 +72,7 @@
 import FacebookComponentVue from './FacebookComponent.vue';
 import GoogleComponent from './GoogleComponent.vue';
 import { mapActions } from 'vuex';
-
+import { validateInputFields } from './utils/validate';
 export default {
   name: "LoginComponent",
   props: ['open'],
@@ -65,6 +84,11 @@ export default {
     return {
       email: '',
       password: '',
+      emailError: '',
+      passwordError: '',
+      isPassword: true,
+      ErrorName: "",
+      ErrorText: ""
     }
   },
   methods: {
@@ -72,16 +96,36 @@ export default {
       loginAction: 'login',
     }),
     async login() {
+      const valid = validateInputFields(this, [
+        { model: 'email', errorKey: 'emailError', message: 'ელ.ფოსტა აუცილებელია' },
+        { model: 'password', errorKey: 'passwordError', message: 'პაროლი აუცილებელია' },
+      ]);
+
+      if (!valid) return;
+
       try {
-        await this.loginAction({
+        const response = await this.loginAction({
           email: this.email,
-          password: this.password,
+          password: this.password
         });
-        this.closeModal();
+
+        if (response === 200) {
+          this.closeModal();
+        } else {
+          if (response === 422) {
+            this.ErrorName = "არასწორი ფორმატი"
+            this.ErrorText = "გაითვალისწინეთ, პაროლი უნდა შედგებოდეს არანკლებ 8 სიმბოლოსგან, ასევე შეამოწმეთ ელ.ფოსტის ფორმატი"
+          } else if (response === 401) {
+            this.ErrorName = "არასწორი ელ.ფოსტა ან პაროლი"
+            this.ErrorText = "შეყვანილი მონაცემები არ ემთხვევა ჩანაწერებს"
+          }
+        }
+
       } catch (error) {
-        console.error(error);
+        console.log(error);
       }
     },
+
 
     closeModal() {
       this.$emit('close');
@@ -99,6 +143,97 @@ export default {
 </script>
 
 <style scoped>
+.Error {
+  background-color: #ffe5e5;
+  border: 1px solid #ffaea8;
+  color: #b71c1c;
+  padding: 16px 24px;
+  margin: 20px auto;
+  border-radius: 10px;
+  max-width: 600px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  line-height: 1.5;
+}
+
+.Error strong {
+  font-size: 14px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.Error p {
+  margin: 0;
+  font-size: 12px;
+
+}
+
+.input-container {
+  position: relative;
+  margin-bottom: 30px;
+}
+
+.input-container input {
+  width: 100%;
+  padding: 12px;
+  padding-right: 45px;
+  font-size: 16px;
+  height: 50px;
+  border: 1px solid #dbdbdb;
+  border-radius: 10px;
+  outline: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.input-error {
+  border-color: #e74c3c;
+}
+
+.input-container label {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #aaa;
+  pointer-events: none;
+  padding: 0 5px;
+  background: white;
+  transition: all 0.3s ease;
+}
+
+.input-container input:focus+label,
+.input-container input:not(:placeholder-shown)+label {
+  top: -10px;
+  font-size: 12px;
+  color: #333;
+}
+
+.error-text {
+  position: absolute;
+  top: -20px;
+  right: 0;
+  color: #e74c3c;
+  font-size: 12px;
+  background: white;
+  padding: 0 5px;
+}
+
+.toggle-password {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: #888;
+  padding: 4px;
+  z-index: 2;
+}
+
+
 .links {
   display: flex;
   flex-direction: column;
@@ -184,17 +319,10 @@ input {
   border: 1px solid #dbdbdb;
   border-radius: 10px;
   outline: none;
-  background: #f9f9f9;
-  transition: 0.3s;
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
 
-input:focus+label,
-input:not(:placeholder-shown)+label {
-  top: -10px;
-  font-size: 12px;
-  color: #333;
-  padding: 0 5px;
-}
+
 
 label {
   position: absolute;
@@ -204,7 +332,25 @@ label {
   font-size: 14px;
   color: #aaa;
   pointer-events: none;
+  padding: 0 5px;
   transition: all 0.3s ease;
+}
+
+input:focus+label,
+input:not(:placeholder-shown)+label {
+  top: -10px;
+  font-size: 12px;
+  color: #333;
+}
+
+.error-text {
+  position: absolute;
+  top: -20px;
+  right: 0;
+  color: #e74c3c;
+  font-size: 12px;
+  background: white;
+  padding: 0 5px;
 }
 
 .loginbtn {
@@ -286,5 +432,30 @@ h2 {
   font-size: 24px;
   z-index: 1000;
 
+}
+
+@media (max-width: 768px) {
+  .modal {
+    position: fixed;
+    top: 0px;
+    right: 0px;
+    width: 100vw;
+    border-radius: none;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+  }
+
+  .login-card {
+    background: white;
+    border-radius: 0px;
+    padding: 20px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-right: 2px solid #ccc;
+    max-width: 100vw;
+    height: 100%;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+  }
 }
 </style>

@@ -14,29 +14,40 @@
           <div class="dotted-line">
             <span></span>
           </div>
-          <form @submit.prevent="login" method="post" id="registrationform">
+          <form @submit.prevent="register" method="post" id="registrationform">
             <div class="input-container">
-              <input v-model="name" type="text" name="name" id="name" required placeholder="" />
+              <span v-if="nameError" class="error-text">{{ nameError }}</span>
+              <input v-model="name" :class="{ 'input-error': nameError }" type="text" name="name" id="name"
+                placeholder="" />
               <label for="name">სახელი</label>
             </div>
             <div class="input-container">
-              <input v-model="email" type="text" name="email" id="email" required placeholder="" />
+              <span v-if="emailError" class="error-text">{{ emailError }}</span>
+              <input v-model="email" :class="{ 'input-error': emailError }" type="email" name="email" id="email"
+                placeholder="" />
               <label for="email">ელ.ფოსტა</label>
             </div>
             <div class="input-container">
-              <input v-model="password" type="password" name="password" id="password" required placeholder="" />
+              <span v-if="passwordError" class="error-text">{{ passwordError }}</span>
+              <input v-model="password" :class="{ 'input-error': passwordError }" type="password" name="password"
+                id="password" placeholder=" " />
               <label for="email">პაროლი</label>
             </div>
             <button class="registrationbtn">რეგისტრაცია</button>
-            <div class="links">
-              <span class="link">
-                უკვე გაქვს ანგარიში? <a @click="openregistermodal" class="forget">ავტორიზაცია</a>
-              </span>
-            </div>
-            <div class="dotted-line">
-              <span></span>
-            </div>
           </form>
+          <div class="links">
+            <span class="link">
+              უკვე გაქვს ანგარიში? <a @click="openregistermodal" class="forget">ავტორიზაცია</a>
+            </span>
+          </div>
+          <div class="dotted-line">
+            <span></span>
+          </div>
+          <div class="Error" v-if="ErrorName && ErrorText">
+            <strong>{{ ErrorName }}</strong>
+            <hr />
+            <p>{{ ErrorText }}</p>
+          </div>
         </div>
       </div>
     </div>
@@ -44,6 +55,7 @@
 </template>
 <script>
 import api from '@/api';
+import { validateInputFields } from './utils/validate';
 
 export default {
   name: "RegisterComponent",
@@ -54,20 +66,38 @@ export default {
       name: '',
       email: '',
       password: '',
+      nameError: '',
+      emailError: '',
+      passwordError: '',
+      ErrorName: "",
+      ErrorText: ""
     }
   },
   methods: {
     async register() {
+      const valid = validateInputFields(this, [
+        { model: 'name', errorKey: 'nameError', message: 'სახელი აუცილებელია' },
+        { model: 'email', errorKey: 'emailError', message: 'ელ.ფოსტა აუცილებელია' },
+        { model: 'password', errorKey: 'passwordError', message: 'პაროლი აუცილებელია' },
+      ]);
+
+      if (!valid) return;
       try {
-        const response = await api.post('register', {
+        await api.post('register', {
           name: this.name,
           email: this.email,
           password: this.password
         });
-        response
-        this.$router.push("/email/verification");
+        let data = {
+          "email": this.email,
+          "from": "register"
+        }
+        this.$emit('emaildata', data);
       } catch (error) {
-        console.error(error);
+        if (error.response.status === 422) {
+          this.ErrorName = "არასწორი ფორმატი"
+          this.ErrorText = "გაითვალისწინეთ, პაროლი უნდა შედგებოდეს არანკლებ 8 სიმბოლოსგან, ასევე შეამოწმეთ ელ.ფოსტის ფორმატი"
+        }
       }
     },
     closeModal() {
@@ -83,6 +113,31 @@ export default {
 </script>
 
 <style scoped>
+.Error {
+  background-color: #ffe5e5;
+  border: 1px solid #ffaea8;
+  color: #b71c1c;
+  padding: 16px 24px;
+  margin: 20px auto;
+  border-radius: 10px;
+  max-width: 600px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  line-height: 1.5;
+}
+
+.Error strong {
+  font-size: 14px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.Error p {
+  margin: 0;
+  font-size: 12px;
+
+}
+
 .links {
   display: flex;
   flex-direction: column;
@@ -168,16 +223,11 @@ input {
   border: 1px solid #dbdbdb;
   border-radius: 10px;
   outline: none;
-  background: #f9f9f9;
-  transition: 0.3s;
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
 
-input:focus+label,
-input:not(:placeholder-shown)+label {
-  top: -10px;
-  font-size: 12px;
-  color: #333;
-  padding: 0 5px;
+.input-error {
+  border-color: #e74c3c;
 }
 
 label {
@@ -188,7 +238,25 @@ label {
   font-size: 14px;
   color: #aaa;
   pointer-events: none;
+  padding: 0 5px;
   transition: all 0.3s ease;
+}
+
+input:focus+label,
+input:not(:placeholder-shown)+label {
+  top: -10px;
+  font-size: 12px;
+  color: #333;
+}
+
+.error-text {
+  position: absolute;
+  top: -20px;
+  right: 0;
+  color: #e74c3c;
+  font-size: 12px;
+  background: white;
+  padding: 0 5px;
 }
 
 .registrationbtn {
@@ -257,5 +325,30 @@ h2 {
   font-size: 24px;
   z-index: 1000;
 
+}
+
+@media (max-width: 768px) {
+  .modal {
+    position: fixed;
+    top: 0px;
+    right: 0px;
+    width: 100vw;
+    border-radius: none;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+  }
+
+  .registration-card {
+    background: white;
+    border-radius: 0px;
+    padding: 20px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-right: 2px solid #ccc;
+    max-width: 100vw;
+    height: 100%;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+  }
 }
 </style>

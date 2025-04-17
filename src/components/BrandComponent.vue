@@ -2,7 +2,7 @@
     <div class="smallsection-container">
         <div @click="handle(item.id)" v-for="(item, index) in brands" :key="index" class="section">
             <div class="seperate-section">
-                <img class="image" :src="item.image" alt="brand logo" />
+                <img class="image" :src="item.media_url" alt="brand logo" />
             </div>
             <span class="name">{{ item.name }}</span>
         </div>
@@ -11,27 +11,41 @@
 
 
 <script>
+import api from '@/api';
+
 export default {
     data() {
         return {
-            brands: [
-                {
-                    id: 1,
-                    name: "Gucci",
-                    image: "/logo/logo-gucci.png"
-                },
-                {
-                    id: 2,
-                    name: "Luis Vitton",
-                    image: "/logo/luisviton.png"
-                },
-            ]
+            brands: []
         }
     },
     methods: {
-        handle(id) {
-            console.log(id);
+        async display() {
+            try {
+                const response = await api.get("/brand/display");
+
+                this.brands = response.data;
+
+            } catch (error) {
+                console.log(error.response)
+            }
+
         },
+        handle(id) {
+            const currentQuery = { ...this.$route.query };
+
+            this.$router.push({
+                path: `/product`,
+                query: {
+                    section: currentQuery.section || 'all',
+                    brand: id || '',
+                    page: 1,
+                },
+            });
+        },
+    },
+    mounted() {
+        this.display();
     },
 }
 </script>
@@ -39,7 +53,6 @@ export default {
 <style scoped>
 .image {
     width: 60px;
-    border-radius: 50%;
     transition: width 0.5s ease, height 0.5s ease;
 }
 
@@ -54,11 +67,12 @@ export default {
     align-items: center;
     align-items: center;
     padding: 5px 5px;
-    border-radius: 30%;
+    border-radius: 10px;
     background-color: transparent;
     border: 1.5px solid #e0e0e0;
     width: auto;
-    height: auto;
+    height: 70px;
+    width: 70px;
     justify-content: center;
     transition: background-color 0.8s ease, border 0.8s ease;
 }

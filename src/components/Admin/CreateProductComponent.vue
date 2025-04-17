@@ -108,6 +108,12 @@
           </div>
         </div>
       </div>
+      <div v-if="brands" class="form-group">
+        <label>ბრენდები</label>
+        <select v-model="form.brand" multiple>
+          <option v-for="brand in brands" :key="brand.id" :value="brand.id">{{ brand.name }}</option>
+        </select>
+      </div>
 
       <button class="additional-button" @click.prevent="toggleAdditionalInfo">დამატებით
         ინფორმაცია?</button>
@@ -166,6 +172,7 @@ export default {
       categories: [],
       subcategories: [],
       sizes: [],
+      brands: [],
       message: null,
       colorquantity: {},
       form: {
@@ -180,15 +187,31 @@ export default {
         Sizes: [],
         quantity: [],
         color: [],
+        brand: []
       },
     };
   },
   computed: {
     filteredcategory() {
-      return this.categories.filter(category => category.maincategory_id === this.form.mainCategory);
+      if (this.form.mainCategory) {
+        return this.categories.filter((category) => {
+          return category.maincategory_id.includes(this.form.mainCategory);
+        });
+      } else {
+        return this.categories;
+      }
     },
+
+
+
     filteredsubcategory() {
-      return this.subcategories.filter(subcategory => subcategory.category_id === this.form.category);
+      if (this.form.category) {
+        return this.subcategories.filter((category) => {
+          return category.category_id.includes(this.form.category);
+        });
+      } else {
+        return this.subcategories;
+      }
     },
   },
 
@@ -213,8 +236,8 @@ export default {
 
   methods: {
     toggleAdditionalInfo() {
-      this.isAdditionalinfo = !this.isAdditionalinfo;  // Toggle the boolean value
-      localStorage.setItem('isAdditionalinfo', this.isAdditionalinfo); // Save the updated boolean to localStorage
+      this.isAdditionalinfo = !this.isAdditionalinfo;
+      localStorage.setItem('isAdditionalinfo', this.isAdditionalinfo);
     },
     toggleisLockedin() {
       this.islockedin = !this.islockedin;
@@ -244,26 +267,16 @@ export default {
       this.colorquantity[index] += 1;
     },
 
-    async maincategory() {
+    async fetchcategory() {
       try {
         const response = await api.get('maincategory');
         this.maincategories = response.data;
-      } catch (error) {
-        console.log(error);
-      }
-    },
-    async category() {
-      try {
-        const response = await api.get('category');
-        this.categories = response.data;
-      } catch (error) {
-        console.log(error);
-      }
-    },
-    async subcategory() {
-      try {
-        const response = await api.get('subcategory');
-        this.subcategories = response.data;
+
+        const responsee = await api.get('category');
+        this.categories = responsee.data;
+
+        const responseee = await api.get('subcategory');
+        this.subcategories = responseee.data;
       } catch (error) {
         console.log(error);
       }
@@ -281,6 +294,16 @@ export default {
     onFileChange(event) {
       this.form.image = event.target.files;
     },
+    async getBrand() {
+      try {
+        const response = await api.get('admin/brand/display', {
+          tokenRequired: true
+        });
+        this.brands = response.data;
+      } catch (error) {
+        return error.response
+      }
+    },
     async createProduct() {
       console.log('Form data before submission:', this.form);
       const formData = new FormData();
@@ -289,6 +312,7 @@ export default {
       formData.append('price', this.form.price);
       formData.append('maincategory_id', this.form.mainCategory);
       formData.append('category_id', this.form.category);
+      formData.append('brand_id', this.form.brand);
       formData.append('subcategory_id', this.form.subCategory);
       formData.append('size_type', this.form.size_type);
       this.form.Sizes.forEach((size, index) => {
@@ -323,10 +347,9 @@ export default {
 
   },
   mounted() {
-    this.maincategory();
-    this.category();
-    this.subcategory();
+    this.fetchcategory();
     this.Getsize();
+    this.getBrand();
   },
 };
 </script>

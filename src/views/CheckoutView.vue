@@ -4,14 +4,20 @@
         <div class="left-section">
             <h3>შეკვეთის დეტალები</h3>
             <form @submit.prevent="submitOrder">
-                <div class="grid-container" v-if="!isAuth">
+                <div v-if="!isAuth">
                     <div class="input-group">
-                        <label for="firstName">სახელი <span class="required">*</span></label>
-                        <input id="firstName" type="text" v-model="user.firstName" required />
+                        <label for="city">ელ.ფოსტა <span class="required">*</span></label>
+                        <input id="city" type="text" v-model="user.city" :disabled="shippingCost === 5" required />
                     </div>
-                    <div class="input-group">
-                        <label for="lastName">გვარი <span class="required">*</span></label>
-                        <input id="lastName" type="text" v-model="user.lastName" required />
+                    <div class="grid-container">
+                        <div class="input-group">
+                            <label for="firstName">სახელი <span class="required">*</span></label>
+                            <input id="firstName" type="text" v-model="user.firstName" required />
+                        </div>
+                        <div class="input-group">
+                            <label for="lastName">გვარი <span class="required">*</span></label>
+                            <input id="lastName" type="text" v-model="user.lastName" required />
+                        </div>
                     </div>
                 </div>
                 <div class="input-group">
@@ -29,7 +35,6 @@
             </form>
         </div>
 
-        <!-- Right Section: Order Summary -->
         <div class="right-section">
             <h3>თქვენი შეკვეთა</h3>
             <div class="order-items">
@@ -97,9 +102,9 @@ export default {
 
                 const response = await api.get("get/temporder", {
                     headers: {
-                        "guest_token": guest_token
+                        "Guest-Token": guest_token
                     },
-                    tokenRequired: true
+                    tokenOptional: true
                 });
                 this.cart = response.data;
 

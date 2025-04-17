@@ -14,25 +14,41 @@
           <div class="dotted-line">
             <span></span>
           </div>
-          <form @submit.prevent="login" method="post" id="loginform">
+          <form @submit.prevent="sendPassword" method="post" id="loginform">
             <div class="input-container">
-              <input v-model="password" type="text" name="password" id="password" required placeholder="" />
+              <span v-if="passwordError" class="error-text">{{ passwordError }}</span>
+              <input v-model="password" :class="{ 'input-error': passwordError }"
+                :type="isNewPassword ? 'password' : 'text'" name="password" id="password" placeholder=" " />
               <label for="password">შეიყვანეთ ახალი პაროლი</label>
+              <button type="button" class="toggle-password" @click="isNewPassword = !isNewPassword"
+                aria-label="Toggle password visibility">
+                <i :class="isNewPassword ? 'fa fa-eye' : 'fa fa-eye-slash'"></i>
+              </button>
 
             </div>
             <div class="input-container">
-              <input v-model="repeatpassword" type="password" name="repeatpassword" id="repeatpassword" required
-                placeholder="" />
+              <span v-if="repeatpasswordError" class="error-text">{{ repeatpasswordError }}</span>
+              <input v-model="repeatpassword" :class="{ 'input-error': repeatpasswordError }"
+                :type="isRepeatPassword ? 'password' : 'text'" name="repeatpassword" id="repeatpassword"
+                placeholder=" " />
               <label for="repeatpassword">გაიმეორეთ პაროლი</label>
+              <button type="button" class="toggle-password" @click="isRepeatPassword = !isRepeatPassword"
+                aria-label="Toggle password visibility">
+                <i :class="isRepeatPassword ? 'fa fa-eye' : 'fa fa-eye-slash'"></i>
+              </button>
             </div>
             <button class="loginbtn">გაგრძელება</button>
-
-
-            <div class="dotted-line">
-              <span></span>
-            </div>
-
           </form>
+
+
+          <div class="dotted-line">
+            <span></span>
+          </div>
+          <div class="Error" v-if="ErrorName && ErrorText">
+            <strong>{{ ErrorName }}</strong>
+            <hr />
+            <p>{{ ErrorText }}</p>
+          </div>
         </div>
       </div>
     </div>
@@ -41,6 +57,7 @@
 
 <script>
 import api from '@/api';
+import { validateInputFields } from '@/components/utils/validate';
 
 export default {
   props: ['open', 'email'],
@@ -48,20 +65,44 @@ export default {
     return {
       password: "",
       repeatpassword: "",
+      passwordError: '',
+      repeatpasswordError: "",
+      ErrorName: "",
+      ErrorText: "",
+      isNewPassword: true,
+      isRepeatPassword: true,
+
+
     };
   },
   methods: {
     async sendPassword() {
+      const valid = validateInputFields(this, [
+        { model: 'password', errorKey: 'passwordError', message: 'აუცილებელი ველი' },
+        { model: 'repeatpassword', errorKey: 'repeatpasswordError', message: 'აუცილებელი ველი' },
+      ]);
+      if (!valid) return;
       if (this.password !== this.repeatpassword) {
-        alert("Passwords do not match.");
+        this.ErrorName = "პაროლი ვერ განახლდა"
+        this.ErrorText = "პაროლები არ ემთხევა ერთმანეთს"
         return;
       }
-      if (this.password.length < 6) {
-        alert("Password must be at least 6 characters long.");
-        return;
+
+      try {
+        const response = await api.post('/reset/password', { password: this.password, email: this.email });
+        if (response.status === 200) {
+          this.ErrorName = "პაროლის აღდგენა"
+          this.ErrorText = "პაროლი წარმატებით შეიცვალა"
+        }
+      } catch (error) {
+        if (error.response.status === 404 || error.response.status === 500) {
+          this.ErrorName = "პაროლი ვერ განახლდა"
+          this.ErrorText = "სცადეთ თავიდან ან დაუკავშირდით support_ს"
+        } else if (error.response.status === 422) {
+          this.ErrorName = "არასწორი ფორმატი"
+          this.ErrorText = "გაითვალისწინეთ, პაროლი უნდა შედგებოდეს არანკლებ 8 სიმბოლოსგან"
+        }
       }
-      const response = await api.post(`/reset/password/${this.id}?token=${this.token}`, { password: this.password });
-      console.log(response);
 
     },
     closeModal() {
@@ -72,6 +113,46 @@ export default {
 </script>
 
 <style scoped>
+.Error {
+  background-color: #ffe5e5;
+  border: 1px solid #ffaea8;
+  color: #b71c1c;
+  padding: 16px 24px;
+  margin: 20px auto;
+  border-radius: 10px;
+  max-width: 600px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  line-height: 1.5;
+}
+
+.Error strong {
+  font-size: 14px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.Error p {
+  margin: 0;
+  font-size: 12px;
+
+}
+
+.toggle-password {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: #888;
+  padding: 4px;
+  z-index: 2;
+}
+
+
 span {
   color: #7c7878;
   font-size: 14px;
@@ -131,6 +212,33 @@ span {
   width: 100%;
   margin-bottom: 20px;
 }
+
+.input-container input {
+  width: 100%;
+  padding: 12px;
+  padding-right: 45px;
+  font-size: 16px;
+  height: 50px;
+  border: 1px solid #dbdbdb;
+  border-radius: 10px;
+  outline: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.input-error {
+  border-color: #e74c3c !important;
+}
+
+.error-text {
+  position: absolute;
+  top: -20px;
+  right: 0;
+  color: #e74c3c;
+  font-size: 12px;
+  background: white;
+  padding: 0 5px;
+}
+
 
 .login-content {
   position: relative;
@@ -231,5 +339,30 @@ h2 {
   font-size: 24px;
   z-index: 1000;
 
+}
+
+@media (max-width: 768px) {
+  .modal {
+    position: fixed;
+    top: 0px;
+    right: 0px;
+    width: 100vh;
+    border-radius: none;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+  }
+
+  .login-card {
+    background: white;
+    border-radius: 0px;
+    padding: 20px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-right: 2px solid #ccc;
+    max-width: 100vw;
+    height: 100%;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+  }
 }
 </style>

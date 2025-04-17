@@ -152,7 +152,7 @@ export default {
     font-weight: 400;
     color: rgb(52, 51, 51);
     cursor: pointer;
-    font-size: 13px;
+    font-size: 12px;
     transition: color 0.3s ease;
 }
 
@@ -183,7 +183,7 @@ export default {
 
 .product-name {
     font-weight: bold;
-    font-size: 13px;
+    font-size: 12px;
     color: rgb(0, 0, 0);
 }
 
@@ -202,6 +202,7 @@ export default {
         display: flex;
         flex-wrap: wrap;
         font-size: 15px;
+        gap: 7px;
     }
 }
 </style>

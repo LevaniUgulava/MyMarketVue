@@ -1,5 +1,6 @@
 <template>
-    <div class="cart-container" v-if="mycarts.length > 0">
+    <div class="cart-container" v-if="apiLoaded && mycarts.length > 0">
+        <Message v-if="message" :message="message" @close="message = ''" />
 
         <div class="product-section">
             <div class="card" v-for="(item, index) in mycarts" :key="index">
@@ -73,7 +74,7 @@
     </div>
 
 
-    <div v-if="apiLoaded && this.mycarts.length === 0" class="empty-cart">
+    <div v-if="this.mycarts.length === 0" class="empty-cart">
         <i class="fa-solid fa-cart-shopping"></i>
         <p class="empty-text">თქვენ ჯერ არ დაგიმატებიან პროდუქტი</p>
         <p class="empty-subtext">დამატეთ ყველა პროდუქტი, რაც თქვენ გაინტერესებთ</p>
@@ -88,6 +89,9 @@
 import api from '@/api';
 import { Carousel, Slide } from "vue3-carousel";
 import "vue3-carousel/dist/carousel.css";
+import { mapGetters } from 'vuex';
+import Message from '@/components/Message/MessageComponent.vue';
+
 
 export default {
     name: 'ShoppingCart',
@@ -96,7 +100,7 @@ export default {
         return {
             mycarts: [],
             allprice: 0,
-            verfifyerrormessage: '',
+            message: '',
             changedsize: {},
             selectedColor: {},
             apiLoaded: false
@@ -104,7 +108,21 @@ export default {
     },
     components: {
         Carousel,
-        Slide
+        Slide,
+        Message
+    },
+    watch: {
+        message(newVal) {
+            if (newVal) {
+                setTimeout(() => {
+                    this.message = null;
+                }, 5000);
+            }
+        },
+    },
+    computed: {
+        ...mapGetters('auth', ['isAuthenticated']),
+
     },
 
     methods: {
@@ -114,11 +132,17 @@ export default {
 
         async checkout() {
             try {
-                const guest_token = localStorage.getItem("guest_token") || crypto.randomUUID();
-                if (!localStorage.getItem("guest_token")) {
-                    localStorage.setItem("guest_token", guest_token);
+                let guest_token = "";
+                if (!this.isAuthenticated) {
+                    guest_token = localStorage.getItem("guest_token") || crypto.randomUUID();
+                    if (!localStorage.getItem("guest_token")) {
+                        localStorage.setItem("guest_token", guest_token);
+                    }
+                } else {
+                    if (localStorage.getItem("guest_token")) {
+                        localStorage.removeItem("guest_token");
+                    }
                 }
-
                 const mappedcart = this.mycarts.map(item => ({
                     guest_token,
                     quantity: item.quantity || 1,
@@ -131,14 +155,17 @@ export default {
                     total_price: item.total_price
                 }));
 
-                await api.post("/temporder", { products: mappedcart }, {
+                const response = await api.post("/temporder", { products: mappedcart }, {
                     tokenRequired: true
                 });
+                console.log(response);
 
                 this.$router.push({ name: "checkout" });
 
             } catch (error) {
-                console.error("Error during checkout:", error);
+                if (error.response.status === 403) {
+                    this.message = `ელფოსტა არ არის ვერიფიცირებული, ვეირიფიკაციისთვის დაჭირეთ <a href='/profile' style="color:white" target='_blank'>აქ</a>`;
+                }
             }
         },
 
@@ -163,7 +190,8 @@ export default {
                 });
 
             } catch (error) {
-                console.error("Error fetching cart:", error);
+                console.error("Error during checkout:", error);
+
             } finally {
                 this.apiLoaded = true;
             }

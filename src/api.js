@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://192.168.0.108:8001/api',
+  baseURL: 'http://192.168.0.105:8001/api',
   timeout: 5000,
 });
 
@@ -24,8 +24,9 @@ api.interceptors.request.use(config => {
 api.interceptors.response.use(response => {
   return response;
 }, error => {
-  if (error.response && error.response.status === 401) {
-    console.log('Token expired or invalid. Redirecting to login...');
+  const isLoginRequest = error.config?.headers?.['X-Login-Request'];
+
+  if (error.response && error.response.status === 401 &&  !isLoginRequest) {
     
     localStorage.removeItem('token');
     localStorage.removeItem('name');

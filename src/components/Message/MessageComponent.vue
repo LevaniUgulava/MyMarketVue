@@ -1,8 +1,6 @@
 <template>
   <div class="messagecomponent">
-    <div>
-      {{ message }}
-    </div>
+    <div v-html="message"></div>
     <div>
       <i @click.prevent="$emit('close')" class="fa-solid fa-xmark"></i>
     </div>
@@ -44,6 +42,10 @@ export default {
 
 .messagecomponent i {
   cursor: pointer;
+}
+
+.messagecomponent a {
+  color: white;
 }
 
 .messagecomponent div {

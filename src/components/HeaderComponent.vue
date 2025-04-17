@@ -80,14 +80,14 @@
       @openregister="() => openmodal('registermodal')" @openforget="() => openmodal('forgetmodal')" />
 
     <RegisterComponent :open="registermodal" @close="() => closemodal('registermodal')"
-      @openlogin="() => openmodal('loginmodal')" />
+      @openlogin="() => openmodal('loginmodal')" @emaildata="handleconfirmmail" />
 
-    <ForgetPassword :open="forgetmodal" @close="() => closemodal('forgetmodal')" @email="handleconfirmmail" />
+    <ForgetPassword :open="forgetmodal" @close="() => closemodal('forgetmodal')" @emaildata="handleconfirmmail" />
 
-    <EmailConfirmation :open="confirmmodal" :email="confirmationemail" @close="() => closemodal('confirmmodal')"
+    <EmailConfirmation :open="confirmmodal" :data="data" @close="() => closemodal('confirmmodal')"
       @openresetmodal="() => openmodal('passwordmmodal')" />
 
-    <PasswordComponent :open="passwordmmodal" :email="confirmationemail" @close="() => closemodal('passwordmmodal')" />
+    <PasswordComponent :open="passwordmmodal" :email="data.email" @close="() => closemodal('passwordmmodal')" />
 
   </div>
 </template>
@@ -143,7 +143,7 @@ export default {
       'forgetmodal',
       'confirmmodal',
       'passwordmmodal',
-      'confirmationemail',
+      'data',
     ]),
   },
   mounted() {
@@ -180,7 +180,7 @@ export default {
   },
 
   methods: {
-    ...mapMutations('modals', ['openmodal', 'closemodal', 'setemail']),
+    ...mapMutations('modals', ['openmodal', 'closemodal', 'setdata']),
 
     noscroll(newVal) {
       if (newVal) {
@@ -190,12 +190,13 @@ export default {
       }
     },
     handleresetopen(data) {
-      this.setemail(data);
+      this.setdata(data);
       this.openmodal('passwordmmodal');
     },
     handleconfirmmail(data) {
-      this.setemail(data);
+      this.setdata(data);
       this.closemodal('forgetmodal');
+      this.closemodal('registermodal');
       this.openmodal('confirmmodal');
     },
     redirect() {

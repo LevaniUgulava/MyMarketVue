@@ -76,10 +76,10 @@
           </span>
           <span v-if="singleproduct.discountstatus" class="discount-square status-discount">-{{
             singleproduct.discountstatus.discount
-          }}%</span>
+            }}%</span>
 
           <span v-else-if="singleproduct.discount" class="discount-square default-discount">-{{ singleproduct.discount
-            }}%</span>
+          }}%</span>
         </p>
         <div class="quantity-control">
           <div class="increment-wrapper">
@@ -169,7 +169,7 @@ export default {
       if (newVal) {
         setTimeout(() => {
           this.message = null;
-        }, 3000);
+        }, 5000);
       }
     },
     singleproduct(newProduct) {
@@ -205,7 +205,9 @@ export default {
         this.$router.push({ name: "checkout" });
 
       } catch (error) {
-        console.error("Error during redirection or API request:", error);
+        if (error.response.status === 403) {
+          this.message = `ელფოსტა არ არის ვერიფიცირებული, ვეირიფიკაციისთვის დაჭირეთ <a href='/profile' style="color:white" target='_blank'>აქ</a>`;
+        }
       }
 
     },

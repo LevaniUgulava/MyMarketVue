@@ -30,11 +30,16 @@
           <span>შეკვეთები</span>
         </router-link>
       </li>
-      <li class="mobile-only" @click="toggleDropup">
-        <router-link :to="{ path: `/profile` }" :class="{ active: $route.path === `/profile` }">
+      <li class="mobile-only">
+        <router-link v-if="isAuthenticated" :to="{ path: `/profile` }" :class="{ active: $route.path === `/profile` }">
           <i class="fa-solid fa-user outline-icon" :class="{ active: $route.path === `/profile` }"> </i>
-          <span> {{ name }}</span>
+          <span>{{ getUser }}</span>
         </router-link>
+        <button class="user-section" @click.prevent="openmodal('loginmodal')">
+          <i class="fa-solid fa-user outline-icon"></i>
+          <span>შესვლა</span>
+        </button>
+
       </li>
     </ul>
   </div>
@@ -43,6 +48,7 @@
 
 <script>
 import CategoryModal from './CategoryModal.vue';
+import { mapGetters, mapState, mapMutations } from 'vuex';
 
 export default {
   components: {
@@ -67,14 +73,49 @@ export default {
         this.isUserClicked
       );
     },
-    isAuthorized() {
-      return Boolean(localStorage.getItem('token'));
+    ...mapGetters('auth', ['isAuthenticated']),
+    ...mapGetters('auth', ['getUser']),
+    ...mapState('modals', [
+      'loginmodal',
+      'registermodal',
+      'forgetmodal',
+      'confirmmodal',
+      'passwordmmodal',
+      'data',
+    ]),
+
+  },
+  watch: {
+    loginmodal(newVal) {
+      this.noscroll(newVal)
     },
-    name() {
-      return this.isAuthorized ? localStorage.getItem('name') : " შესვლა";
+    passwordmmodal(newVal) {
+      this.noscroll(newVal)
+
+    },
+    registermodal(newVal) {
+      this.noscroll(newVal)
+
+    },
+    forgetmodal(newVal) {
+      this.noscroll(newVal)
+
+    },
+    confirmmodal(newVal) {
+      this.noscroll(newVal)
+
     },
   },
   methods: {
+    noscroll(newVal) {
+      if (newVal) {
+        document.body.classList.add('no-scroll');
+      } else {
+        document.body.classList.remove('no-scroll');
+      }
+    },
+    ...mapMutations('modals', ['openmodal', 'closemodal', 'setdata']),
+
     handleButtonClick() {
       console.log('Filter clicked!');
     },
@@ -192,7 +233,7 @@ export default {
 }
 
 .sidebar ul li a,
-.user-section {
+.user-section button {
   text-decoration: none;
   display: flex;
   align-items: center;
@@ -203,6 +244,7 @@ export default {
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
   background-color: rgba(255, 255, 255, 0.9);
+
 }
 
 /* Outline Icon Styles */
@@ -246,6 +288,9 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin: auto;
+    width: 100%;
+    border: none;
   }
 
   .sidebar ul li i,

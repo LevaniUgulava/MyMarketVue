@@ -59,6 +59,7 @@ export default {
       selectedmainCategory: [],
       selectedColors: [],
       selectedSizes: [],
+      selectedBrands: [],
       emitselectedmainCategory: [],
       selectedCategory: [],
       emitselectedCategory: [],
@@ -115,7 +116,7 @@ export default {
       this.selectmax = queryParams.get('max') || '';
       this.selectedColors = queryParams.get('colors') || '';
       this.selectedSizes = queryParams.get('sizes') || ''
-
+      this.selectedBrands = queryParams.get('brand') || ''
 
       try {
         const response = await api.get('display', {
@@ -125,6 +126,7 @@ export default {
             maincategory: this.selectedmainCategory,
             category: this.selectedCategory,
             subcategory: this.selectedsubCategory,
+            brands: this.selectedBrands,
             section: this.Section,
             min: this.selectmin,
             max: this.selectmax,

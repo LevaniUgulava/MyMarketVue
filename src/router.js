@@ -26,6 +26,10 @@ const routes = [
 
       },
       {
+        path: "/docs",
+        component: () => import("@/components/Footer/DocumentComponent.vue"), 
+      },
+      {
         path: "cart",
         name: "Cart",
         component: () => import("@/views/CartView.vue"),
@@ -72,28 +76,13 @@ const routes = [
         name: "ExclusivePage",
         component: () => import("@/components/Status/ExclusivePage.vue"),
       },
-
-      {
-        path: "about-us",
-        name: "AboutUs",
-        component: () => import("@/components/FooterContent/about-us.vue"),
-      },
-      {
-        path: "services",
-        name: "Service",
-        component: () => import("@/components/FooterContent/ServicesInfo.vue"),
-      },
+  
       {
         path: "checkout",
         name: "checkout",
         component: () => import("@/views/CheckoutView.vue"),
       },
-      {
-        path: "privacy-policy",
-        name: "privacy-policy",
-        component: () =>
-          import("@/components/FooterContent/privacy-policy.vue"),
-      },
+  
     ],
   },
   {
@@ -170,6 +159,16 @@ const routes = [
         props: true,
       },
       {
+        path: "brands",
+        component: () =>
+          import("@/components/Admin/Brands/BrandsComponent.vue"),
+      },
+      {
+        path: "brands/action",
+        component: () =>
+          import("@/components/Admin/Brands/BrandActionComponent.vue"),
+      },
+      {
         path: "roles",
         name: "roles",
         component: () => import("@/components/Admin/roles/RolesComponent.vue"),
@@ -208,9 +207,14 @@ const routes = [
         component: () => import("@/components/Admin/banner/BannerCreateComponent.vue"),
       },
       {
-        path: "logs",
-        name: "logs",
-        component: () => import("@/views/Admin/LoggerView.vue"),
+        path: "docs",
+        name: "docs",
+        component: () => import("@/components/Admin/Documents/DocumentComponent.vue"),
+      },
+      {
+        path: "docs/create",
+        name: "docscreate",
+        component: () => import("@/components/Admin/Documents/CreateDocuments.vue"),
       },
 
       {

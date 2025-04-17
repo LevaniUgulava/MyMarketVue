@@ -157,6 +157,7 @@ export default {
   }
 
   .status-description {
+    margin-bottom: 10px;
     font-size: 0.6rem;
   }
 
@@ -165,7 +166,8 @@ export default {
   }
 
   .status-bar {
-    height: 10px;
+    height: 5px;
+    margin: 10px 0;
   }
 
   .status-details p {

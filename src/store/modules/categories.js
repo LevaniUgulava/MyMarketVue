@@ -4,7 +4,9 @@ const state = {
     selectedsubCategories: getLocalStorage('selectedsubCategories'),
     priceRange: getLocalStorage('priceRange'),
     selectedColors: getLocalStorage('selectedColors'),
-    selectedSizes: getLocalStorage('selectedSizes')
+    selectedSizes: getLocalStorage('selectedSizes'),
+    selectedBrands: getLocalStorage('selectedBrands')
+
 };
 function getLocalStorage(key) {
     const storedValue = localStorage.getItem(key);
@@ -63,6 +65,10 @@ const mutations = {
         state.selectedSizes = size;
         localStorage.setItem("selectedSizes", JSON.stringify(size));
     },
+    setBrands(state, brand) {
+        state.selectedBrands = brand;
+        localStorage.setItem("selectedBrands", JSON.stringify(brand));
+    },
 };
 
 const getters = {
@@ -71,7 +77,8 @@ const getters = {
     getSubCategory: (state) => state.selectedsubCategories,
     getPriceRange: (state) => state.priceRange,
     getColors: (state) => state.selectedColors,
-    getSizes: (state) => state.selectedSizes
+    getSizes: (state) => state.selectedSizes,
+    getBrands: (state) => state.selectedBrands,
 };
 
 export default {

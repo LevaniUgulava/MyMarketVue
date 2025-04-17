@@ -15,29 +15,52 @@
                     <div class="dotted-line">
                         <span></span>
                     </div>
-                    <div class="verification-message">
+                    <div class="verification-message" v-if="data.from !== 'register'">
                         <h3>ვერიფიკაციის კოდი თქვენი ელ.ფოსტაზე</h3>
                         <p>თქვენმა სისტემამ უკვე გაგზავნა ვერთიფიკაციის კოდი თქვენს ელ.ფოსტის მისამართზე. გთხოვთ,
                             შეიყვანოთ კოდი ქვემოთ მოცემულ ველში, რათა დაადასტუროთ თქვენი ანგარიში.</p>
                         <div class="email-info">
-                            <p><strong>ელ.ფოსტის მისამართი:</strong> {{ email }}</p>
+                            <p><strong>ელ.ფოსტის მისამართი:</strong> {{ data.email }}</p>
                         </div>
-                        <p class="note">თუ არ მიიღეთ კოდი, შეგიძლიათ დააჭიროთ "მחדש გაგზავნა".</p>
+                        <p class="note">თუ არ მიიღეთ კოდი, შეგიძლიათ დააჭიროთ "გაგზავნა".</p>
                     </div>
+                    <div class="verification-message" v-else>
+                        <h3>ვერიფიკაციის კოდი თქვენი ელ.ფოსტაზე</h3>
+                        <p>გაიარეთ ვერიფიკაცია, რათა გამოიყენოთ ყველა ფუნქცია და უზრუნველყოთ უსაფრთხოება, რაც საშუალებას
+                            მოგცემთ წვდომა მიიღოთ სრულად ყველა სერვისზე და შესაძლებლობაზე..</p>
+                        <div class="email-info">
+                            <p><strong>ელ.ფოსტის მისამართი:</strong> {{ data.email }}</p>
+                        </div>
+                        <p class="note">კოდის მისაღებად დააჭირეთ <strong>"გაგზავნა"</strong>.</p>
+                    </div>
+
 
                     <form @submit.prevent="checkOtp" method="post" id="loginform">
                         <div class="input-container">
-                            <input v-model="otp" type="text" name="otp" id="otp" required placeholder="" />
+                            <span v-if="otpError" class="error-text">{{ otpError }}</span>
+                            <input v-model="otp" :class="{ 'input-error': otpError }" type="text" name="otp" id="otp"
+                                placeholder="" />
                             <label for="otp">ვერიფიკაციის კოდი</label>
+                            <a class="resend" v-if="isSendEmail">
+                                {{ remainingTime }}s
+                            </a>
+                            <button v-else type="button" class="resend" @click.prevent="sendEmail"> გაგზავნა </button>
                         </div>
 
                         <button class="loginbtn">გაგრძელება</button>
-
-                        <div class="dotted-line">
-                            <span></span>
-                        </div>
-
                     </form>
+
+                    <div class="dotted-line">
+                        <span>{{ data.from === 'register' ? 'ან' : '' }}</span>
+                    </div>
+                    <button v-if="data.from === 'register'" @click="closeModal" class="verifypass">ვერიფიკაციის
+                        გამოტოვება</button>
+
+                    <div class="Error" v-if="ErrorName && ErrorText">
+                        <strong>{{ ErrorName }}</strong>
+                        <hr />
+                        <p>{{ ErrorText }}</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -45,42 +68,186 @@
 </template>
 <script>
 import api from '@/api';
-
+import { validateInputFields } from '@/components/utils/validate';
 
 export default {
     name: "verifyComp",
-    props: ['open', 'email'],
+    props: ['open', 'data'],
 
     data() {
         return {
-            otp: ""
+            otp: "",
+            otpError: '',
+            ErrorName: "",
+            ErrorText: "",
+            isSendEmail: false,
+            remainingTime: 30,
+            intervalId: null
+
         };
     },
     methods: {
-        async checkOtp() {
-            try {
-                const response = await api.post('/checkotp', { email: this.email, otp: this.otp });
-                if (response.data.success) {
-                    this.$emit('openresetmodal', response.data.success);
-                    this.closeModal();
-                } else {
-                    console.log("failed");
+        async sendEmail() {
+            if (this.data.from === "forget") {
 
+                try {
+                    const response = await api.post('/forget/password', { email: this.data.email });
+
+                    if (response.status === 200) {
+                        this.isSendEmail = true;
+                        this.remainingTime = 30;
+                        this.startCountdown();
+                        this.saveTimerState();
+                    }
+                } catch (error) {
+                    if (error.response.status === 422) {
+                        this.ErrorName = "არასწორი ფორმატი"
+                        this.ErrorText = "გაითვალისწინეთ, პაროლი უნდა შედგებოდეს არანკლებ 8 სიმბოლოსგან, ასევე შეამოწმეთ ელ.ფოსტის ფორმატი"
+                    } else if (error.response.status === 500) {
+                        this.ErrorName = "არასწორი ელ.ფოსტა"
+                        this.ErrorText = "ჩანაწერები არ ემთხევა"
+                    }
+                }
+            } else {
+                try {
+                    const response = await api.post("/resend-verify", { email: this.data.email });
+                    if (response.status === 200) {
+                        this.isSendEmail = true;
+                        this.remainingTime = 30;
+                        this.startCountdown();
+                        this.saveTimerState();
+                    }
+                } catch (error) {
+                    console.error(error);
+                }
+
+            }
+        },
+        async checkOtp() {
+            const valid = validateInputFields(this, [
+                { model: 'otp', errorKey: 'otpError', message: 'ერთჯერადი კოდი აუცილებელია' },
+            ]);
+
+            if (!valid) return;
+            try {
+                if (this.data.from === "forget") {
+                    const response = await api.post('/checkotp', { email: this.data.email, otp: this.otp });
+                    if (response.data.success) {
+                        this.$emit('openresetmodal', response.data.success);
+                        this.closeModal();
+                    } else {
+                        console.log("failed");
+
+                    }
+                } else if (this.data.from === "register") {
+                    const response = await api.post('/email/verify', { email: this.data.email, otp: this.otp });
+                    if (response.data.success) {
+                        this.closeModal();
+                    } else {
+                        console.log("failed");
+                    }
                 }
 
             } catch (error) {
-                console.log(error);
+                if (error.response.status === 400 || error.response.status === 422) {
+                    this.ErrorName = "დროებითი კოდი არასწორია"
+                    this.ErrorText = "დარწმუნდით რომ კოდი სწორია"
+
+                }
+            }
+        },
+
+        startCountdown() {
+            if (this.intervalId) {
+                clearInterval(this.intervalId);
             }
 
+            this.intervalId = setInterval(() => {
+                if (this.remainingTime > 0) {
+                    this.remainingTime--;
+                    this.saveTimerState();
+                } else {
+                    this.isSendEmail = false;
+                    clearInterval(this.intervalId);
+                    localStorage.removeItem('remainingTime');
+                }
+            }, 1000);
+        },
+        saveTimerState() {
+            localStorage.setItem('remainingTime', this.remainingTime);
+            localStorage.setItem('isSendEmail', this.isSendEmail);
+        },
+        loadTimerState() {
+            const savedTime = localStorage.getItem('remainingTime');
+            const savedStatus = localStorage.getItem('isSendEmail');
+
+            if (savedTime !== null && savedStatus !== null) {
+                this.remainingTime = parseInt(savedTime, 10);
+                this.isSendEmail = savedStatus === 'true';
+
+                if (this.isSendEmail && this.remainingTime > 0) {
+                    this.startCountdown();
+                }
+            }
         },
         closeModal() {
             this.$emit('close');
         },
-    }
+    },
+    mounted() {
+        this.loadTimerState();
+    },
 };
 </script>
 
 <style scoped>
+.verifypass {
+    display: flex;
+    margin: 20px auto;
+    border: none;
+    background-color: transparent;
+    color: #3d2dec;
+}
+
+.Error {
+    background-color: #ffe5e5;
+    border: 1px solid #ffaea8;
+    color: #b71c1c;
+    padding: 16px 24px;
+    margin: 20px auto;
+    border-radius: 10px;
+    max-width: 600px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    line-height: 1.5;
+}
+
+.Error strong {
+    font-size: 14px;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.Error p {
+    margin: 0;
+    font-size: 12px;
+
+}
+
+.resend {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    color: #3d2dec;
+    padding: 4px;
+    z-index: 2;
+}
+
 .verification-message {
     padding: 10px;
     background-color: #f4f7fa;
@@ -198,16 +365,11 @@ input {
     border: 1px solid #dbdbdb;
     border-radius: 10px;
     outline: none;
-    background: #f9f9f9;
-    transition: 0.3s;
+    transition: border-color 0.3s, box-shadow 0.3s;
 }
 
-input:focus+label,
-input:not(:placeholder-shown)+label {
-    top: -10px;
-    font-size: 12px;
-    color: #333;
-    padding: 0 5px;
+.input-error {
+    border-color: #e74c3c;
 }
 
 label {
@@ -218,8 +380,27 @@ label {
     font-size: 14px;
     color: #aaa;
     pointer-events: none;
+    padding: 0 5px;
     transition: all 0.3s ease;
 }
+
+input:focus+label,
+input:not(:placeholder-shown)+label {
+    top: -10px;
+    font-size: 12px;
+    color: #333;
+}
+
+.error-text {
+    position: absolute;
+    bottom: -18px;
+    right: 0;
+    color: #e74c3c;
+    font-size: 12px;
+    background: white;
+    padding: 0 5px;
+}
+
 
 .loginbtn {
     padding: 12px;
@@ -279,5 +460,29 @@ h2 {
     font-size: 24px;
     z-index: 1000;
 
+}
+@media (max-width: 768px) {
+  .modal {
+    position: fixed;
+    top: 0px;
+    right: 0px;
+    width: 100vh;
+    border-radius: none;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+  }
+
+  .login-card {
+    background: white;
+    border-radius: 0px;
+    padding: 20px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-right: 2px solid #ccc;
+    max-width: 100vw;
+    height: 100%;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+  }
 }
 </style>

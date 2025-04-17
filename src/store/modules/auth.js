@@ -36,19 +36,28 @@ const state = {
   
   const actions = {
     async login({ commit }, { email, password }) {
-        try {
-            const response = await api.post('login', {
-              email: email,
-              password: password
-            });
-            commit('setName', response.data.name);
-            commit('setToken', response.data.token);
-            commit('setRoles', response.data.roles[0]);
-            commit('setUserId', response.data.id);
-          } catch (error) {
-            console.error(error);
+      try {
+        const response = await api.post('login', {
+          email,
+          password
+        }, {
+          headers: {
+            "X-Login-Request": true
           }
+        });
+    
+        commit('setName', response.data.name);
+        commit('setToken', response.data.token);
+        commit('setRoles', response.data.roles[0]);
+        commit('setUserId', response.data.id);
+    
+        return response.status;
+    
+      } catch (error) {
+          return error.response.status;
+      }
     },
+    
     
     async logout({ commit }) {
         try {
@@ -77,4 +86,3 @@ const state = {
     actions,
     getters,
   };
-  

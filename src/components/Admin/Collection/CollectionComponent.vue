@@ -1,5 +1,6 @@
 <template>
     <div>
+        <a href="/admin/brands">ბრენდების მართვა</a>
         <h1>Collections:</h1>
         <router-link :to="{ name: 'collectioncreate' }">Create New Collection</router-link>
         <table>

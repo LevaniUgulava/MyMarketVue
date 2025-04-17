@@ -65,6 +65,27 @@
                 </div>
             </div>
         </div>
+        <!-- Brand Section -->
+        <div class="filter-section">
+            <h3 @click="toggleSection('brand')">
+                მწარმოებელი
+                <svg v-if="collapsed.brand" class="icon icon-chevron-up icon-md" viewBox="0 0 24 24"
+                    stroke="currentColor" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 15L12 9L18 15"></path>
+                </svg>
+                <svg v-else class="icon icon-chevron-down icon-md" viewBox="0 0 24 24" stroke="currentColor" fill="none"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 9L12 15L6 9"></path>
+                </svg>
+            </h3>
+            <div v-if="!collapsed.brand">
+                <div class="checkbox-container" v-for="(brand, Index) in brands || []" :key="Index">
+                    <input type="checkbox" :id="'brand-' + brand.id" v-model="selectedBrands" :value="brand.id"
+                        @change="performSearch" />
+                    <label :for="'brand-' + brand.id">{{ brand.name }}</label>
+                </div>
+            </div>
+        </div>
 
         <!-- Price Range Section -->
         <div class="filter-section">
@@ -158,7 +179,8 @@ export default {
                 subcategory: false,
                 price: false,
                 color: false,
-                size: false
+                size: false,
+                brand: false
             },
             mainCategories: [],
             Categories: [],
@@ -176,7 +198,9 @@ export default {
             colors: [],
             selectedColors: [],
             sizes: [],
-            selectedSizes: []
+            selectedSizes: [],
+            brands: [],
+            selectedBrands: []
 
         };
     },
@@ -188,6 +212,7 @@ export default {
             this.priceRange = this.getPriceRange;
             this.selectedColors = this.getColors;
             this.selectedSizes = this.getSizes;
+            this.selectedBrands = this.getBrands;
         },
         resetFilters() {
             this.selectedMainCategories = [];
@@ -195,6 +220,7 @@ export default {
             this.selectedsubCategories = [];
             this.selectedColors = [];
             this.selectedSizes = [];
+            this.selectedBrands = [];
             this.priceRange = { min: null, max: "" };
 
             this.setMainCategory([]);
@@ -203,12 +229,16 @@ export default {
             this.setColors([]);
             this.setPriceRange([]);
             this.setSizes([]);
+            this.setBrands([]);
+
             localStorage.removeItem('selectedMainCategories');
             localStorage.removeItem('selectedCategories');
             localStorage.removeItem('selectedsubCategories');
             localStorage.removeItem('selectedColors');
             localStorage.removeItem('priceRange');
             localStorage.removeItem('selectedSizes');
+            localStorage.removeItem('selectedBrands');
+
             this.performSearch();
 
         },
@@ -218,7 +248,8 @@ export default {
             'setSubCategory',
             'setPriceRange',
             'setColors',
-            'setSizes'
+            'setSizes',
+            'setBrands'
         ]),
 
         toggleSection(section) {
@@ -241,6 +272,9 @@ export default {
                 const responsesize = await api.get('sizes', {
                     tokenRequired: false
                 });
+                const responsebrand = await api.get('/brand/display', {
+                    tokenRequired: false
+                });
 
 
                 this.mainCategories = response.data;
@@ -248,6 +282,7 @@ export default {
                 this.subCategories = responseee.data;
                 this.colors = responsecolor.data
                 this.sizes = responsesize.data;
+                this.brands = responsebrand.data
             } catch (error) {
                 console.error('Failed to fetch categories:', error);
             }
@@ -261,6 +296,7 @@ export default {
             this.setPriceRange(this.priceRange);
             this.setSizes(this.selectedSizes);
             this.setColors(this.selectedColors);
+            this.setBrands(this.selectedBrands);
         },
 
 
@@ -274,6 +310,8 @@ export default {
             const subcategoryParam = this.selectedsubCategories.map(q => q.id).join(",");
             const sizesParm = this.selectedSizes.join(",");
             const colorsParam = this.selectedColors.join(',');
+            const brandParam = this.selectedBrands.join(',');
+
 
 
             this.$router.push({
@@ -283,6 +321,7 @@ export default {
                     maincategory: maincategoryParam || '',
                     category: categoryParam || '',
                     subcategory: subcategoryParam || '',
+                    brand: brandParam || '',
                     min: this.priceRange.min || '',
                     max: this.priceRange.max || '',
                     sizes: sizesParm || '',
@@ -300,7 +339,8 @@ export default {
             'getSubCategory',
             'getPriceRange',
             'getColors',
-            'getSizes'
+            'getSizes',
+            "getBrands"
         ]),
         filteredCategory() {
             if (this.selectedMainCategories.length) {

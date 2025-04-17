@@ -2,50 +2,50 @@
   <footer class="footer">
     <div class="container">
       <div class="footer-columns">
+        <!-- Column for "Company" section -->
         <div class="column">
-          <h4>Company</h4>
+          <h4>კომპანია</h4>
           <ul>
-            <li><router-link to="/about">About Us</router-link></li>
-            <li><router-link to="/press">Press</router-link></li>
-            <li><router-link to="/support">Support</router-link></li>
-            <li><router-link to="/contact">Contact</router-link></li>
+            <li><router-link to="/docs#privacy-policy">ჩვენს შესახებ</router-link></li>
+            <li><router-link to="/terms">წესები და პირობები</router-link></li>
+            <li><router-link to="/privacy-policy">პირადი მონაცემების პოლიტიკა</router-link></li>
+            <li><router-link to="/returns">დაბრუნების პოლიტიკა</router-link></li>
           </ul>
         </div>
+
+        <!-- Column for "Contact" section -->
         <div class="column">
-          <h4>Resources</h4>
+          <h4>კონტაქტი:</h4>
           <ul>
-            <li><router-link to="/learning-centre">Learning Centre</router-link></li>
-            <li><router-link to="/promotion">Promotion</router-link></li>
-            <li><router-link to="/inspiration">Inspiration</router-link></li>
-            <li><router-link to="/videos">Videos</router-link></li>
-            <li><router-link to="/submit">Submit</router-link></li>
+            <li>ელფოსტა:</li>
+            <li>ნომერი:</li>
+            <div class="column socials">
+              <div class="icons">
+                <a href="#" target="_blank"><i class="fab fa-facebook"></i></a>
+                <a href="#" target="_blank"><i class="fab fa-twitter"></i></a>
+                <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
+                <a href="#" target="_blank"><i class="fab fa-pinterest"></i></a>
+              </div>
+            </div>
           </ul>
         </div>
+
+        <!-- Column for "New Offers" section -->
         <div class="column">
-          <h4>Store</h4>
+          <h4>ახალი შეთავაზებეი</h4>
           <ul>
-            <li><router-link to="/store">View the Store</router-link></li>
-            <li><router-link to="/forest-ui">Forest UI Kit</router-link></li>
-            <li><router-link to="/otto-template">Otto Template</router-link></li>
+            <li><router-link to="/returns">დაბრუნების პოლიტიკა</router-link></li>
           </ul>
-        </div>
-        <div class="column socials">
-          <h4>Follow our Socials</h4>
-          <div class="icons">
-            <a href="#"><i class="fab fa-twitter"></i></a>
-            <a href="#"><i class="fab fa-instagram"></i></a>
-            <a href="#"><i class="fab fa-webflow"></i></a>
-            <a href="#"><i class="fab fa-discord"></i></a>
-          </div>
         </div>
       </div>
-      <div class="footer-bottom">
-        <p>&copy; 2024 Flowbase. Powered by Webflow</p>
-        <div class="links">
-          <a href="#">Privacy Policy</a>
-          <a href="#">Affiliate Notice</a>
-          <a href="#">Press Kit</a>
-        </div>
+    </div>
+
+    <!-- Footer bottom section -->
+    <div class="footer-bottom">
+      <p>&copy; 2024 YourStore. Powered by Webflow</p>
+      <div class="links">
+        <a href="#">კონფიდენციალურობის პოლიტიკა</a>
+        <a href="#">პირადი მონაცემების პოლიტიკა</a>
       </div>
     </div>
   </footer>
@@ -53,7 +53,21 @@
 
 <script>
 export default {
-  name: "FlowbaseFooter",
+  name: "FooterComponent",
+  data() {
+    return {
+      items: [
+        { "id": 1, "url": "bla", "name": "დადდს" },
+        { "id": 2, "url": "bla", "name": "დადდს" },
+        { "id": 3, "url": "bla", "name": "დადდს" },
+        { "id": 4, "url": "bla", "name": "დადდს" },
+        { "id": 5, "url": "bla", "name": "დადდს" },
+        { "id": 6, "url": "bla", "name": "დადდს" },
+        { "id": 7, "url": "bla", "name": "დადდს" },
+        { "id": 8, "url": "bla", "name": "დადდს" }
+      ],
+    }
+  },
 };
 </script>
 
@@ -96,6 +110,7 @@ export default {
 
 .column ul li {
   margin: 6px 0;
+  font-size: 13px;
 }
 
 .column ul li a {
@@ -123,6 +138,15 @@ export default {
   color: #000;
 }
 
+.payment-methods .icons {
+  display: flex;
+  gap: 20px;
+}
+
+.payment-methods .icons img {
+  width: 40px;
+}
+
 .footer-bottom {
   border-top: 1px solid #ddd;
   margin-top: 30px;
@@ -135,12 +159,58 @@ export default {
 
 .footer-bottom .links a {
   margin-left: 20px;
-  text-decoration: none;
-  color: #6b6b6b;
 }
 
 .footer-bottom .links a:hover {
   color: #000;
+}
+
+.column-1 {
+  padding: 20px;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  /* Space between title and items */
+}
+
+.flex {
+  display: flex;
+  flex-wrap: wrap;
+  /* Allow wrapping */
+  gap: 20px;
+  /* Space between items */
+}
+
+.sec {
+  width: calc(33.33% - 20px);
+  /* 3 items per row */
+  margin-bottom: 20px;
+  /* Space between rows */
+}
+
+.sec ul {
+  padding: 0;
+  list-style: none;
+}
+
+.sec ul li {
+  margin: 5px 0;
+}
+
+@media (max-width: 768px) {
+  .sec {
+    width: calc(50% - 20px);
+    /* 2 items per row for smaller screens */
+  }
+}
+
+@media (max-width: 480px) {
+  .sec {
+    width: 100%;
+    /* 1 item per row for very small screens */
+  }
 }
 
 @media (max-width: 768px) {
@@ -160,6 +230,10 @@ export default {
     display: flex;
     gap: 15px;
     flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .payment-methods .icons {
     justify-content: center;
   }
 }

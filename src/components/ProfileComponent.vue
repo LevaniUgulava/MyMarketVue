@@ -1,6 +1,5 @@
 <template>
-  {{ message }}
-  <div class="profile-container">
+  <div v-if="!loading" class="profile-container">
     <div class="content">
       <div class="left-sections">
         <div class="section">
@@ -31,14 +30,23 @@
       <div class="section1">
 
         <div class="section">
-          <div class="side-section">
-            <h3>Side Section</h3>
-            <p>This section will be placed side by side with the two sections.</p>
-            <button @click="resend">Send Verification Email</button>
+          <div v-if="isVerified" class="side-section verified">
+            <h3>ვერიფიკაცია</h3>
+            <i class="fa-solid fa-circle-check"></i>
+            <p>თქვენი ელფოსტა წარმატებით დადასტურდა. ახლა შეგიძლიათ პლატფორმის ყველა მახასიათებლის წვდომა.</p>
+          </div>
+
+          <div v-else class="side-section unverified">
+            <h3>ვერიფიკაცია</h3>
+            <i class="fa-solid fa-square-xmark"></i>
+            <p>თქვენი ელფოსტა ჯერ არ დადასტურდა. გთხოვთ გაიაროთ ვერიფიკაცია თქვენი ელფოსტით.</p>
+            <p>ვერიფიკაციისთვის დააჭირეთ<button class="sendbtn" @click.prevent="send">გაგზავნა</button></p>
+            <div class="messageverify">
+              {{ messageverify }}
+            </div>
           </div>
         </div>
         <div class="section">
-
           <UserStatusComponentVue />
         </div>
       </div>
@@ -47,6 +55,7 @@
 </template>
 
 <script>
+import { mapMutations } from 'vuex';
 import UserStatusComponentVue from './UserStatusComponent.vue';
 import api from '@/api';
 export default {
@@ -60,17 +69,38 @@ export default {
       email: null,
       currentpassword: null,
       newpassword: null,
-      message: ""
+      message: "",
+      isVerified: "",
+      loading: true,
+      messageverify: "",
+
     };
   },
   methods: {
-    async getprofile() {
-      const token = localStorage.getItem("token");
+    ...mapMutations('modals', ['openmodal', 'closemodal', 'setdata']),
 
-      if (!token) {
-        console.log("Error: Token not found");
-        return;
+    async send() {
+      try {
+        const response = await api.post("/resend-verify", { email: this.email }, {
+          tokenRequired: true
+        });
+        if (response.status === 200) {
+          this.messageverify = "შეამოწმეთ ელფოსტა, ვერიფიკაციის კოდი გამოგზავნილია"
+          let data = {
+            email: this.email,
+            from: "register"
+          };
+          this.setdata(data);
+          this.openmodal('confirmmodal');
+
+        }
+      } catch (error) {
+        console.error(error);
       }
+
+
+    },
+    async getprofile() {
 
       try {
         const response = await api.get("getprofile", {
@@ -78,18 +108,17 @@ export default {
         });
         this.name = response.data.user.name;
         this.email = response.data.user.email;
+        this.isVerified = response.data.isVerified;
+        this.loading = false;
+        this.$emit("load", this.loading);
       } catch (error) {
         console.error("Error fetching profile:", error);
+        this.loading = false;
+        this.$emit("load", this.loading);
+
       }
     },
     async updateprofile() {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        console.log("Error: Token not found");
-        return;
-      }
-
       try {
         const response = await api.post("/profile/update", {
           name: this.name,
@@ -105,12 +134,6 @@ export default {
 
     },
     async updatepassword() {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        console.log("Error: Token not found");
-        return;
-      }
 
       try {
         const response = await api.post("/profile/update/password", {
@@ -131,12 +154,6 @@ export default {
     },
 
     async resend() {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        console.log("Error: Token not found");
-        return;
-      }
 
       try {
         const response = await api.post('/resend/verification', {}, {
@@ -157,6 +174,12 @@ export default {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Raleway:wght@400;500;700&display=swap');
 
+.messageverify {
+  color: #388e3c;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
 .profile-container {
   margin-top: 2%;
   padding: 10px;
@@ -176,6 +199,17 @@ export default {
   flex-direction: column;
   width: 55%;
   justify-content: space-between;
+}
+
+.sendbtn {
+  background-color: transparent;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+}
+
+.sendbtn:hover {
+  color: #004085;
 }
 
 .section1 {
@@ -236,47 +270,37 @@ export default {
 
 .side-section {
   border-radius: 8px;
-  padding: 20px;
+  padding: 25px;
   text-align: center;
-  font-family: 'Raleway', sans-serif;
   flex: 1;
-  /* Makes side section the same height as other sections */
 }
 
 .side-section h3 {
-  font-size: 1.5rem;
-  color: #2c3e50;
-  margin-bottom: 1rem;
+  font-size: 20px;
+  font-weight: 700;
+  color: #333333;
+  margin-bottom: 10px
 }
 
 .side-section p {
-  font-size: 1rem;
-  color: #555;
-  line-height: 1.6;
-  margin-bottom: 1.5rem;
+  font-size: 14px;
+  color: #777777;
+  margin-bottom: 20px;
+  line-height: 1.5;
 }
 
-.side-section button {
-  background: linear-gradient(135deg, #4facfe, #00f2fe);
-  border: none;
-  color: white;
-  font-size: 0.8rem;
-  font-weight: bold;
-  padding: 0.8rem 1.5rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
+.verified i {
+  font-size: 2.5rem;
+  color: #388e3c;
+  margin-top: 1rem;
 }
 
-.side-section button:hover {
-  background: linear-gradient(135deg, #00c6ff, #0072ff);
-  transform: translateY(-2px);
+.unverified i {
+  font-size: 2.5rem;
+  color: #f11a1a;
+  margin-top: 1rem;
 }
 
-.side-section button:active {
-  transform: translateY(0);
-  background: linear-gradient(135deg, #0072ff, #0052cc);
-}
 
 @media (min-width: 375px) and (max-width: 430px) {
   .content {

@@ -16,17 +16,24 @@
           </div>
           <form @submit.prevent="sendEmail" method="post" id="loginform">
             <div class="input-container">
-              <input v-model="email" type="text" name="email" id="email" required placeholder="" />
+              <span v-if="emailError" class="error-text">{{ emailError }}</span>
+              <input v-model="email" :class="{ 'input-error': emailError }" type="email" name="email" id="email"
+                placeholder="" />
               <label for="email">ელ.ფოსტა</label>
             </div>
 
             <button class="loginbtn">გაგზავნა</button>
-
-            <div class="dotted-line">
-              <span></span>
-            </div>
-
           </form>
+
+          <div class="dotted-line">
+            <span></span>
+          </div>
+          <div class="Error" v-if="ErrorName && ErrorText">
+            <strong>{{ ErrorName }}</strong>
+            <hr />
+            <p>{{ ErrorText }}</p>
+          </div>
+
         </div>
       </div>
     </div>
@@ -34,6 +41,7 @@
 </template>
 <script>
 import api from '@/api';
+import { validateInputFields } from '@/components/utils/validate';
 
 export default {
   name: "ForgetPassword",
@@ -41,13 +49,35 @@ export default {
 
   data() {
     return {
-      email: ""
+      email: "",
+      emailError: '',
+      ErrorName: "",
+      ErrorText: ""
     };
   },
   methods: {
     async sendEmail() {
-      await api.post('/forget/password', { email: this.email });
-      this.$emit('email', this.email);
+      const valid = validateInputFields(this, [
+        { model: 'email', errorKey: 'emailError', message: 'ელ.ფოსტა აუცილებელია' },
+      ]);
+
+      if (!valid) return;
+      try {
+        await api.post('/forget/password', { email: this.email });
+        let data = {
+          "email": this.email,
+          "from": "forget"
+        }
+        this.$emit('emaildata', data);
+      } catch (error) {
+        if (error.response.status === 422) {
+          this.ErrorName = "არასწორი ფორმატი"
+          this.ErrorText = "გაითვალისწინეთ, პაროლი უნდა შედგებოდეს არანკლებ 8 სიმბოლოსგან, ასევე შეამოწმეთ ელ.ფოსტის ფორმატი"
+        } else if (error.response.status === 500) {
+          this.ErrorName = "არასწორი ელ.ფოსტა"
+          this.ErrorText = "ჩანაწერები არ ემთხევა"
+        }
+      }
     },
     closeModal() {
       this.$emit('close');
@@ -58,6 +88,31 @@ export default {
 </script>
 
 <style scoped>
+.Error {
+  background-color: #ffe5e5;
+  border: 1px solid #ffaea8;
+  color: #b71c1c;
+  padding: 16px 24px;
+  margin: 20px auto;
+  border-radius: 10px;
+  max-width: 600px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  line-height: 1.5;
+}
+
+.Error strong {
+  font-size: 14px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.Error p {
+  margin: 0;
+  font-size: 12px;
+
+}
+
 span {
   color: #7c7878;
   font-size: 14px;
@@ -136,16 +191,11 @@ input {
   border: 1px solid #dbdbdb;
   border-radius: 10px;
   outline: none;
-  background: #f9f9f9;
-  transition: 0.3s;
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
 
-input:focus+label,
-input:not(:placeholder-shown)+label {
-  top: -10px;
-  font-size: 12px;
-  color: #333;
-  padding: 0 5px;
+.input-error {
+  border-color: #e74c3c;
 }
 
 label {
@@ -156,7 +206,25 @@ label {
   font-size: 14px;
   color: #aaa;
   pointer-events: none;
+  padding: 0 5px;
   transition: all 0.3s ease;
+}
+
+input:focus+label,
+input:not(:placeholder-shown)+label {
+  top: -10px;
+  font-size: 12px;
+  color: #333;
+}
+
+.error-text {
+  position: absolute;
+  top: -20px;
+  right: 0;
+  color: #e74c3c;
+  font-size: 12px;
+  background: white;
+  padding: 0 5px;
 }
 
 .loginbtn {
@@ -217,5 +285,30 @@ h2 {
   font-size: 24px;
   z-index: 1000;
 
+}
+
+@media (max-width: 768px) {
+  .modal {
+    position: fixed;
+    top: 0px;
+    right: 0px;
+    width: 100vh;
+    border-radius: none;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+  }
+
+  .login-card {
+    background: white;
+    border-radius: 0px;
+    padding: 20px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-right: 2px solid #ccc;
+    max-width: 100vw;
+    height: 100%;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+  }
 }
 </style>

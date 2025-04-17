@@ -14,7 +14,7 @@ const modalKeys = [
     forgetmodal: false,
     confirmmodal: false,
     passwordmmodal: false,
-    confirmationemail: null,
+    data: {},
   });
   
   const mutations = {
@@ -26,8 +26,8 @@ const modalKeys = [
     closemodal(state, modalName) {
       state[modalName] = false;
     },
-    setemail(state, email) {
-      state.confirmationemail = email;
+    setdata(state, data) {
+      state.data = data;
     },
   };
   
