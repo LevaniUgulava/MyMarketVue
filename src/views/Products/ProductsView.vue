@@ -1,7 +1,6 @@
 <template>
   <Message v-if="emitcartmessage" :message="emitcartmessage" @close="emitcartmessage = ''" />
   <Message v-if="emitdata" :message="emitdata" @close="emitdata = ''" />
-
   <div class="container">
 
     <div class="category-container">
@@ -9,16 +8,26 @@
         class="category-modal" ref="productviewcategory" />
     </div>
     <div class="products-container">
-      <div v-if="products.length > 0">
+      <div>
         <BreadcrumbComponent :maincategory="emitselectedmainCategory" :category="emitselectedCategory"
           :subcategory="emitselectedsubCategory" class="bread" @item-removed="handleremoved" />
 
         <div class="main-content">
 
-          <div class="'products-wrapper products-wrapper-collapsed">
+          <div class="products-wrapper-collapsed" v-if="products.length > 0 && isloaded">
             <ProductCardComponent v-for="(item, index) in products" :key="index" :initialproduct="item"
               @cart-updated="handleCartUpdated" @liked-message="handleunauthorizedlike"
               @cart-message="handleunauthorizedcart" />
+          </div>
+          <div v-else-if="!isloaded">
+            <SkeletonComponent />
+          </div>
+          <div v-else-if="isloaded">
+            <div class="empty">
+              <i class="fa-solid fa-magnifying-glass emptyicon"></i>
+              <p>პროდუქტი ვერ მოიძებნა</p>
+
+            </div>
           </div>
           <CustomPagination v-if="products.length > 0 && pagination.total > 1" :currentPage="pagination.current_page"
             :totalPages="pagination.total" class="pagination" />
@@ -35,6 +44,7 @@ import Message from '@/components/Message/MessageComponent.vue';
 import BreadcrumbComponent from '@/components/BreadcrumbComponent.vue';
 import CustomPagination from '@/components/CustomPagination.vue';
 import ProductViewCategory from './ProductViewCategory.vue';
+import SkeletonComponent from '@/components/SkeletonComponent.vue';
 import api from '@/api';
 export default {
   name: 'HomeView',
@@ -43,13 +53,15 @@ export default {
     BreadcrumbComponent,
     Message,
     CustomPagination,
-    ProductViewCategory
+    ProductViewCategory,
+    SkeletonComponent
   },
 
   data() {
     return {
       products: [],
       showModal: false,
+      isloaded: false,
       selectedProduct: null,
       selectedProductComments: [],
       selectmin: 0,
@@ -80,7 +92,7 @@ export default {
       if (newVal) {
         setTimeout(() => {
           this.emitdata = null;
-        }, 500000000);
+        }, 5000);
       }
     },
     emitlikemessage(newVal) {
@@ -120,7 +132,7 @@ export default {
 
       try {
         const response = await api.get('display', {
-
+          tokenOptional: true,
           params: {
             searchname: this.searchname,
             maincategory: this.selectedmainCategory,
@@ -134,7 +146,7 @@ export default {
             colors: this.selectedColors,
             page: page,
           },
-        });
+        },);
 
         if (this.Section == "all") {
           this.products = response.data.all.data;
@@ -154,6 +166,8 @@ export default {
 
       } catch (error) {
         console.error('Error fetching products:', error);
+      } finally {
+        this.isloaded = true;
       }
     },
     handlemain(maincategory) {
@@ -204,6 +218,26 @@ export default {
 };
 </script>
 <style scoped>
+.empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+  flex-direction: column;
+  text-align: center;
+}
+
+.emptyicon {
+  font-size: 35px;
+  color: transparent;
+  color: #ccc;
+}
+
+.empty p {
+  color: #ccc;
+  font-size: 14px;
+}
+
 .container {
   display: flex;
   flex-wrap: wrap;
@@ -258,7 +292,7 @@ export default {
   /* Forces pagination to bottom */
 }
 
-@media (min-width: 390px) and (max-width: 574px) {
+@media (max-width: 767px) {
   .category-modal {
     display: none;
   }
@@ -275,6 +309,15 @@ export default {
 
   .products-wrapper-collapsed {
     grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    display: grid;
+    width: 100%;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  .products-wrapper-collapsed {
+    grid-template-columns: repeat(3, 1fr);
     gap: 10px;
     display: grid;
     width: 100%;

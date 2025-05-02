@@ -1,6 +1,7 @@
 <template lang="html">
   <transition name="modal-fade">
-    <div v-if="isModalVisible" class="modal-overlay" @touchstart.passive="startTouch" @touchmove.passive="onTouchMove" @touchend="endTouch">
+    <div v-if="isModalVisible" class="modal-overlay" @touchstart.passive="startTouch" @touchmove.passive="onTouchMove"
+      @touchend="endTouch">
       <div class="modal-content" :style="{ transform: `translateY(${modalTranslateY}px)` }">
         <div class="modal-lever"></div>
         <div class="modal-body" ref="scrollableBody">
@@ -86,15 +87,15 @@ export default {
 .modal-fade-leave-active {
   transition: opacity 0.4s ease, background-color 0.4s ease;
 }
+
 .modal-fade-enter-from,
 .modal-fade-leave-to {
   opacity: 0;
-  background-color: rgba(0, 0, 0, 0);
 }
+
 .modal-fade-enter-to,
 .modal-fade-leave-from {
   opacity: 1;
-  background-color: rgba(0, 0, 0, 0.4);
 }
 
 .modal-overlay {

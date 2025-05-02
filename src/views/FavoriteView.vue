@@ -71,11 +71,6 @@ export default {
 </script>
 
 <style>
-.favorites-container {
-  padding: 20px;
-}
-
-
 .empty-favorites {
   display: flex;
   flex-direction: column;
@@ -189,7 +184,7 @@ export default {
 }
 
 /* Responsive Grid */
-@media (min-width: 390px) and (max-width: 574px) {
+@media (max-width: 767px) {
   .products-grid {
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;
@@ -201,17 +196,13 @@ export default {
   }
 
   .empty-text {
-    font-size: 1.3rem;
+    font-weight: 100;
   }
 
-  .empty-subtext {
-    font-size: 0.9rem;
-  }
-
-  .primary-btn,
-  .secondary-btn {
-    font-size: 0.8rem;
-    padding: 12px 15px;
+  .secondary-btn,
+  .primary-btn {
+    font-size: 12px;
+    font-weight: 100
   }
 }
 </style>

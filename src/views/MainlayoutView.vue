@@ -1,7 +1,7 @@
 <template>
   <div class="layout-container">
     <SwiperContent class="banner" />
-    <HeaderComponentVue class="header" :isMobile="isMobile" @search="handleSearch" />
+    <HeaderComponentVue  :isMobile="isMobile" @search="handleSearch" />
 
     <HomeSideBarVue class="sidebar" v-if="isMobile" />
 
@@ -80,18 +80,6 @@ export default {
   flex-direction: column;
 }
 
-.header {
-  width: 100%;
-  position: fixed;
-  top: 0;
-  height: 60px;
-  background-color: #f8f8f8;
-  z-index: 200;
-  display: flex;
-  left: 0;
-  align-items: center;
-  padding: 10px;
-}
 
 .main-content {
   flex-grow: 1;

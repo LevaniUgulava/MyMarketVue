@@ -11,7 +11,7 @@
       <div v-if="OrderProducts.length > 0" class="order-box">
         <div v-for="order in OrderProducts" :key="order.order_id" class="order-card">
           <div class="card-header">
-            <h3 class="order-id">შეკვეთა #{{ order.order_id }}</h3>
+            <h3 class="order-id">ID #{{ order.order_id }}</h3>
             <h3 class="order-amount">გადახდილი: {{ order.order_amount }} <i class="fa-solid fa-lari-sign"></i></h3>
           </div>
           <div class="products">

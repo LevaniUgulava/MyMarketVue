@@ -13,11 +13,22 @@
       <div class="product-container">
         <Breadcrumb class="bread" :maincategory="[]" :category="[]" :subcategory="[]" :name="title" />
 
-        <div v-if="products.length > 0">
-          <div class="products-wrapper">
+        <div v-if="products.length > 0 && isloaded">
+          <div class=" products-wrapper">
             <ProductCardComponent v-for="(item) in products" :key="item.id" :initialproduct="item"
               @cart-updated="handleCartUpdated" @liked-message="handleunauthorizedlike"
               @cart-message="handleunauthorizedcart" />
+          </div>
+        </div>
+        <div v-else-if="!isloaded">
+          <SkeletonComponent />
+        </div>
+
+        <div v-else-if="isloaded">
+          <div class="empty">
+            <i class="fa-solid fa-magnifying-glass emptyicon"></i>
+            <p>პროდუქტი ვერ მოიძებნა</p>
+
           </div>
         </div>
       </div>
@@ -36,18 +47,21 @@ import Message from 'primevue/message';
 import api from '@/api';
 import Breadcrumb from '@/components/BreadcrumbComponent.vue';
 import ProductViewCategory from '@/views/Products/ProductViewCategory.vue';
+import SkeletonComponent from './SkeletonComponent.vue';
 export default {
   name: 'FavoriteView',
   components: {
     ProductCardComponent,
     Message,
     Breadcrumb,
-    ProductViewCategory
+    ProductViewCategory,
+    SkeletonComponent
   },
   props: ["id"],
   data() {
     return {
       products: [],
+      isloaded: false,
       showModal: false,
       selectedProduct: null,
       selectedProductComments: [],
@@ -55,8 +69,7 @@ export default {
       emitlikemessage: null,
       emitcartmessage: null,
       pagination: {},
-      isLoading: true,
-      title: ""
+      title: "",
     };
   },
   watch: {
@@ -85,23 +98,47 @@ export default {
       handler() {
         this.getcollection();
       },
-      immediate: false,
+      immediate: true,
     },
   },
   methods: {
     async getcollection() {
+      const queryParams = new URLSearchParams(this.$route.query);
+      const page = parseInt(queryParams.get('page')) || 1;
+      let selectedmainCategory = queryParams.get('maincategory') || '';
+      let selectedCategory = queryParams.get('category') || '';
+      let selectedsubCategory = queryParams.get('subcategory') || '';
+      let Section = queryParams.get('section') || '';
+      let selectmin = queryParams.get('min') || '';
+      let selectmax = queryParams.get('max') || '';
+      let selectedColors = queryParams.get('colors') || '';
+      let selectedSizes = queryParams.get('sizes') || ''
+      let selectedBrands = queryParams.get('brand') || ''
       try {
         const response = await api.get(`product/collection/${this.id}`, {
-          tokenRequired: true
+          tokenRequired: true,
+          params: {
+            maincategory: selectedmainCategory,
+            category: selectedCategory,
+            subcategory: selectedsubCategory,
+            brands: selectedBrands,
+            section: Section,
+            min: selectmin,
+            max: selectmax,
+            sizes: selectedSizes,
+            colors: selectedColors,
+            page: page,
+          },
         });
         this.products = response.data.collection.products;
         this.title = response.data.collection.title;
         // this.pagination = response.data.pagination;
 
 
-        this.isLoading = false;
       } catch (error) {
         console.log(error);
+      } finally {
+        this.isloaded = true;
       }
     },
 
@@ -126,6 +163,27 @@ export default {
 </script>
 
 <style scoped>
+.empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+  flex-direction: column;
+  text-align: center;
+  width: 1100px;
+}
+
+.emptyicon {
+  font-size: 35px;
+  color: #ccc;
+}
+
+.empty p {
+  color: #ccc;
+  font-size: 14px;
+}
+
+
 .container {
   display: flex;
   flex-wrap: wrap;
@@ -229,6 +287,7 @@ export default {
 .products-wrapper {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
   width: 100%;
 }
 
@@ -286,7 +345,15 @@ export default {
 }
 
 
-@media (max-width: 490px) {
+@media (max-width: 767px) {
+  .category-modal {
+    display: none;
+  }
+
+  .category-container {
+    display: none;
+  }
+
   .products-wrapper {
     grid-template-columns: repeat(2, 1fr);
     gap: 0.5rem;

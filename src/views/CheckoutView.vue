@@ -40,8 +40,8 @@
             <div class="order-items">
                 <div v-for="(item, index) in cart" :key="index" class="order-item">
                     <span>{{ item.name }}</span>
-                    <span>x {{ item.quantity }}</span>
-                    <span>{{ item.total_price }}₾</span>
+                    <span>{{ item.retail_price }}₾ x {{ item.quantity }}</span>
+                    <span>სულ: {{ item.total_price }}₾</span>
                 </div>
             </div>
             <hr />

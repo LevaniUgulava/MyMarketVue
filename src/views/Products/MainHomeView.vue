@@ -47,8 +47,9 @@
 import ProductCardComponent from '@/components/ProductCardComponent.vue';
 import Message from '@/components/Message/MessageComponent.vue';
 import SwipeCarousel from '@/components/SwipeCarousel.vue';
-import api from '@/api';
 import BrandComponent from '@/components/BrandComponent.vue';
+import { mapActions, mapGetters } from 'vuex';
+
 export default {
   components: {
     ProductCardComponent,
@@ -75,28 +76,9 @@ export default {
     };
   },
   methods: {
-    async loadData() {
-      try {
-        const [productsResponse, collectionResponse] = await Promise.all([
-          api.get('display', {
-            tokenOptional: true,
-            params: { section: ['all', 'discount'] }
-          }),
-          api.get('collection/display')
-        ]);
-
-        this.categories = [
-          { key: 'all', title: 'ყველა პროდუქტი', products: productsResponse.data.all.data },
-          { key: 'discount', title: 'ფასდაკლებული პროდუქტი', products: productsResponse.data.discount.data },
-        ]
-        const sections = collectionResponse.data;
-        this.sections = sections;
-
-      } catch (error) {
-        console.error('Error loading data:', error);
-      }
-    },
-
+    ...mapActions("product", {
+      displayAction: 'loadData',
+    }),
     see(category) {
       this.$router.push({ path: `/product`, query: { section: category } });
     },
@@ -107,8 +89,22 @@ export default {
       this.emitdata = message.message;
     },
   },
-  mounted() {
-    this.loadData();
+  computed: {
+    ...mapGetters('product', ["getCategories", "getSections"])
+  },
+  watch: {
+    getCategories(newCategories) {
+      this.categories = newCategories;
+    },
+    getSections(newSections) {
+      this.sections = newSections;
+    },
+  },
+  async mounted() {
+    await this.displayAction();
+    this.categories = this.getCategories;
+    this.sections = this.getSections;
+
   },
 };
 </script>
@@ -201,7 +197,7 @@ button:hover {
   justify-content: space-between;
   align-items: center;
   padding: 10px 0;
-  font-weight: 700;
+  font-weight: 500;
   border-bottom: 1px solid #ddd;
 }
 
@@ -321,12 +317,20 @@ button:hover {
 }
 
 @media (max-width: 768px) {
-  .collection-label{
+  .collection-label {
+    font-size: 12px;
+  }
+
+  .product-availability {
+    padding: 5px 10px;
+    font-size: 10px;
+  }
+
+  .section-header p {
+    margin-left: 0px;
     font-size: 13px;
   }
-  .product-availability {
-    font-size: 0.7rem;
-  }
+
 
   .show-all-button {
     width: 150px;
@@ -335,6 +339,7 @@ button:hover {
 
   .grid-item {
     flex-direction: column;
+    height: 150px;
   }
 
   .grid-item-image {
@@ -342,9 +347,19 @@ button:hover {
     height: 150px;
   }
 
+  .grid-item-text .discount {
+    padding: 4px 6px;
+    font-size: 10px;
+  }
+
+  .grid-item-text .description {
+    font-size: 12px;
+  }
+
   .grid-item-text {
-    text-align: center;
     padding: 20px;
+    font-size: 10px;
+    line-height: 0.5;
   }
 }
 </style>

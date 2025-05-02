@@ -35,7 +35,7 @@ const state = {
   };
   
   const actions = {
-    async login({ commit }, { email, password }) {
+    async login({ commit, dispatch }, { email, password }) {
       try {
         const response = await api.post('login', {
           email,
@@ -51,7 +51,12 @@ const state = {
         commit('setRoles', response.data.roles[0]);
         commit('setUserId', response.data.id);
     
+        if(response.status === 200){
+            await dispatch('product/loadData', null, { root: true });
+        }
+        
         return response.status;
+
     
       } catch (error) {
           return error.response.status;
@@ -59,7 +64,7 @@ const state = {
     },
     
     
-    async logout({ commit }) {
+    async logout({ commit,dispatch }) {
         try {
             await api.post('logout', {}, {
               tokenRequired: true
@@ -73,6 +78,8 @@ const state = {
             localStorage.removeItem('token');
             localStorage.removeItem('roles');
             localStorage.removeItem('userid');
+            await dispatch('product/loadData', null, { root: true });
+
           } catch (error) {
             console.error('Logout failed', error);
           }    

@@ -119,7 +119,7 @@ export default {
 
 .brand-image {
     max-width: 100%;
-    height: auto;
+    height: 100px;
     border-radius: 5px;
 }
 

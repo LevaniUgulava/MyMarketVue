@@ -257,32 +257,21 @@ export default {
         },
         async fetchCategories() {
             try {
-                const response = await api.get('maincategory', {
-                    tokenRequired: false
-                });
-                const responsee = await api.get('category', {
-                    tokenRequired: false
-                });
-                const responseee = await api.get('subcategory', {
-                    tokenRequired: false
-                });
-                const responsecolor = await api.get('colors', {
-                    tokenRequired: false
-                });
-                const responsesize = await api.get('sizes', {
-                    tokenRequired: false
-                });
-                const responsebrand = await api.get('/brand/display', {
-                    tokenRequired: false
-                });
-
+                const [response, responsee, responseee, responsecolor, responsesize, responsebrand] = await Promise.all([
+                    api.get('maincategory', { tokenRequired: false }),
+                    api.get('category', { tokenRequired: false }),
+                    api.get('subcategory', { tokenRequired: false }),
+                    api.get('colors', { tokenRequired: false }),
+                    api.get('sizes', { tokenRequired: false }),
+                    api.get('/brand/display', { tokenRequired: false })
+                ]);
 
                 this.mainCategories = response.data;
                 this.Categories = responsee.data;
                 this.subCategories = responseee.data;
-                this.colors = responsecolor.data
+                this.colors = responsecolor.data;
                 this.sizes = responsesize.data;
-                this.brands = responsebrand.data
+                this.brands = responsebrand.data;
             } catch (error) {
                 console.error('Failed to fetch categories:', error);
             }
@@ -315,9 +304,9 @@ export default {
 
 
             this.$router.push({
-                path: `/product`,
+                path: this.$route.path,
                 query: {
-                    section: currentQuery.section || 'all',
+                    section: currentQuery.section,
                     maincategory: maincategoryParam || '',
                     category: categoryParam || '',
                     subcategory: subcategoryParam || '',

@@ -7,7 +7,8 @@
 
 
     <nav>
-      <img src="/logo/2.png" @click="redirect()" class="logo">
+      <!-- <img src="/logo/2.png"  class="logo">  -->
+      <p @click="redirect()">MyDressWay</p>
 
       <div class="search-container">
         <input type="text" class="searchname" v-model="searchname" placeholder="ძიება..." />
@@ -23,6 +24,12 @@
           <i class="fas fa-search"></i>
         </button>
       </div>
+      <!-- <div class="search-container-mobile" ref="searchContainer" @click.stop>
+
+        <button @click="toggleSearch" class="srchbtn-mobile">
+          <i class="fas fa-search"></i>
+        </button>
+      </div> -->
 
 
 
@@ -147,6 +154,7 @@ export default {
     ]),
   },
   mounted() {
+
     this.NamesforSearch();
     document.addEventListener('click', this.handleClickOutside);
 
@@ -247,6 +255,7 @@ export default {
           this.$refs.searchInput.focus();
         }
       });
+      // this.$router.push('/search');
     },
     closeOnBlur() {
       setTimeout(() => {
@@ -265,7 +274,7 @@ export default {
         return;
       }
       // Redirect or call search
-      this.$router.push({ path: '/product', query: { searchname: this.searchname } });
+      //this.$router.push({ path: '/product', query: { searchname: this.searchname } });
       this.isOpen = false;
     },
 
@@ -300,7 +309,7 @@ export default {
 </script>
 
 
-<style>
+<style scoped>
 html,
 body {
   margin: 0;
@@ -444,7 +453,7 @@ body {
 .sticky-header {
   position: fixed;
   top: 30px;
-  width: 100vw;
+  width: 100%;
   z-index: 1000;
   min-height: 60px;
 }
@@ -463,6 +472,8 @@ body {
 .desktop-header {
   display: flex;
   align-items: center;
+  left: 0;
+  right: 0;
   justify-content: space-between;
   padding: 10px 20px;
   width: 100%;
@@ -647,8 +658,6 @@ h1 {
     border-radius: 5px;
     z-index: 2;
     font-size: 14px;
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -658,8 +667,8 @@ h1 {
     position: absolute;
     right: 10px;
     top: 0;
-    height: 30px;
-    width: 200px;
+    height: 40px;
+    width: 350px;
     padding: 0 10px;
     font-size: 13px;
     border: 1px solid #ccc;
@@ -738,5 +747,15 @@ h1 {
     display: none;
   }
 
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  .redirects {
+    gap: 0px
+  }
+
+  .search-container {
+    max-width: 300px;
+  }
 }
 </style>

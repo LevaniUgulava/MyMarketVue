@@ -2,7 +2,7 @@
     <div>
         <ProfileComponent @load="handleload" />
         <div class="btnclass">
-            <button class="logout" @click.prevent="logout">გამოსვლა</button>
+            <button v-if="!loading" class="logout" @click.prevent="logout">გამოსვლა</button>
             <button v-if="!loading" @click.prevent="toggleOpen" class="deactivate">ანგარიშის დეაქტივაცია</button>
         </div>
 

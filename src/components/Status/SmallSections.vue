@@ -75,7 +75,6 @@ export default {
 }
 
 .sectionrole {
-    font-weight: bold;
     color: #7a1dff;
 }
 

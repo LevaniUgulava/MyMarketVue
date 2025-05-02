@@ -53,11 +53,6 @@ export default {
   },
   methods: {
     async addToCart(id) {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        this.$emit('cart-message', "არ არის ავტორიზირებული");
-        return;
-      }
       try {
         const response = await api.post(
           `addcart/${id}`,
@@ -130,7 +125,7 @@ export default {
 }
 
 .card:hover {
-  transform: scale(1.03);
+  transform: scale(1.005);
 }
 
 .img-container {
@@ -224,6 +219,21 @@ button:hover {
 
   .button-group {
     width: 150px;
+    margin: 0 auto;
+  }
+
+  .img {
+    height: 200px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  .card {
+    width: 100%;
+  }
+
+  .button-group {
+    width: 200px;
     margin: 0 auto;
   }
 

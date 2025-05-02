@@ -9,6 +9,7 @@ const routes = [
     path: "/",
     component: () => import("@/views/MainlayoutView.vue"),
     children: [
+  
       {
         path: "",
         name: "Home",
@@ -18,6 +19,7 @@ const routes = [
           description:"გვერდი სადაც შეიძენთ ქალისა და კაცის ტანსაცმელს,ფეხსაცმელს,სათვალეს,შარვალი,კაბა,ორეული"
         }
       },
+     
       {
         path: "product",
         name: "allproduct",
@@ -84,6 +86,12 @@ const routes = [
       },
   
     ],
+  },
+  {
+    path: "/search",
+    name: "search",
+    component: () => import("@/components/SearchComponent.vue"),
+
   },
   {
     path: "/reset/password/:id",
