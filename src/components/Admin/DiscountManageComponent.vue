@@ -55,7 +55,6 @@
     </table>
 
 
-    <Bootstrap5Pagination :data="pagination" @pagination-change-page="changePage" />
 
 
 
@@ -63,13 +62,11 @@
 </template>
 
 <script>
-import { Bootstrap5Pagination } from "laravel-vue-pagination";
 import CategoryModalVue from '../CategoryModal.vue';
 import api from '@/api';
 export default {
   name: "DiscountManageComponent",
   components: {
-    Bootstrap5Pagination,
     CategoryModalVue
   },
   data() {

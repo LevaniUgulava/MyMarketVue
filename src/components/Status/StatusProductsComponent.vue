@@ -32,7 +32,6 @@
         </li>
       </ul>
 
-      <Bootstrap5Pagination :data="pagination" @pagination-change-page="changePage" />
     </div>
     <div v-else>
       <p>No products found for this status.</p>
@@ -42,14 +41,11 @@
 
 <script>
 import api from "@/api";
-import { Bootstrap5Pagination } from "laravel-vue-pagination";
 
 export default {
   name: "StatusProductComponent",
   props: ["id"],
-  components: {
-    Bootstrap5Pagination,
-  },
+
   data() {
     return {
       products: [],

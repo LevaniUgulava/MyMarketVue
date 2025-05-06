@@ -1,8 +1,5 @@
 <template>
   <div>
-    <Message v-if="emitdata" closable class="message">{{ emitdata }}</Message>
-    <Message v-if="emitlikemessage" closable class="message" severity="error">{{ emitlikemessage }}</Message>
-    <Message v-if="emitcartmessage" closable class="message" severity="error">{{ emitcartmessage }}</Message>
     <div class="container">
 
       <div class="category-container">
@@ -43,7 +40,6 @@
 
 <script>
 import ProductCardComponent from '../components/ProductCardComponent.vue';
-import Message from 'primevue/message';
 import api from '@/api';
 import Breadcrumb from '@/components/BreadcrumbComponent.vue';
 import ProductViewCategory from '@/views/Products/ProductViewCategory.vue';
@@ -52,7 +48,6 @@ export default {
   name: 'FavoriteView',
   components: {
     ProductCardComponent,
-    Message,
     Breadcrumb,
     ProductViewCategory,
     SkeletonComponent

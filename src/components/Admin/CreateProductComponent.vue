@@ -1,5 +1,4 @@
 <template>
-  <Message v-if="message" closable class="message">{{ message }}</Message>
 
   <div class="form-container">
     <form class="product-form" @submit.prevent="createProduct">
@@ -153,13 +152,10 @@
 </template>
 <script>
 import api from '@/api';
-import Message from 'primevue/message';
 
 export default {
   name: 'CreateProductComponent',
-  components: {
-    Message,
-  },
+
   data() {
     return {
       additionalname: JSON.parse(localStorage.getItem('additionalname')) || [],

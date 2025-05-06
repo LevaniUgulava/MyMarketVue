@@ -27,7 +27,6 @@
 
         <li v-if="isadmin"><a href="/admin/roles"><i class="fas fa-user-cog"></i>როლების მართვა</a></li>
         <!-- <li><a href="/admin/logs"><i class="fas fa-clipboard-list"></i>ჩანაწერები</a></li> -->
-        <li><a href="/admin/docs"><i class="fa-solid fa-file"></i>დოკუმენტები</a></li>
         <li><a href="#other"><i class="fas fa-ellipsis-h"></i>სხვა</a></li>
       </ul>
     </div>

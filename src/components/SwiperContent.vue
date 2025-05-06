@@ -41,11 +41,14 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
+    position: relative;
+    width: 100%;
+    height: 100%;
 }
 
 .slide-content {
     z-index: 10;
-    opacity: 1;
+    opacity: 0;
     transition: opacity 0.5s ease-in-out;
 }
 

@@ -3,48 +3,58 @@
     <div class="role-section">
       <h2 dragover.prevent @drop="drop(1)">Admins</h2>
       <table v-if="admins.length > 0">
-        <tr>
-          <th>Name</th>
-          <th>Email</th>
-        </tr>
-        <tr v-for="item in admins" :key="item.id" draggable="true" @dragstart="dragStart(item.id)" @dragover.prevent
-          @drop="drop(item.pivot.role_id)">
-          <td>{{ item.name }}</td>
-          <td>{{ item.email }}</td>
-        </tr>
+        <thead>
 
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="item in admins" :key="item.id" draggable="true" @dragstart="dragStart(item.id)" @dragover.prevent
+            @drop="drop(item.pivot.role_id)">
+            <td>{{ item.name }}</td>
+            <td>{{ item.email }}</td>
+          </tr>
+        </tbody>
       </table>
     </div>
 
     <div class="role-section">
       <h2 @dragover.prevent @drop="drop(2)">Operators</h2>
       <table v-if="operators.length > 0">
-        <tr>
-          <th>Name</th>
-          <th>Email</th>
-        </tr>
-        <tr v-for="item in operators" :key="item.id" draggable="true" @dragstart="dragStart(item.id)" @dragover.prevent
-          @drop="drop(item.pivot.role_id)">
-          <td>{{ item.name }}</td>
-          <td>{{ item.email }}</td>
-        </tr>
-
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="item in operators" :key="item.id" draggable="true" @dragstart="dragStart(item.id)"
+            @dragover.prevent @drop="drop(item.pivot.role_id)">
+            <td>{{ item.name }}</td>
+            <td>{{ item.email }}</td>
+          </tr>
+        </tbody>
       </table>
     </div>
 
     <div class="role-section">
       <h2 @dragover.prevent @drop="drop(3)">Editors</h2>
       <table v-if="editors.length > 0">
-        <tr>
-          <th>Name</th>
-          <th>Email</th>
-        </tr>
-        <tr v-for="item in editors" :key="item.id" draggable="true" @dragstart="dragStart(item.id)" @dragover.prevent
-          @drop="drop(item.pivot.role_id)">
-          <td>{{ item.name }}</td>
-          <td>{{ item.email }}</td>
-        </tr>
-
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="item in editors" :key="item.id" draggable="true" @dragstart="dragStart(item.id)" @dragover.prevent
+            @drop="drop(item.pivot.role_id)">
+            <td>{{ item.name }}</td>
+            <td>{{ item.email }}</td>
+          </tr>
+        </tbody>
       </table>
     </div>
 
@@ -53,15 +63,19 @@
 
 
       <table v-if="defaultRoles.length > 0">
-        <tr>
-          <th>Name</th>
-          <th>Email</th>
-        </tr>
-        <tr v-for="item in defaultRoles" :key="item.id" draggable="true" @dragstart="dragStart(item.id)"
-          @dragover.prevent @drop="drop(item.pivot.role_id)">
-          <td>{{ item.name }}</td>
-          <td>{{ item.email }}</td>
-        </tr>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="item in defaultRoles" :key="item.id" draggable="true" @dragstart="dragStart(item.id)"
+            @dragover.prevent @drop="drop(item.pivot.role_id)">
+            <td>{{ item.name }}</td>
+            <td>{{ item.email }}</td>
+          </tr>
+        </tbody>
 
       </table>
     </div>

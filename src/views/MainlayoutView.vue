@@ -52,12 +52,11 @@ export default {
   position: fixed;
   top: 0;
   left: 0;
-  height: 10px;
+  height: 30px;
   width: 100%;
   background-color: #62389c;
   color: white;
   text-align: center;
-  padding: 15px;
   font-size: 0.7rem;
   font-weight: bold;
   z-index: 1000;

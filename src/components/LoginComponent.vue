@@ -175,9 +175,8 @@ export default {
 
 .input-container input {
   width: 100%;
-  padding: 12px;
-  padding-right: 45px;
   font-size: 16px;
+  text-indent: 15px;
   height: 50px;
   border: 1px solid #dbdbdb;
   border-radius: 10px;
@@ -303,6 +302,8 @@ span {
 
 .login-content {
   position: relative;
+  width: 365px;
+
   bottom: 10px;
 }
 
@@ -311,16 +312,6 @@ span {
   top: 20px;
 }
 
-input {
-  width: 100%;
-  padding: 12px;
-  font-size: 16px;
-  height: 50px;
-  border: 1px solid #dbdbdb;
-  border-radius: 10px;
-  outline: none;
-  transition: border-color 0.3s, box-shadow 0.3s;
-}
 
 
 
@@ -416,7 +407,7 @@ h2 {
   border-right: 2px solid #ccc;
   width: 100%;
   max-width: 50vh;
-  height: 100%;
+  height: 95%;
   box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
 }
 

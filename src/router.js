@@ -215,17 +215,6 @@ const routes = [
         component: () => import("@/components/Admin/banner/BannerCreateComponent.vue"),
       },
       {
-        path: "docs",
-        name: "docs",
-        component: () => import("@/components/Admin/Documents/DocumentComponent.vue"),
-      },
-      {
-        path: "docs/create",
-        name: "docscreate",
-        component: () => import("@/components/Admin/Documents/CreateDocuments.vue"),
-      },
-
-      {
         path: "statuses",
         name: "status",
         component: () => import("@/views/Status/StatusView.vue"),

@@ -14,7 +14,6 @@
         @liked-message="handleunauthorizedlike" @cart-message="handleunauthorizedcart" />
     </div>
   </div>
-  <Bootstrap5Pagination :data="pagination" @pagination-change-page="changePage" />
 
   <CommentModal v-if="showModal" :product="selectedProduct" :comments="selectedProductComments" @close="closeModal"
     @comment-submitted="refreshComments(selectedProduct.id)" />
@@ -23,8 +22,6 @@
 <script>
 import ProductCardComponent from '@/components/ProductCardComponent.vue';
 import CommentModal from '@/components/CommentModal.vue';
-import Message from 'primevue/message';
-import { Bootstrap5Pagination } from 'laravel-vue-pagination';
 import CountDownComponent from '../CountDownComponent.vue';
 import api from '@/api';
 
@@ -34,8 +31,6 @@ export default {
     ProductCardComponent,
     CommentModal,
     CountDownComponent,
-    Message,
-    Bootstrap5Pagination,
   },
   data() {
     return {

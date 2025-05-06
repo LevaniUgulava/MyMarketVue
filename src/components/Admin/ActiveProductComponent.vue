@@ -19,6 +19,8 @@
      />
       
         <table>
+          <thead>
+
             <tr>
                 <th>ID</th>
                 <th>Name</th>
@@ -30,6 +32,9 @@
                 <th>Image</th>
                 <th>Actions</th>
             </tr>
+          </thead>
+              <tbody>
+
             <tr v-for="product in products" :key="product.id">
                 <td>{{ product.id }}</td>
                 <td>{{ product.name }}</td>
@@ -54,27 +59,19 @@
                     </div>
                 </td>
             </tr>
+          </tbody>
+
         </table>
-          <div class="pagination-container">
-      <div class="pagination">
-        <Bootstrap5Pagination
-          :data="pagination"
-          @pagination-change-page="fetchProductData"
-        />   
-      </div>
     </div>
-    
-    </div>
+
 </template>
 
 <script>
-import { Bootstrap5Pagination } from "laravel-vue-pagination";
 import CategoryModalVue from '../CategoryModal.vue';
 import api from '@/api';
 export default {
   name: "ActiveProductComponent",
   components: {
-    Bootstrap5Pagination,
     CategoryModalVue
 
   },

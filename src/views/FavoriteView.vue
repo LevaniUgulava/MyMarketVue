@@ -18,21 +18,18 @@
       </div>
     </div>
 
-    <Bootstrap5Pagination v-if="apiLoaded && products.length > 0" :data="pagination"
-      @pagination-change-page="changePage" />
+
   </div>
 </template>
 
 <script>
 import ProductCardComponent from '../components/ProductCardComponent.vue';
-import { Bootstrap5Pagination } from 'laravel-vue-pagination';
 import api from '@/api';
 
 export default {
   name: 'FavoriteView',
   components: {
     ProductCardComponent,
-    Bootstrap5Pagination,
   },
   props: {
     isSidebarCollapsed: {

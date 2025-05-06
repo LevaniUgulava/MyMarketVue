@@ -29,18 +29,24 @@
             </form>
 
             <table class="category-table">
-                <tr>
-                    <th>Name</th>
-                    <th>Action</th>
-                </tr>
-                <tr v-for="category in mainCategories" :key="category.id">
-                    <td>{{ category.name }}</td>
-                    <td>
-                        <button @click="deleteMainCategory(category.id)" class="btn btn-danger">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr v-for="category in mainCategories" :key="category.id">
+                        <td>{{ category.name }}</td>
+                        <td>
+                            <button @click="deleteMainCategory(category.id)" class="btn btn-danger">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+
             </table>
         </div>
 
@@ -55,21 +61,27 @@
             </form>
 
             <table class="category-table">
-                <tr>
-                    <th>Name</th>
-                    <th>Action</th>
-                </tr>
-                <tr v-if="categories.length === 0">
-                    <td colspan="2">No categories available.</td>
-                </tr>
-                <tr v-for="category in categories" :key="category.id">
-                    <td>{{ category.name }}</td>
-                    <td>
-                        <button @click="deleteCategory(category.id)" class="btn btn-danger">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr v-if="categories.length === 0">
+                        <td colspan="2">No categories available.</td>
+                    </tr>
+                    <tr v-for="category in categories" :key="category.id">
+                        <td>{{ category.name }}</td>
+                        <td>
+                            <button @click="deleteCategory(category.id)" class="btn btn-danger">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+
             </table>
         </div>
 
@@ -85,21 +97,27 @@
             </form>
 
             <table class="category-table">
-                <tr>
-                    <th>Name</th>
-                    <th>Action</th>
-                </tr>
-                <tr v-if="subcategories.length === 0">
-                    <td colspan="2">No subcategories available.</td>
-                </tr>
-                <tr v-for="subcategory in subcategories" :key="subcategory.id">
-                    <td>{{ subcategory.name }}</td>
-                    <td>
-                        <button @click="deleteSubCategory(subcategory.id)" class="btn btn-danger">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr v-if="subcategories.length === 0">
+                        <td colspan="2">No subcategories available.</td>
+                    </tr>
+                    <tr v-for="subcategory in subcategories" :key="subcategory.id">
+                        <td>{{ subcategory.name }}</td>
+                        <td>
+                            <button @click="deleteSubCategory(subcategory.id)" class="btn btn-danger">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+
             </table>
         </div>
     </div>

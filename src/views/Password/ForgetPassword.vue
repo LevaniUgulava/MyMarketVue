@@ -170,11 +170,14 @@ span {
 .input-container {
   position: relative;
   width: 100%;
+
   margin-bottom: 20px;
 }
 
 .login-content {
   position: relative;
+  width: 365px;
+
   bottom: 10px;
 }
 
@@ -185,7 +188,8 @@ span {
 
 input {
   width: 100%;
-  padding: 12px;
+  text-indent: 15px;
+
   font-size: 16px;
   height: 50px;
   border: 1px solid #dbdbdb;
@@ -269,7 +273,7 @@ h2 {
   border-right: 2px solid #ccc;
   width: 100%;
   max-width: 50vh;
-  height: 100%;
+  height: 95%;
   box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
 }
 

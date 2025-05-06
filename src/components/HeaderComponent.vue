@@ -310,6 +310,10 @@ export default {
 
 
 <style scoped>
+* {
+  box-sizing: border-box;
+}
+
 html,
 body {
   margin: 0;
@@ -346,7 +350,6 @@ body {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 12px 15px;
   font-size: 14px;
   font-weight: 600;
   text-decoration: none;
@@ -356,6 +359,7 @@ body {
   cursor: pointer;
   text-align: center;
   width: 100px;
+  height: 60px;
 }
 
 .redirect-button span {
