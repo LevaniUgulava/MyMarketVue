@@ -605,8 +605,11 @@ h1 {
   border-top-right-radius: 6px;
   border-bottom-right-radius: 6px;
   color: white;
-  transition: color 0.3s;
   position: absolute;
+}
+.srchbtn:hover{
+  color: #62389c;
+  background: white;
 }
 
 .srchbtn {
@@ -614,10 +617,6 @@ h1 {
 }
 
 
-
-.srchbtn:hover {
-  font-size: 19px;
-}
 
 .search-container-mobile {
   display: none;
