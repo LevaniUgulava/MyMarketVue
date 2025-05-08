@@ -608,8 +608,7 @@ h1 {
   position: absolute;
 }
 .srchbtn:hover{
-  color: #62389c;
-  background: white;
+  background: #542d89;
 }
 
 .srchbtn {
