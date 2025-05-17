@@ -185,8 +185,7 @@ export default {
 .sidebar {
   width: 100%;
   height: 65px;
-  background-color: #f0f4f5;
-  color: #333;
+  background-color: #f9fbfb;
   position: fixed;
   bottom: 0;
   left: 0;
@@ -209,14 +208,11 @@ export default {
   flex: 1;
   text-align: center;
   margin: 15px 0;
-  overflow: hidden;
 }
 
 .user-section {
   flex: 1;
   text-align: center;
-  padding: 12px;
-  background-color: rgba(255, 255, 255, 0.9);
   gap: 10px;
 }
 
@@ -232,12 +228,10 @@ export default {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px;
   font-weight: 500;
   color: #333;
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
-  background-color: rgba(255, 255, 255, 0.9);
 
 }
 
@@ -257,7 +251,6 @@ export default {
 @media (max-width: 768px) {
   .sidebar {
     width: 100%;
-    background-color: #f0f4f5;
     position: fixed;
     bottom: 0;
     left: 0;
@@ -267,7 +260,8 @@ export default {
     align-items: center;
     padding: 5px 0;
   }
-  .user-section span{
+
+  .user-section span {
     color: #333333;
   }
 
@@ -287,6 +281,7 @@ export default {
     margin: auto;
     width: 100%;
     border: none;
+    background-color: #f9fbfb;
   }
 
   .sidebar ul li i,
