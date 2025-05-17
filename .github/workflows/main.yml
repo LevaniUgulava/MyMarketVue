@@ -87,7 +87,7 @@ jobs:
 
         run: |
 
-          aws s3 sync ./dist s3://mydresswat-front/ --delete
+          aws s3 sync ./dist s3://mydressway/ --delete
 
 
 
@@ -97,6 +97,6 @@ jobs:
 
         run: |
 
-          aws cloudfront create-invalidation --distribution-id E1WO86Z3XPB0FR --paths "/*"
+          aws cloudfront create-invalidation --distribution-id E230NIF1DMVO74 --paths "/*"
 
 
