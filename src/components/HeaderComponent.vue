@@ -7,29 +7,18 @@
 
 
     <nav>
-      <!-- <img src="/logo/2.png"  class="logo">  -->
-      <p @click="redirect()">MyDressWay</p>
+      <p v-if="!isMobile" @click="redirect()">MyDressWay</p>
 
       <div class="search-container">
         <input type="text" class="searchname" v-model="searchname" placeholder="ძიება..." />
         <button @click="performSearch" class="srchbtn"><i class="fa-solid fa-magnifying-glass"></i></button>
       </div>
-
-      <div class="search-container-mobile" ref="searchContainer" @click.stop>
-        <transition name="search-transition">
-          <input v-if="isOpen" ref="searchInput" type="text" class="searchname-mobile" v-model="searchname"
-            @blur="closeOnBlur" @keyup.enter="submitSearch" placeholder="ძიება..." />
-        </transition>
+      <div class="search-container-mobile" @click.stop>
+        <input type="text" class="searchname-mobile" v-model="searchname" placeholder="ძიება..." />
         <button @click="toggleSearch" class="srchbtn-mobile">
           <i class="fas fa-search"></i>
         </button>
       </div>
-      <!-- <div class="search-container-mobile" ref="searchContainer" @click.stop>
-
-        <button @click="toggleSearch" class="srchbtn-mobile">
-          <i class="fas fa-search"></i>
-        </button>
-      </div> -->
 
 
 
@@ -154,7 +143,6 @@ export default {
     ]),
   },
   mounted() {
-
     this.NamesforSearch();
     document.addEventListener('click', this.handleClickOutside);
 
@@ -468,6 +456,7 @@ body {
   justify-content: space-between;
   padding: 10px 20px;
   width: 100%;
+  height: 100px;
   flex-direction: column;
   background-blend-mode: multiply;
   background-color: #f9fbfb;
@@ -607,7 +596,8 @@ h1 {
   color: white;
   position: absolute;
 }
-.srchbtn:hover{
+
+.srchbtn:hover {
   background: #542d89;
 }
 
@@ -621,7 +611,7 @@ h1 {
   display: none;
 }
 
-.search-transition-enter-active,
+/* .search-transition-enter-active,
 .search-transition-leave-active {
   transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
 }
@@ -636,51 +626,49 @@ h1 {
 .search-transition-leave-from {
   transform: scaleX(1);
   opacity: 1;
-}
+} */
 
 @media (max-width: 768px) {
+  nav {
+    flex: none;
+  }
+
   .search-container-mobile {
-    display: flex;
-    align-items: center;
     position: relative;
-    justify-content: flex-end;
-    width: 240px;
+    width: 100%;
+    margin: auto;
     height: 30px;
+    display: block;
+
+  }
+
+  .searchname-mobile {
+    width: 100%;
+    height: 40px;
+    padding: 0 40px 0 15px;
+    font-size: 14px;
+    border: 1px solid #7a1dff;
+    border-radius: 5px;
+    outline: none;
   }
 
   .srchbtn-mobile {
     position: absolute;
-    right: -20px;
+    right: 0;
     top: 0;
-    width: 30px;
-    height: 30px;
+    width: 35px;
+    height: 40px;
     background-color: #62389c;
     border: none;
     color: white;
-    border-radius: 5px;
-    z-index: 2;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
     font-size: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
-  }
-
-  .searchname-mobile {
-    position: absolute;
-    right: 10px;
-    top: 0;
-    height: 40px;
-    width: 350px;
-    padding: 0 10px;
-    font-size: 13px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: white;
-    transform-origin: right;
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-    outline: none;
-    z-index: 1;
+    cursor: pointer;
+    z-index: 2;
   }
 
   .search-container {
@@ -690,22 +678,13 @@ h1 {
 
   .sticky-header {
     top: 0;
-
+    left: 0;
   }
 
   .redirects {
     display: none;
   }
 
-  .logo {
-    height: 40px;
-    margin-left: -10px;
-  }
-
-  .header {
-    padding: 0px 0px;
-    height: 60px;
-  }
 
   h1 {
     font-size: 0.5rem;
@@ -737,12 +716,6 @@ h1 {
 
   .user-section {
     display: none;
-  }
-
-  nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
   }
 
   .dropdown {
