@@ -88,12 +88,6 @@ const routes = [
     ],
   },
   {
-    path: "/search",
-    name: "search",
-    component: () => import("@/components/SearchComponent.vue"),
-
-  },
-  {
     path: "/reset/password/:id",
     component: () => import("@/views/Password/PasswordComponent.vue"),
     props: (route) => ({

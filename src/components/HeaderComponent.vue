@@ -28,6 +28,7 @@
           {{ item }}
         </div>
       </div>
+      
       <div class="redirects">
         <div class="btnredirect">
           <router-link :to="{ path: `/favorites` }" class="redirect-button"
