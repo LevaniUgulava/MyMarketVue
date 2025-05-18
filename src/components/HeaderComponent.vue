@@ -28,7 +28,7 @@
           {{ item }}
         </div>
       </div>
-      
+
       <div class="redirects">
         <div class="btnredirect">
           <router-link :to="{ path: `/favorites` }" class="redirect-button"
@@ -70,7 +70,6 @@
     </nav>
 
     <div class="small-sections-wrapper">
-
       <SmallSections />
     </div>
     <LoginComponent :open="loginmodal" @close="() => closemodal('loginmodal')"
@@ -312,6 +311,7 @@ body {
 
 .small-sections-wrapper {
   width: 100%;
+  height: 40px;
   border-top: 1px solid #e0e0e0;
 }
 
@@ -455,7 +455,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 20px;
+  padding: 15px 20px;
   width: 100%;
   height: 100px;
   flex-direction: column;
@@ -630,6 +630,9 @@ h1 {
 } */
 
 @media (max-width: 768px) {
+  .small-sections-wrapper{
+    height: 20px;
+  }
   nav {
     flex: none;
   }
