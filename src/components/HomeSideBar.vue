@@ -1,6 +1,6 @@
 <template>
   <transition name="fade-slide">
-    <div v-if="showTopButton" class="top-button">
+    <div v-if="showTopButton" :class="['top-button', platform === 'ios' ? 'ios-filter-button' : '']">
       <button @click="isModalVisible = true">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 12" width="18" height="18">
           <path
@@ -11,7 +11,7 @@
       </button>
     </div>
   </transition>
-  <div class="sidebar">
+  <div :class="['sidebar', platform === 'ios' ? 'ios-padding' : '']">
     <ul>
       <li>
         <router-link :to="{ path: `/` }" :class="{ active: $route.path === `/` }">
@@ -54,6 +54,7 @@
 </template>
 
 <script>
+import { Capacitor } from '@capacitor/core';
 import CategoryModal from './CategoryModal.vue';
 import { mapGetters, mapState, mapMutations } from 'vuex';
 
@@ -66,6 +67,7 @@ export default {
       showFilterButton: true,
       lastScrollY: 0,
       isModalVisible: false,
+      platform: Capacitor.getPlatform()
     };
   },
   computed: {
@@ -157,7 +159,7 @@ export default {
 
 .top-button {
   position: fixed;
-  bottom: 70px;
+  bottom: 90px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 1;
@@ -189,7 +191,7 @@ export default {
   position: fixed;
   bottom: 0;
   left: 0;
-  z-index: 9999;
+  z-index: 0;
   display: flex;
   justify-content: space-around;
   align-items: center;
@@ -201,6 +203,15 @@ export default {
   width: 100%;
   padding: 0;
   margin: 0;
+}
+
+.ios-padding {
+  padding-bottom: env(safe-area-inset-bottom) !important;
+}
+
+.ios-filter-button {
+  padding-bottom: env(safe-area-inset-bottom) !important;
+
 }
 
 .sidebar ul li {
@@ -254,7 +265,7 @@ export default {
     position: fixed;
     bottom: 0;
     left: 0;
-    z-index: 9999;
+    z-index: 4;
     display: flex;
     justify-content: space-around;
     align-items: center;

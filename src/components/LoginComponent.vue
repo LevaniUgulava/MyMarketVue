@@ -4,13 +4,17 @@
 
   <div v-if="open" class="modal">
     <div class="login-wrapper">
-      <div class="login-card">
-        <button class="close" @click="closeModal">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
+      <div :class="['login-card', platform === 'ios' ? 'ios-padding' : '']">
+
 
         <div class="login-content">
-          <h2>ავტორიზაცია</h2>
+          <div class="title">
+            <h2>ავტორიზაცია</h2>
+            <button class='close' @click="closeModal">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+
           <div class="dotted-line">
             <span></span>
           </div>
@@ -73,6 +77,7 @@ import FacebookComponentVue from './FacebookComponent.vue';
 import GoogleComponent from './GoogleComponent.vue';
 import { mapActions } from 'vuex';
 import { validateInputFields } from './utils/validate';
+import { Capacitor } from '@capacitor/core';
 export default {
   name: "LoginComponent",
   props: ['open'],
@@ -88,7 +93,8 @@ export default {
       passwordError: '',
       isPassword: true,
       ErrorName: "",
-      ErrorText: ""
+      ErrorText: "",
+      platform: Capacitor.getPlatform()
     }
   },
   methods: {
@@ -137,8 +143,20 @@ export default {
     openforgetmodal() {
       this.$emit('openforget');
       this.closeModal();
-    }
-  }
+    },
+    // CheckPlatform() {
+    //   const isIos = Capacitor.getPlatform() === "ios";
+    //   if (isIos) {
+    //     const loginCard = document.querySelector(".login-card");
+    //     if (loginCard) {
+    //       loginCard.style.paddingTop = 'calc(30px + env(safe-area-inset-top))';
+    //     }
+    //   }
+    // }
+  },
+  // mounted() {
+  //   this.CheckPlatform();
+  // },
 }
 </script>
 
@@ -361,6 +379,7 @@ h2 {
   display: flex;
   justify-content: center;
   font-size: 1.5rem;
+  margin: auto;
   font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
 }
 
@@ -411,18 +430,24 @@ h2 {
   box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
 }
 
+.ios-padding {
+  padding-top: calc(80px + env(safe-area-inset-top)) !important;
+}
+
 .close {
-  position: absolute;
-  top: 20px;
-  right: 20px;
   background-color: transparent;
   border: none;
   cursor: pointer;
-  padding: 10px;
   border-radius: 40%;
-  font-size: 24px;
-  z-index: 1000;
+  font-size: 20px;
 
+}
+
+.title {
+  display: flex;
+  padding-top: 20px;
+  margin: 0 auto 0 30px;
+  justify-content: space-between;
 }
 
 @media (max-width: 768px) {
@@ -447,6 +472,10 @@ h2 {
     max-width: 100vw;
     height: 100%;
     box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+  }
+
+  .title {
+    padding-top: 35px;
   }
 }
 </style>

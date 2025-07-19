@@ -4,13 +4,17 @@
 
   <div v-if="open" class="modal">
     <div class="login-wrapper">
-      <div class="login-card">
-        <button class="close" @click="closeModal">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
+      <div :class="['login-card', platform === 'ios' ? 'ios-padding' : '']">
+
 
         <div class="login-content">
-          <h2>პაროლის აღდგენა</h2>
+          <div class="title">
+            <h2>პაროლის აღდგენა</h2>
+            <button class="close" @click="closeModal">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+
           <div class="dotted-line">
             <span></span>
           </div>
@@ -58,6 +62,7 @@
 <script>
 import api from '@/api';
 import { validateInputFields } from '@/components/utils/validate';
+import { Capacitor } from '@capacitor/core';
 
 export default {
   props: ['open', 'email'],
@@ -71,6 +76,7 @@ export default {
       ErrorText: "",
       isNewPassword: true,
       isRepeatPassword: true,
+      platform: Capacitor.getPlatform()
 
 
     };
@@ -215,11 +221,8 @@ span {
 
 .input-container input {
   width: 100%;
-  padding: 12px;
-  padding-right: 45px;
   font-size: 16px;
   text-indent: 15px;
-
   height: 50px;
   border: 1px solid #dbdbdb;
   border-radius: 10px;
@@ -324,24 +327,29 @@ h2 {
   justify-content: center;
   align-items: center;
   border-right: 2px solid #ccc;
-  width: 100%;
   max-width: 50vh;
   height: 95%;
   box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
 }
 
+.ios-padding {
+  padding-top: calc(80px + env(safe-area-inset-top)) !important;
+}
+
 .close {
-  position: absolute;
-  top: 20px;
-  right: 20px;
+
   background-color: transparent;
   border: none;
   cursor: pointer;
-  padding: 10px;
-  border-radius: 40%;
-  font-size: 24px;
-  z-index: 1000;
+  font-size: 20px;
 
+}
+
+.title {
+  display: flex;
+  padding-top: 20px;
+  margin: 0 auto 0 100px;
+  justify-content: space-between;
 }
 
 @media (max-width: 768px) {
@@ -363,7 +371,6 @@ h2 {
     justify-content: center;
     align-items: center;
     border-right: 2px solid #ccc;
-    max-width: 100vw;
     height: 100%;
     box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
   }

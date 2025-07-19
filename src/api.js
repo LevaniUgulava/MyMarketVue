@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://api.mydressway.ge/api',
+  baseURL: 'http://192.168.0.111:8001/api',
   timeout: 5000,
 });
 

@@ -4,13 +4,17 @@
 
   <div v-if="open" class="modal">
     <div class="registration-wrapper">
-      <div class="registration-card">
-        <button class="close" @click="closeModal">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
+      <div :class="['registration-card', platform === 'ios' ? 'ios-padding' : '']">
+
 
         <div class="registration-content">
-          <h2>რეგისტრაცია</h2>
+          <div class="title">
+            <h2>რეგისტრაცია</h2>
+            <button class='close' @click="closeModal">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+
           <div class="dotted-line">
             <span></span>
           </div>
@@ -56,6 +60,7 @@
 <script>
 import api from '@/api';
 import { validateInputFields } from './utils/validate';
+import { Capacitor } from '@capacitor/core';
 
 export default {
   name: "RegisterComponent",
@@ -70,7 +75,9 @@ export default {
       emailError: '',
       passwordError: '',
       ErrorName: "",
-      ErrorText: ""
+      ErrorText: "",
+      platform: Capacitor.getPlatform()
+
     }
   },
   methods: {
@@ -315,17 +322,24 @@ h2 {
   box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
 }
 
+.ios-padding {
+  padding-top: calc(60px + env(safe-area-inset-top)) !important;
+}
+
+
+.title {
+  display: flex;
+  padding-top: 20px;
+  margin: 0 auto 0 100px;
+  justify-content: space-between;
+}
+
 .close {
-  position: absolute;
-  top: 20px;
-  right: 20px;
+
   background-color: transparent;
   border: none;
   cursor: pointer;
-  padding: 10px;
-  border-radius: 40%;
-  font-size: 24px;
-  z-index: 1000;
+  font-size: 20px;
 
 }
 

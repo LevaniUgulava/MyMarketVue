@@ -5,14 +5,13 @@
   </head>
   <div :class="['sticky-header', isMobile ? 'mobile-header' : 'desktop-header']">
 
-
     <nav>
       <p v-if="!isMobile" @click="redirect()">MyDressWay</p>
-
       <div class="search-container">
         <input type="text" class="searchname" v-model="searchname" placeholder="ძიება..." />
         <button @click="performSearch" class="srchbtn"><i class="fa-solid fa-magnifying-glass"></i></button>
       </div>
+
       <div class="search-container-mobile" @click.stop>
         <input type="text" class="searchname-mobile" v-model="searchname" placeholder="ძიება..." />
         <button @click="toggleSearch" class="srchbtn-mobile">
@@ -79,11 +78,10 @@
       @openlogin="() => openmodal('loginmodal')" @emaildata="handleconfirmmail" />
 
     <ForgetPassword :open="forgetmodal" @close="() => closemodal('forgetmodal')" @emaildata="handleconfirmmail" />
-
     <EmailConfirmation :open="confirmmodal" :data="data" @close="() => closemodal('confirmmodal')"
       @openresetmodal="() => openmodal('passwordmmodal')" />
-
     <PasswordComponent :open="passwordmmodal" :email="data.email" @close="() => closemodal('passwordmmodal')" />
+
 
   </div>
 </template>
@@ -97,6 +95,8 @@ import { mapActions, mapGetters, mapState, mapMutations } from 'vuex';
 import ForgetPassword from '@/views/Password/ForgetPassword.vue';
 import EmailConfirmation from '@/views/Password/EmailConfirmation.vue';
 import PasswordComponent from '@/views/Password/PasswordComponent.vue';
+import { Capacitor } from '@capacitor/core';
+
 
 export default {
 
@@ -127,6 +127,7 @@ export default {
       emitmax: '',
       kaitems: ["პროფილი", "გასვლა"],
 
+
     };
   },
 
@@ -141,12 +142,16 @@ export default {
       'passwordmmodal',
       'data',
     ]),
+
   },
   mounted() {
     this.NamesforSearch();
+    this.PlatformCheck();
     document.addEventListener('click', this.handleClickOutside);
-
   },
+
+
+
   watch: {
     searchname() {
       this.Suggestion();
@@ -177,6 +182,19 @@ export default {
 
   methods: {
     ...mapMutations('modals', ['openmodal', 'closemodal', 'setdata']),
+
+
+    PlatformCheck() {
+      const isIos = Capacitor.getPlatform() === "ios"
+      if (isIos) {
+        document.querySelector('.mobile-header').style.paddingTop = 'env(safe-area-inset-top)';
+        document.querySelector('.mobile-header').style.height = 'calc(90px + env(safe-area-inset-top))';
+
+      }
+    },
+
+
+
 
     noscroll(newVal) {
       if (newVal) {
@@ -298,6 +316,12 @@ export default {
 
 
 <style scoped>
+.test {
+  padding: 20px;
+  /* Applies 20px padding to all sides */
+}
+
+
 * {
   box-sizing: border-box;
 }
@@ -630,9 +654,10 @@ h1 {
 } */
 
 @media (max-width: 768px) {
-  .small-sections-wrapper{
+  .small-sections-wrapper {
     height: 20px;
   }
+
   nav {
     flex: none;
   }

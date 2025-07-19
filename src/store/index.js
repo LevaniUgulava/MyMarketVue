@@ -5,13 +5,17 @@ import auth from './modules/auth';
 import categories from './modules/categories';
 import modals from './modules/modals';
 import product from './modules/product';
+import platform from './modules/platform';
 
 const store = createStore({
   modules: {
     auth, 
     categories,
     modals,
-    product
+    product,
+    platform
+    
+
   },
   plugins: [
     createPersistedState({

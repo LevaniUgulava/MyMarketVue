@@ -6,6 +6,8 @@
             <swiper-slide v-for="(item, index) in texts" :key="index">
                 <div class="slide-content">{{ item }}</div>
             </swiper-slide>
+
+
         </swiper>
     </div>
 </template>
@@ -30,8 +32,14 @@ export default {
     },
     data() {
         return {
-            texts: ["adsdsadasdasdasdasasdasdasdasdasdasdad", "hiasdasdsdasdasdasdsds"],
+            texts: [
+                "ვებ-გვერდი არის სატესტო რეჟიმში",
+                "მიიღე ფასდაკლება პრომო კოდით"
+            ],
         };
+    },
+    methods: {
+
     },
 };
 </script>

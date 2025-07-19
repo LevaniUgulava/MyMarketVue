@@ -1,7 +1,7 @@
 <template>
   <div class="layout-container">
     <SwiperContent class="banner" />
-    <HeaderComponentVue  :isMobile="isMobile" @search="handleSearch" />
+    <HeaderComponentVue :isMobile="isMobile" @search="handleSearch" />
 
     <HomeSideBarVue class="sidebar" v-if="isMobile" />
 
@@ -11,7 +11,7 @@
       </router-view>
     </div>
 
-    <FooterComponentVue class="footer" />
+    <FooterComponentVue v-if="!isMobile" class="footer" />
   </div>
 </template>
 
@@ -20,6 +20,7 @@ import HeaderComponentVue from '@/components/HeaderComponent.vue';
 import HomeSideBarVue from '@/components/HomeSideBar.vue';
 import FooterComponentVue from '@/components/FooterComponent.vue';
 import SwiperContent from '@/components/SwiperContent.vue';
+import { Capacitor } from '@capacitor/core';
 export default {
   name: 'MainLayout',
   components: {
@@ -34,12 +35,24 @@ export default {
     };
   },
   mounted() {
+    this.checkPlatform();
     window.addEventListener('resize', this.checkScreenSize);
   },
   beforeUnmount() {
     window.removeEventListener('resize', this.checkScreenSize);
   },
   methods: {
+    checkPlatform() {
+      const isIos = Capacitor.getPlatform() === "ios";
+      const el = document.querySelector('.main-content');
+
+      if (isIos && window.matchMedia('(max-width: 768px)').matches) {
+        el.style.paddingTop = "calc(60px + env(safe-area-inset-top))";
+      } else {
+        el.style.paddingTop = "";
+      }
+    },
+
     checkScreenSize() {
       this.isMobile = window.innerWidth <= 768;
     },
@@ -73,7 +86,7 @@ export default {
   left: 0;
   background-color: #f0f4f5;
   padding: 10px;
-  overflow-y: auto;
+  /* overflow-y: auto; */
   z-index: 200;
   display: none;
   flex-direction: column;
@@ -86,7 +99,6 @@ export default {
   box-sizing: border-box;
   min-height: calc(100vh - 60px);
   margin-top: 130px;
-  overflow-y: auto;
 }
 
 .footer {
@@ -128,8 +140,9 @@ export default {
     width: 100% !important;
     margin-left: 0 !important;
     padding-bottom: 70px !important;
-    margin-top: 70px;
-
+    margin-top: 0px;
+    overflow: hidden;
+    padding-top: 60px;
   }
 
   .footer {

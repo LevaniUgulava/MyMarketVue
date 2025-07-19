@@ -18,7 +18,6 @@ export default {
         }
     },
     methods: {
-
         handlerole() {
             this.$router.push("/exclusive")
         },
