@@ -319,6 +319,7 @@ button:hover {
 @media (max-width: 768px) {
   .collection-label {
     font-size: 12px;
+    line-height: normal;
   }
 
   .product-availability {

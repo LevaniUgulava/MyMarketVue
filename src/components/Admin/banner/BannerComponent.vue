@@ -7,7 +7,8 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th>ბანერი</th>
+                        <th>ბანერი(desktop)</th>
+                        <th>ბანერი(mobile)</th>
                         <th>მისამართი</th>
                         <th>მოქმედებები</th>
                     </tr>
@@ -15,7 +16,10 @@
                 <tbody>
                     <tr v-for="(item, index) in banners" :key="index">
                         <td>
-                            <img :src="item.media_url" alt="banner" class="img">
+                            <img :src="item.media_desktop" alt="banner" class="img">
+                        </td>
+                        <td>
+                            <img :src="item.media_mobile" alt="banner" class="img">
                         </td>
                         <td>{{ item.url }}</td>
                         <td>

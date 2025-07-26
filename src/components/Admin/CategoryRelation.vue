@@ -9,12 +9,12 @@
             <tbody>
                 <tr v-for="category in Categories" :key="category.id" @dragover.prevent
                     @drop="() => handleDrop(category)">
-                    <td>{{ category.name }}</td>
+                    <td>{{ category.ka_name }}</td>
                     <td>
                         <div class="categories-container">
                             <div v-for="subCategory in category.subcategories" :key="subCategory.id"
                                 class="category-item">
-                                <span>{{ subCategory.name }}</span>
+                                <span>{{ subCategory.ka_name }}</span>
                                 <i @click.prevent="remove(category.id, subCategory.id)"
                                     class="fa-solid fa-xmark remove"></i>
                             </div>
@@ -29,7 +29,7 @@
             <div class="heap-container">
                 <div v-for="category in filteredCategories" :key="category.id" class="category-item" draggable="true"
                     @dragstart="handleDragStart(category)">
-                    <span>{{ category.name }}</span>
+                    <span>{{ category.ka_name }}</span>
                 </div>
             </div>
         </div>

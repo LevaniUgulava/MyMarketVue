@@ -1,5 +1,5 @@
 <template>
-  <div class="order-card">
+  <div class="order-card-component">
     <carousel v-if="isimageshown" :items-to-show="1" class="custom-carousel">
       <slide v-for="(image, index) in product.image_urls" :key="index">
         <img :src="image" alt="Product Image" class="product-img" />
@@ -10,19 +10,36 @@
     </carousel>
 
     <div class="order-details">
-      <h3 class="product-name">{{ product.name }}</h3>
-      <p class="product-description">{{ product.description }}</p>
-
-      <div class="order-info">
-        <p><i class="fas fa-ruler"></i> ზომა: <strong>{{ product.size }}</strong></p>
-        <p><i class="fas fa-cubes"></i> რაოდენობა: <strong>{{ product.quantity }}</strong></p>
-        <p><i class="fa-solid fa-lari-sign"></i> სულ: <strong>{{ product.total_price }}</strong> <i
-            class="fa-solid fa-lari-sign"></i></p>
+      <div class="product-title">
+        <span>დასახელება</span>
+        {{ product.name }}
       </div>
 
-      <p :class="['order-status', statusClass]">
-        სტატუსი: <strong>{{ order_status }}</strong>
-      </p>
+      <div class="product-title">
+        <span>ზომა</span>
+        {{ product.size }}
+      </div>
+      <div class="product-title">
+        <span>საცალო ფასი</span>
+        <div>
+          {{ product.retail_price }} <i class="fa-solid fa-lari-sign"></i>
+        </div>
+      </div>
+      <div class="product-title">
+        <span>რაოდენობა</span>
+        {{ product.quantity }}
+      </div>
+      <div class="product-title">
+        <span>სულ</span>
+        <div>
+          {{ product.total_price }} <i class="fa-solid fa-lari-sign"></i>
+        </div>
+      </div>
+
+      <div class="product-title">
+        <span>სტატუსი</span>
+        {{ order_status }}
+      </div>
     </div>
   </div>
 </template>
@@ -73,136 +90,65 @@ export default {
 
 
 <style scoped>
-.order-card {
+.order-card-component {
   display: flex;
-  flex-direction: column;
-  width: 230px;
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 15px;
-  overflow: hidden;
-}
+  gap: 20px;
 
-.order-card:hover {
-  transform: translateY(-2px);
-}
-
-/* Image Carousel */
-.custom-carousel {
-  border-radius: 10px;
-  overflow: hidden;
-  margin-bottom: 12px;
-  height: 180px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #f0f0f0;
 }
 
 .product-img {
   max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  display: block;
   border-radius: 10px;
 }
 
-/* Order Details */
-.order-details {
+.custom-carousel {
+  width: 20%;
+
+}
+
+.product-title {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 10px 0;
-}
-
-.product-name {
-  font-size: 1rem;
+  gap: 10px;
+  align-items: center;
+  font-size: 13px;
   font-weight: bold;
-  color: #4a148c;
-  margin-bottom: 5px;
-}
-
-.product-description {
-  font-size: 0.85rem;
-  color: #666;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-}
-
-/* Order Info */
-.order-info p {
-  font-size: 0.9rem;
   color: #333;
-  margin: 2px 0;
 }
 
-.order-info p i {
-  color: #9b51e0;
-  margin-right: 5px;
+.order-details {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  width: 80%;
+  align-items: center;
+  justify-content: space-between;
 }
 
-/* Order Status */
-.order-status {
-  font-weight: bold;
-  border-radius: 6px;
-  padding: 5px 10px;
-  display: inline-block;
-  font-size: 0.85rem;
-  text-align: center;
+span {
+  color: #888;
 }
 
-/* Different Status Colors */
-.status-pending {
-  background-color: #fff3cd;
-  color: #856404;
-}
-
-.status-shipped {
-  background-color: #cce5ff;
-  color: #004085;
-}
-
-.status-delivered {
-  background-color: #d4edda;
-  color: #155724;
-}
-
-.status-canceled {
-  background-color: #f8d7da;
-  color: #721c24;
-}
-
-.status-default {
-  background-color: #e2e3e5;
-  color: #383d41;
-}
-
-/* Mobile Responsive */
 @media (max-width: 768px) {
-  .order-card {
-    width: 150px;
+  .order-card-component {
+    gap: 0px;
+
+  }
+
+  .order-details {
+    flex-direction: column;
+    gap: 5px;
+    margin: auto;
+    width: 40%;
+  }
+
+  .product-title {
+    font-size: 12px;
+    flex-direction: row;
   }
 
   .custom-carousel {
-    height: 140px;
-  }
-
-  .product-name {
-    font-size: 0.85rem;
-  }
-
-  .product-description {
-    font-size: 0.7rem;
-  }
-
-  .order-info p {
-    font-size: 0.75rem;
-  }
-
-  .order-status {
-    font-size: 0.75rem;
-    padding: 3px 6px;
+    width: 50%;
   }
 }
 </style>

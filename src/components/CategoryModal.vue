@@ -1,6 +1,6 @@
 <template lang="html">
   <transition name="modal-fade">
-    <div v-if="isModalVisible" class="modal-overlay" @touchstart.passive="startTouch" @touchmove.passive="onTouchMove"
+    <div v-if="isModalVisible" class="modal-overlay" @touchstart="startTouch" @touchmove="onTouchMove"
       @touchend="endTouch">
       <div class="modal-content" :style="{ transform: `translateY(${modalTranslateY}px)` }">
         <div class="modal-lever"></div>
@@ -48,23 +48,23 @@ export default {
     startTouch(event) {
       const scrollable = this.$refs.scrollableBody;
       this.currentScroll = scrollable.scrollTop;
-      this.isDragging = this.currentScroll <= 0;
+      this.isDragging = true;
       this.touchStart = event.touches[0].clientY;
       this.maxTranslateY = window.innerHeight * 0.8;
     },
     onTouchMove(event) {
       const currentY = event.touches[0].clientY;
       const deltaY = currentY - this.touchStart;
-      const scrollable = this.$refs.scrollableBody;
 
-      if (this.isDragging && scrollable.scrollTop <= 0 && deltaY > 0) {
+      if (this.isDragging && deltaY > 0) {
         event.preventDefault();
-        this.modalTranslateY = deltaY;
+        this.modalTranslateY = Math.min(deltaY, this.maxTranslateY);
       }
     },
     endTouch(event) {
       const touchEnd = event.changedTouches[0].clientY;
       const deltaY = touchEnd - this.touchStart;
+
       if (deltaY > 60 && this.isDragging) {
         this.closeModal();
       } else {
@@ -77,10 +77,13 @@ export default {
     },
     resetModalPosition() {
       this.modalTranslateY = 0;
+      this.modalHeight = 400;
     },
   },
 };
 </script>
+
+
 
 <style scoped lang="css">
 .modal-fade-enter-active,
@@ -119,14 +122,14 @@ export default {
   max-height: 80vh;
   position: relative;
   box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.15);
-  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 0.4s ease, background-color 0.4s ease;
   display: flex;
   flex-direction: column;
 }
 
 .modal-lever {
   width: 60px;
-  height: 5px;
+  height: 10px;
   background-color: #bbb;
   border-radius: 4px;
   margin: 10px auto;

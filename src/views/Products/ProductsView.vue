@@ -241,7 +241,7 @@ export default {
 .container {
   display: flex;
   flex-wrap: wrap;
-  padding: 15px;
+  padding-top: 15px;
   gap: 20px;
 }
 

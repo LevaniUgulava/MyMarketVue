@@ -7,8 +7,11 @@
             <label>მისამართი:</label>
             <input class="input" type="text" v-model="data.url" placeholder="მისამართი" required>
 
-            <label>სურათი:</label>
-            <input type="file" @change="handleFileChange" required>
+            <label>სურათი(desktop):</label>
+            <input type="file" @change="handleFileChange('desktop', $event)" required>
+
+            <label>სურათი(mobile):</label>
+            <input type="file" @change="handleFileChange('mobile', $event)" required>
 
             <button type="submit">შეინახე</button>
         </form>
@@ -22,7 +25,9 @@ export default {
         return {
             data: {
                 url: null,
-                image: null
+                image_desktop: null,
+                image_mobile: null
+
             }
         }
     },
@@ -31,7 +36,8 @@ export default {
             try {
                 const formData = new FormData();
                 formData.append('url', this.data.url);
-                formData.append('image', this.data.image);
+                formData.append('image-desktop', this.data.image_desktop);
+                formData.append('image-mobile', this.data.image_mobile);
 
                 const response = await api.post('/banner/admin/create', formData, {
                     tokenRequired: true
@@ -43,9 +49,13 @@ export default {
                 console.log(error);
             }
         },
-       
-        handleFileChange(event) {
-            this.data.image = event.target.files[0];
+
+        handleFileChange(type, event) {
+            if (type === 'desktop') {
+                this.data.image_desktop = event.target.files[0];
+            } else if (type === 'mobile') {
+                this.data.image_mobile = event.target.files[0];
+            }
         }
 
     },

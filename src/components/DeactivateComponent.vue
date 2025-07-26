@@ -279,9 +279,8 @@ export default {
 
 .input-container input {
     width: 100%;
-    padding: 14px;
-    padding-right: 45px;
-    font-size: 13px;
+    font-size: 16px;
+    text-indent: 15px;
     height: 50px;
     border: 1px solid #dbdbdb;
     border-radius: 10px;

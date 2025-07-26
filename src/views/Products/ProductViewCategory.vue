@@ -17,7 +17,7 @@
                 <div v-for="(mainCategory, index) in mainCategories" :key="index" class="checkbox-container">
                     <input type="checkbox" :id="'main-' + mainCategory.id" v-model="selectedMainCategories"
                         :value="mainCategory" @change="performSearch" />
-                    <label :for="'main-' + mainCategory.id">{{ mainCategory.name }}</label>
+                    <label :for="'main-' + mainCategory.id">{{ mainCategory.ka_name }}</label>
                 </div>
             </div>
         </div>
@@ -38,7 +38,7 @@
                 <div class="checkbox-container" v-for="(category, catIndex) in filteredCategory || []" :key="catIndex">
                     <input type="checkbox" :id="'category-' + category.id" v-model="selectedCategories"
                         :value="category" @change="performSearch" />
-                    <label :for="'category-' + category.id">{{ category.name }}</label>
+                    <label :for="'category-' + category.id">{{ category.ka_name }}</label>
                 </div>
             </div>
         </div>
@@ -61,7 +61,7 @@
                     :key="subIndex">
                     <input type="checkbox" :id="'subcategory-' + subcategory.id" v-model="selectedsubCategories"
                         :value="subcategory" @change="performSearch" />
-                    <label :for="'subcategory-' + subcategory.id">{{ subcategory.name }}</label>
+                    <label :for="'subcategory-' + subcategory.id">{{ subcategory.ka_name }}</label>
                 </div>
             </div>
         </div>
@@ -272,11 +272,26 @@ export default {
                 this.colors = responsecolor.data;
                 this.sizes = responsesize.data;
                 this.brands = responsebrand.data;
+                this.setCategoryFromQuery();
+
             } catch (error) {
                 console.error('Failed to fetch categories:', error);
             }
 
         },
+        setCategoryFromQuery() {
+            const currentQuery = { ...this.$route.query };
+            if (currentQuery.maincategory) {
+                const ids = currentQuery.maincategory.split(',');
+                const obj = this.mainCategories.filter((main) => {
+                    return ids.includes(String(main.id));
+                });
+                this.setMainCategory(obj);
+            } else {
+                console.log('No maincategory in query');
+            }
+        },
+
 
         setCategroies() {
             this.setMainCategory(this.selectedMainCategories);
@@ -290,6 +305,7 @@ export default {
 
 
         performSearch() {
+
             this.setCategroies();
 
             const currentQuery = { ...this.$route.query };
@@ -355,8 +371,23 @@ export default {
     },
 
     mounted() {
-        this.fetchCategories();
-        this.loadsavefilter();
+        this.fetchCategories().then(() => {
+            this.loadsavefilter();
+            this.setCategoryFromQuery();
+        });
+    },
+    watch: {
+        '$route.query': {
+            handler() {
+                if (this.mainCategories.length) {
+                    this.setCategoryFromQuery();
+                    this.loadsavefilter();
+                } else {
+                    console.log("Waiting for categories to load");
+                }
+            },
+            immediate: true,
+        }
     },
 };
 </script>
@@ -514,6 +545,14 @@ div>div {
     .checkbox-container label:before {
         width: 20px;
         height: 20px;
+    }
+
+    .checkbox-container label:hover:before {
+        border-color: none;
+    }
+
+    .reset-button:hover {
+        background-color: none;
     }
 
 }

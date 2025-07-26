@@ -2,21 +2,30 @@
   <div class="container">
     <div class="toggle-buttons">
       <button :class="{ active: showPending }" @click="toggleSection('pending')">
-        მიმდინარე შეკვეთები </button>
+        მიმდინარე შეკვეთები
+      </button>
       <button :class="{ active: !showPending }" @click="toggleSection('completed')">
-        შესრულებული შეკვეთები </button>
+        შესრულებული შეკვეთები
+      </button>
     </div>
 
     <div v-if="apiLoaded && showPending" class="order-section">
       <div v-if="OrderProducts.length > 0" class="order-box">
         <div v-for="order in OrderProducts" :key="order.order_id" class="order-card">
-          <div class="card-header">
-            <h3 class="order-id">ID #{{ order.order_id }}</h3>
-            <h3 class="order-amount">გადახდილი: {{ order.order_amount }} <i class="fa-solid fa-lari-sign"></i></h3>
-          </div>
-          <div class="products">
+          <div class="left-section">
             <OrderComponent v-for="product in order.products" :key="product.id" :product="product"
               :order_status="order.order_status" />
+          </div>
+          <div class="right-section">
+            <div class="order-desc">
+              <h3 class="order-id">შეკვეთის ნომერი: #{{ order.order_id }}</h3>
+              <h3 class="order-amount">გადახდილი თანხა: {{ order.order_amount }} <i class="fa-solid fa-lari-sign"></i>
+              </h3>
+              <h3 class="order-amount">მიმღები: {{ order.order_fullname }}
+              </h3>
+              <h3 class="order-amount">მისამართი : {{ order.address.town }}, {{ order.address.address }}
+              </h3>
+            </div>
           </div>
         </div>
       </div>
@@ -30,13 +39,18 @@
     <div v-if="apiLoaded && !showPending" class="order-section">
       <div v-if="CompletedProducts.length > 0" class="order-box">
         <div v-for="order in CompletedProducts" :key="order.order_id" class="order-card">
-          <div class="card-header">
-            <h3 class="order-id">შეკვეთა #{{ order.order_id }}</h3>
-            <h3 class="order-amount">გადახდილი: {{ order.order_amount }} <i class="fa-solid fa-lari-sign"></i></h3>
-          </div>
           <div class="products">
             <OrderComponent v-for="product in order.products" :key="product.id" :product="product"
               :order_status="order.order_status" />
+          </div>
+          <div class="right-section">
+            <div class="order-desc">
+              <h3 class="order-id">შეკვეთის ნომერი: #{{ order.order_id }}</h3>
+              <h3 class="order-amount">გადახდილი თანხა: {{ order.order_amount }} <i class="fa-solid fa-lari-sign"></i>
+              </h3>
+              <h3 class="order-amount">მიმღები: {{ order.order_fullname }}
+              </h3>
+            </div>
           </div>
         </div>
       </div>
@@ -60,11 +74,13 @@ export default {
     return {
       OrderProducts: [],
       CompletedProducts: [],
-      showPending: true,
       apiLoaded: false
     };
   },
   computed: {
+    showPending() {
+      return this.$route.query.section === 'pending';
+    },
     ordersReady() {
       return this.apiLoaded && (this.OrderProducts.length > 0 || this.CompletedProducts.length > 0);
     }
@@ -78,38 +94,41 @@ export default {
         });
         this.OrderProducts = response.data.Pending || [];
         this.CompletedProducts = response.data.Completed || [];
-        this.$nextTick(() => {
-          this.apiLoaded = true;
-        });
+        this.apiLoaded = true;
       } catch (error) {
         console.error(error);
         this.apiLoaded = true;
       }
     },
     toggleSection(section) {
-      this.showPending = section === 'pending';
+      this.$router.push({ query: { section } });
     }
   },
   mounted() {
     this.getOrders();
+  },
+  watch: {
+    '$route.query.section': function (newSection) {
+      if (newSection === 'pending') {
+        this.apiLoaded = true;
+      }
+    }
   }
 };
 </script>
 
+
 <style scoped>
-/* Container */
 .container {
   margin: 20px auto;
   padding: 20px;
 }
 
-/* Toggle Buttons (Now Styled as Minimalist Tabs) */
 .toggle-buttons {
   display: flex;
   justify-content: center;
   gap: 20px;
   border-bottom: 2px solid #ddd;
-  /* Subtle separator line */
   padding-bottom: 10px;
 }
 
@@ -124,14 +143,11 @@ export default {
   transition: color 0.3s ease;
 }
 
-/* Active State */
 .toggle-buttons button.active {
   color: #9b51e0;
-  /* Strong purple */
   font-weight: bold;
 }
 
-/* Underline Effect */
 .toggle-buttons button::after {
   content: "";
   display: block;
@@ -145,7 +161,6 @@ export default {
   transform: translateX(-50%);
 }
 
-/* Expand Underline on Hover & Active */
 .toggle-buttons button:hover::after,
 .toggle-buttons button.active::after {
   width: 100%;
@@ -156,7 +171,6 @@ export default {
   padding-top: 20px;
 }
 
-/* Order Header - No Box, Just Clean Title */
 .section-header {
   font-size: 1.3rem;
   font-weight: bold;
@@ -165,31 +179,75 @@ export default {
   margin-bottom: 15px;
 }
 
-/* Order Cards - No Background, Only Separation */
 .order-card {
   border-bottom: 1px solid #ddd;
+  display: flex;
+  gap: 20px
 }
 
-/* Last Order No Border */
 .order-card:last-child {
   border-bottom: none;
 }
 
-/* Card Header - Better Spacing */
-.card-header {
+
+
+.left-section {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: bold;
-  color: #4a148c;
-  margin-bottom: 10px;
+  flex-direction: column;
+  gap: 10px;
+  width: 80%;
+
 }
 
-.products {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 15px;
+.right-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 30%;
+  height: max-content;
+
 }
+
+
+.order-desc {
+  background-color: #f8f8f8;
+  border-radius: 10px;
+  max-width: 100%;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  padding: 30px 40px;
+  margin: 30px auto;
+  width: 300px;
+  color: #111;
+}
+
+.order-id {
+  color: #111;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #ddd;
+
+}
+
+.order-amount {
+  font-size: 18px;
+}
+
+
+
+.order-id,
+.order-amount {
+  margin-bottom: 12px;
+  font-size: 15px;
+  font-family: Arial, Helvetica, sans-serif;
+  padding-bottom: 8px;
+}
+
+.order-address {
+  font-weight: 400;
+  font-family: Arial, Helvetica, sans-serif;
+  margin-top: 15px;
+}
+
+
 
 .no-order-message {
   text-align: center;
@@ -245,7 +303,7 @@ export default {
   }
 
   .toggle-buttons button {
-    font-size: 0.9rem;
+    font-size: 12px;
   }
 
   .products {
@@ -253,12 +311,26 @@ export default {
     gap: 5px;
   }
 
-  h2 {
-    font-size: 1.3rem;
+
+
+  .order-card {
+    flex-direction: column;
   }
 
-  .card-header {
-    font-size: 0.7rem;
+  .left-section {
+    width: 100%;
+    gap: 30px;
+  }
+
+  .container {
+    padding: 0;
+    padding-top: 20px;
+  }
+
+  .right-section {
+    margin: auto;
+    width: 100%;
+
   }
 }
 </style>

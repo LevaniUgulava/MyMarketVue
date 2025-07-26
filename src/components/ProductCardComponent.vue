@@ -1,5 +1,13 @@
 <template>
-  <router-link :to="{ name: 'single', params: { id: initialproduct.id } }" class="card-container">
+  <router-link :to="{
+    name: 'single', params: {
+      id: initialproduct.id,
+      maincategory: initialproduct.MainCategory.en_name,
+      category: initialproduct.Category.en_name,
+      subcategory: initialproduct.SubCategory.en_name,
+      slug: initialproduct.slug
+    }
+  }" class="card-container">
     <div class="card">
       <div class="img-container">
         <img :src="initialproduct.image_urls[0]" alt="Product Image" class="img" />
@@ -13,7 +21,7 @@
             initialproduct.discountstatus.discount : initialproduct.discount }}%
         </span>
         <button class="likebtn" @click.prevent="toggleLike(initialproduct.id)"
-          :title="isLiked ? (currentLanguage === 'ka' ? 'მოწონების გაუქმება' : 'Unlike') : (currentLanguage === 'ka' ? 'მოწონება' : 'Like')">
+          title="isLiked ? 'მოწონების გაუქმება' : 'მოწონება' ">
           <i :class="isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
         </button>
       </div>
@@ -212,6 +220,10 @@ button:hover {
   color: #62389c;
 }
 
+.likebtn:hover {
+  color: #ff0000;
+}
+
 @media (max-width: 576px) {
   .card {
     width: 100%;
@@ -224,6 +236,8 @@ button:hover {
 
   .img {
     height: 200px;
+    width: 170px;
+
   }
 }
 
@@ -239,6 +253,15 @@ button:hover {
 
   .img {
     height: 200px;
+    width: 170px;
+  }
+
+  button:hover {
+    color: none;
+  }
+
+  .card:hover {
+    transform: 0;
   }
 }
 </style>

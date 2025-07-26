@@ -2,7 +2,7 @@
     <div class="smallsection-container" v-if="categories.length > 0">
         <div class="sectionrole" @click="handlerole">როლის მიხედვით</div>
         <div @click="handle(item.id)" v-for="(item, index) in categories" :key="index" class="section">
-            {{ item.name }}
+            {{ item.ka_name }}
         </div>
     </div>
 </template>

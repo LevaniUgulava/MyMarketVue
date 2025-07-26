@@ -38,7 +38,7 @@
                 <tbody>
 
                     <tr v-for="category in mainCategories" :key="category.id">
-                        <td>{{ category.name }}</td>
+                        <td>{{ category.ka_name }}</td>
                         <td>
                             <button @click="deleteMainCategory(category.id)" class="btn btn-danger">
                                 <i class="fa-solid fa-trash"></i>
@@ -73,7 +73,7 @@
                         <td colspan="2">No categories available.</td>
                     </tr>
                     <tr v-for="category in categories" :key="category.id">
-                        <td>{{ category.name }}</td>
+                        <td>{{ category.ka_name }}</td>
                         <td>
                             <button @click="deleteCategory(category.id)" class="btn btn-danger">
                                 <i class="fa-solid fa-trash"></i>
@@ -109,7 +109,7 @@
                         <td colspan="2">No subcategories available.</td>
                     </tr>
                     <tr v-for="subcategory in subcategories" :key="subcategory.id">
-                        <td>{{ subcategory.name }}</td>
+                        <td>{{ subcategory.ka_name }}</td>
                         <td>
                             <button @click="deleteSubCategory(subcategory.id)" class="btn btn-danger">
                                 <i class="fa-solid fa-trash"></i>

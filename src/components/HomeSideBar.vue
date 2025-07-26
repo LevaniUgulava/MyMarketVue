@@ -1,6 +1,7 @@
 <template>
   <transition name="fade-slide">
-    <div v-if="showTopButton" :class="['top-button', platform === 'ios' ? 'ios-filter-button' : '']">
+    <div v-if="showTopButton"
+      :class="['top-button', platform === 'ios' ? 'ios-filter-button' : '', platform === 'android' ? 'android-padding' : '']">
       <button @click="isModalVisible = true">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 12" width="18" height="18">
           <path
@@ -11,7 +12,7 @@
       </button>
     </div>
   </transition>
-  <div :class="['sidebar', platform === 'ios' ? 'ios-padding' : '']">
+  <div :class="['sidebar', platform === 'ios' ? 'ios-padding' : '', platform === 'android' ? 'android-padding' : '']">
     <ul>
       <li>
         <router-link :to="{ path: `/` }" :class="{ active: $route.path === `/` }">
@@ -195,7 +196,6 @@ export default {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  padding: 5px 0;
 }
 
 .sidebar ul {
@@ -214,11 +214,21 @@ export default {
 
 }
 
+.android-padding {
+  padding-bottom: 30px !important;
+}
+
+.android-filter-button {
+  padding-bottom: 30px !important;
+
+}
+
+
 .sidebar ul li {
   list-style: none;
   flex: 1;
   text-align: center;
-  margin: 15px 0;
+  margin: 15px;
 }
 
 .user-section {

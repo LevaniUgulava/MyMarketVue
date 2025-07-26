@@ -22,7 +22,7 @@ html {
 
 }
 
-body {
+* {
   font-family: 'Noto Sans Georgian', sans-serif;
 
 }

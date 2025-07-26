@@ -25,7 +25,7 @@ export default {
 }
 
 .skeleton-item {
-    width: 260px;
+    width: 250px;
     height: 390px;
     background-color: transparent;
     border-radius: 8px;
@@ -35,7 +35,7 @@ export default {
 }
 
 .skeleton-image {
-    height: 250px;
+    height: 260px;
     margin-bottom: 10px;
     border-radius: 12px;
     animation: pulse 1.5s infinite ease-in-out;
@@ -89,7 +89,7 @@ export default {
     }
 }
 
-@media (min-width: 768px) and (max-width: 1024px) {
+@media (max-width: 767px) {
     .skeletondiv {
         margin-top: 20px;
         display: grid;
@@ -99,13 +99,29 @@ export default {
     }
 
     .skeleton-item {
-        width: 130px;
+        width: 170px;
         height: 330px;
         background-color: transparent;
         border-radius: 8px;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+    }
+
+    .skeleton-image {
+        height: 200px;
+        width: 170px;
+        margin-bottom: 10px;
+        border-radius: 12px;
+        animation: pulse 1.5s infinite ease-in-out;
+
+    }
+
+    .skeleton-button {
+        width: 150px;
+        margin: 0 auto;
+
+
     }
 }
 </style>

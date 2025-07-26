@@ -17,43 +17,43 @@
         <template v-if="getMainCategory && getMainCategory.length">
             <span class="separator"> / </span>
             <span v-for="(item, index) in getMainCategory" :key="index" class="clickable background">
-                {{ item.name }}
+                {{ item.ka_name }}
                 <i @click.prevent="remove(index, 'selectedMainCategories')" class="fa-solid fa-xmark"></i>
             </span>
         </template>
 
-        <template v-if="maincategory && maincategory.name">
+        <template v-if="maincategory && maincategory.ka_name">
             <span class="separator"> / </span>
             <span class="clickable">
-                {{ maincategory.name }}
+                {{ maincategory.ka_name }}
             </span>
         </template>
 
         <template v-if="getCategory && getCategory.length">
             <span class="separator"> / </span>
             <span v-for="(item, index) in getCategory" :key="index" class="clickable background">
-                {{ item.name }}
+                {{ item.ka_name }}
                 <i @click.prevent="remove(index, 'selectedCategories')" class="fa-solid fa-xmark"></i>
             </span>
         </template>
-        <template v-if="category && category.name">
+        <template v-if="category && category.ka_name">
             <span class="separator"> / </span>
             <span class="clickable">
-                {{ category.name }}
+                {{ category.ka_name }}
             </span>
         </template>
 
         <template v-if="getSubCategory && getSubCategory.length">
             <span class="separator"> / </span>
             <span v-for="(item, index) in getSubCategory" :key="index" class="clickable background">
-                {{ item.name }}
+                {{ item.ka_name }}
                 <i @click.prevent="remove(index, 'selectedsubCategories')" class="fa-solid fa-xmark"></i>
             </span>
         </template>
-        <template v-if="subcategory && subcategory.name">
+        <template v-if="subcategory && subcategory.ka_name">
             <span class="separator"> / </span>
             <span class="clickable">
-                {{ subcategory.name }}
+                {{ subcategory.ka_name }}
             </span>
         </template>
         <span v-if="name" class="separator"> / </span>

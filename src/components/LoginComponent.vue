@@ -4,7 +4,8 @@
 
   <div v-if="open" class="modal">
     <div class="login-wrapper">
-      <div :class="['login-card', platform === 'ios' ? 'ios-padding' : '']">
+      <div
+        :class="['login-card', platform === 'ios' ? 'ios-padding' : '', platform === 'android' ? 'android-padding' : '']">
 
 
         <div class="login-content">
@@ -321,7 +322,7 @@ span {
 .login-content {
   position: relative;
   width: 365px;
-
+  margin: auto;
   bottom: 10px;
 }
 
@@ -432,6 +433,10 @@ h2 {
 
 .ios-padding {
   padding-top: calc(80px + env(safe-area-inset-top)) !important;
+}
+
+.android-padding {
+  padding-top: 60px !important;
 }
 
 .close {

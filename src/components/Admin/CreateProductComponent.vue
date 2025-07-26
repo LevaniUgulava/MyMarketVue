@@ -22,7 +22,7 @@
         <label>მთავარი კატეგორია</label>
         <select v-if="maincategories.length > 0" v-model="form.mainCategory" required>
           <option value="" selected>Select Main Category</option>
-          <option v-for="category in maincategories" :key="category.id" :value="category.id">{{ category.name }}
+          <option v-for="category in maincategories" :key="category.id" :value="category.id">{{ category.ka_name }}
           </option>
         </select>
       </div>
@@ -31,7 +31,7 @@
         <label>კატეგორია</label>
         <select v-if="categories.length > 0" v-model="form.category" required>
           <option value="" selected>Select Category</option>
-          <option v-for="category in filteredcategory" :key="category.id" :value="category.id">{{ category.name }}
+          <option v-for="category in filteredcategory" :key="category.id" :value="category.id">{{ category.ka_name }}
           </option>
         </select>
       </div>
@@ -40,7 +40,7 @@
         <label>ქვეკატეგორია</label>
         <select v-if="subcategories.length > 0" v-model="form.subCategory" required>
           <option value="" selected>Select SubCategory</option>
-          <option v-for="category in filteredsubcategory" :key="category.id" :value="category.id">{{ category.name }}
+          <option v-for="category in filteredsubcategory" :key="category.id" :value="category.id">{{ category.ka_name }}
           </option>
         </select>
       </div>

@@ -33,9 +33,8 @@
                   <span v-if="messageofsize" class="message">{{ messageofsize }}</span>
                 </div>
                 <div class="size-container">
-                  <div v-for="item in singleproduct.size"
-                    :class="['size-item', { active: clicked && selectedSize === item.size }]" :key="item.size"
-                    @click="handleClick(item)">
+                  <div v-for="item in singleproduct.size" :class="['size-item', { active: selectedSize === item.size }]"
+                    :key="item.size" @click="handleClick(item)">
                     {{ item.size }}
                   </div>
                 </div>
@@ -46,9 +45,9 @@
                   <span v-if="messageofcolor" class="message">{{ messageofcolor }}</span>
                 </div>
                 <div class="color-container">
-                  <div v-for="(item, index) in (clicked ? sizecolors : allcolors)" :key="index"
-                    :class="['color-item', { active: cclick && selectedColor === item }]" @click="colorclick(item)">
-                    {{ item.color }}
+                  <div v-for="(item, index) in (selectedSize ? sizecolors : allcolors)" :key="index"
+                    :class="['color-item', { active: selectedColor === item }]" @click="colorclick(item)">
+                    {{ selectedSize ? item.color : item }}
                   </div>
                 </div>
               </li>
@@ -101,7 +100,7 @@
           </div>
         </div>
 
-        <button class="buy" @click="redirect">ყიდვა</button>
+        <button class="buy" @click="redirect()">ყიდვა</button>
         <button class="addbtn" @click="addToCart()">კალათაში დამატება</button>
       </div>
     </div>
@@ -158,7 +157,8 @@ export default {
       allcolors: [],
       sizecolors: [],
       clicked: false,
-      cclick: false
+      cclick: false,
+      allcolor: [],
     };
   },
   watch: {
@@ -177,18 +177,26 @@ export default {
         this.selectedImage = newProduct.image_urls[0];
       }
     },
+    selectedColor() {
+      this.quantity = 1;
+    }
+
   },
   methods: {
     async redirect() {
       try {
-        const guest_token = localStorage.getItem("guest_token") || crypto.randomUUID();
-
-        if (!localStorage.getItem("guest_token")) {
-          localStorage.setItem("guest_token", guest_token);
+        if (!this.selectedSize) {
+          this.showMessage("აირჩიეთ ზომა", "messageofsize");
         }
+        if (!this.selectedColor) {
+          this.showMessage("აირჩიეთ ფერი", "messageofcolor");
+        }
+        if (!this.selectedSize || !this.selectedColor) {
+          return;
+        }
+
         const quantity = this.quantity || 1;
         const data = [{
-          guest_token: guest_token,
           quantity: quantity,
           name: this.singleproduct.name,
           product_id: this.id,
@@ -205,7 +213,7 @@ export default {
         this.$router.push({ name: "checkout" });
 
       } catch (error) {
-        if (error.response.status === 403) {
+        if (error.response?.status === 403) {
           this.message = `ელფოსტა არ არის ვერიფიცირებული, ვეირიფიკაციისთვის დაჭირეთ <a href='/profile' style="color:white" target='_blank'>აქ</a>`;
         }
       }
@@ -250,15 +258,27 @@ export default {
     },
 
     handleClick(item) {
-      this.selectedSize = item.size;
-      this.sizecolors = item.details;
-      this.clicked = true;
+      if (this.selectedSize === item.size) {
+        this.selectedSize = null;
+        this.sizecolors = [];
+
+      } else {
+        this.selectedSize = item.size;
+        this.sizecolors = item.details;
+      }
+
     },
     colorclick(item) {
-      this.selectedColor = item;
-      this.selectedColorquantity = item.quantity;
-      this.cclick = true;
+      if (this.selectedColor === item) {
+        this.selectedColor = null;
+        this.selectedColorquantity = null;
+      } else {
+        this.selectedColor = item;
+        this.selectedColorquantity = item.quantity;
+      }
+
     },
+
     async getproduct() {
       try {
         const response = await api.get(`display/${this.id}`, {
@@ -272,9 +292,19 @@ export default {
         this.similarproduct = res.data.data;
         this.additionalinfo = JSON.parse(this.singleproduct.additionalinfo);
 
-        this.allcolors = this.singleproduct.size.flatMap(element =>
-          element.details
-        );
+
+        this.allcolors = [
+          ...new Set(
+            this.singleproduct.size.flatMap(element =>
+              element.details.map(item =>
+                item.color
+              )
+            )
+          )
+        ];
+
+
+
 
       } catch (error) {
         this.errormessage = "An error occurred while loading the data.";
@@ -434,7 +464,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid #7a1dff;
+  border: 1.5px solid #7a1dff;
   border-radius: 8px;
   font-size: 12px;
   font-weight: bold;
@@ -448,7 +478,7 @@ export default {
 .size-item.active {
   background-color: #7a1dff;
   color: white;
-  border: 2px solid #5e14cc;
+  border: 1px solid #7a1dff;
 }
 
 .left-section {
@@ -563,7 +593,6 @@ ul li {
 .product-page {
   display: flex;
   flex-direction: column;
-  width: 100%;
   margin: auto;
   padding: 30px;
 }
@@ -640,7 +669,9 @@ ul li {
 .price {
   font-size: 18px;
   font-weight: bold;
+  width: fit-content;
   color: #2b2731;
+  margin: auto;
   margin-bottom: 15px;
 }
 
@@ -697,7 +728,8 @@ ul li {
 
   .quantity-control {
     justify-content: center;
-    width: auto;
+    width: fit-content;
+    margin: auto;
   }
 
   .thumbnail-container {

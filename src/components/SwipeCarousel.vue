@@ -5,7 +5,8 @@
             :navigation="true" :effect="'fade'" class="carousel">
             <swiper-slide v-for="(image, index) in images" :key="index">
                 <a :href="image.url" target="_blank" rel="noopener noreferrer">
-                    <img :src="image.media_url" class="carousel-image" alt="carousel slide" />
+                    <img :src="[isMobile ? image.media_mobile : image.media_desktop]" class="carousel-image"
+                        alt="carousel slide" />
                 </a>
             </swiper-slide>
         </swiper>
@@ -36,6 +37,7 @@ export default {
     data() {
         return {
             images: [],
+            isMobile: window.innerWidth <= 768
         };
     },
     methods: {
@@ -49,9 +51,18 @@ export default {
                 console.log(error);
             }
         },
+        handleResize() {
+            this.isMobile = window.innerWidth <= 768;
+        }
     },
+
     mounted() {
         this.getbanner();
+        window.addEventListener('resize', this.handleResize);
+
+    },
+    beforeUnmount() {
+        window.removeEventListener('resize', this.checkScreenSize);
     },
 };
 </script>
@@ -59,23 +70,26 @@ export default {
 
 <style>
 .carousel-container {
-    padding: 10px;
-    margin-top: 20px;
-    width: 100%;
+    width: auto;
+    padding-top: 40px;
     overflow: hidden;
 }
 
 .carousel {
-    width: 100%;
+    width: auto;
     height: 100%;
 }
 
 .carousel-image {
+    display: block;
     width: 100%;
     height: 100%;
+    margin: auto;
     border-radius: 10px;
-    object-fit: cover;
+    object-fit: contain;
 }
+
+
 
 .swiper-button-prev,
 .swiper-button-next {
@@ -96,6 +110,8 @@ export default {
     color: black;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+
 
 .swiper-button-prev::after {
     margin-left: 20px;
@@ -123,7 +139,7 @@ export default {
 
     .swiper-button-prev,
     .swiper-button-next {
-        width: 5px;       
+        width: 5px;
     }
 }
 </style>

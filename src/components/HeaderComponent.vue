@@ -6,27 +6,36 @@
   <div :class="['sticky-header', isMobile ? 'mobile-header' : 'desktop-header']">
 
     <nav>
-      <p v-if="!isMobile" @click="redirect()">MyDressWay</p>
-      <div class="search-container">
-        <input type="text" class="searchname" v-model="searchname" placeholder="ძიება..." />
-        <button @click="performSearch" class="srchbtn"><i class="fa-solid fa-magnifying-glass"></i></button>
-      </div>
+      <p v-if="!isMobile" @click="redirect()">Silhouettes</p>
 
-      <div class="search-container-mobile" @click.stop>
-        <input type="text" class="searchname-mobile" v-model="searchname" placeholder="ძიება..." />
-        <button @click="toggleSearch" class="srchbtn-mobile">
-          <i class="fas fa-search"></i>
-        </button>
-      </div>
-
-
-
-      <div v-if="searchname.length > 0 && SuggestionNames.length > 0" class="suggestions-container">
-        <div v-for="(item, index) in SuggestionNames" :key="index" class="suggestion-item"
-          @click="selectSuggestion(item)">
-          {{ item }}
+      <div class="search-desktop">
+        <div class="search-container">
+          <input type="text" v-model="searchname" placeholder="ძიება..." class="searchname" />
+          <button @click="performSearch" class="srchbtn">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
+        </div>
+        <div class="search-container-mobile" @click.stop>
+          <input type="text" class="searchname-mobile" v-model="searchname" placeholder="ძიება..." />
+          <button @click="toggleSearch" class="srchbtn-mobile">
+            <i class="fas fa-search"></i>
+          </button>
+        </div>
+        <div v-if="searchname.length > 0 && SuggestionNames.length > 0" class="suggestions-container">
+          <div v-for="(item, index) in SuggestionNames" :key="index" class="suggestion-item"
+            @click="selectSuggestion(item)">
+            <i class="fa-solid fa-magnifying-glass"></i> {{ item }}
+          </div>
         </div>
       </div>
+
+
+
+
+
+
+
+
 
       <div class="redirects">
         <div class="btnredirect">
@@ -38,7 +47,7 @@
         </div>
 
         <div class="btnredirect">
-          <router-link :to="{ path: `/orders` }" class="redirect-button"
+          <router-link :to="{ path: `/orders`, query: { section: 'pending' } }" class="redirect-button"
             :class="{ 'active': $route.path === `/orders` }">
             <i class="fa-solid fa-bag-shopping outline-icon"></i>
             <span>შეკვეთები</span>
@@ -71,6 +80,7 @@
     <div class="small-sections-wrapper">
       <SmallSections />
     </div>
+    <!-- :open="loginmodal" -->
     <LoginComponent :open="loginmodal" @close="() => closemodal('loginmodal')"
       @openregister="() => openmodal('registermodal')" @openforget="() => openmodal('forgetmodal')" />
 
@@ -185,10 +195,13 @@ export default {
 
 
     PlatformCheck() {
-      const isIos = Capacitor.getPlatform() === "ios"
-      if (isIos) {
+      const platform = Capacitor.getPlatform();
+      if (platform === "ios") {
         document.querySelector('.mobile-header').style.paddingTop = 'env(safe-area-inset-top)';
         document.querySelector('.mobile-header').style.height = 'calc(90px + env(safe-area-inset-top))';
+      } else if (platform === "android") {
+        document.querySelector('.mobile-header').style.paddingTop = '50px';
+        document.querySelector('.mobile-header').style.height = '140px';
 
       }
     },
@@ -416,50 +429,7 @@ body {
   color: #62389c;
 }
 
-.suggestions-container {
-  position: absolute;
-  width: 400px;
-  background: #ffffff;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-  border: 1px solid #ccc;
-  max-height: 250px;
-  overflow-y: auto;
-  z-index: 1000;
-  padding: 8px;
-  top: 75%;
-  left: 255px;
-}
 
-
-.suggestion-item {
-  padding: 10px 15px;
-  cursor: pointer;
-  border-radius: 10px;
-  font-weight: bold;
-  font-size: 0.9rem;
-  color: #004d40;
-
-}
-
-.suggestion-item:hover {
-  background: linear-gradient(90deg, #f2e8ff, #e0c9fc);
-  color: #4a148c;
-  font-weight: 500;
-  transition: all 0.2s ease-in-out;
-}
-
-.suggestions-container::-webkit-scrollbar {
-  width: 5px;
-}
-
-.suggestions-container::-webkit-scrollbar-thumb {
-  background-color: #ccc;
-  border-radius: 5px;
-}
-
-.suggestions-container::-webkit-scrollbar-track {
-  background-color: #f0f0f0;
-}
 
 .logo {
   height: 65px;
@@ -579,6 +549,16 @@ h1 {
   cursor: pointer;
 }
 
+.search-desktop {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 500px;
+  margin: auto;
+  position: relative;
+
+}
+
 .search-container {
   display: flex;
   align-items: center;
@@ -608,6 +588,51 @@ h1 {
 .search-container input::placeholder {
   color: #aaa;
 }
+
+.suggestions-container {
+  position: absolute;
+  top: 110%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  max-height: 250px;
+  width: 100%;
+  overflow-y: auto;
+  margin: auto;
+  z-index: 9;
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.suggestion-item:hover {
+  background-color: #f0f0f0;
+}
+
+.suggestions-container::-webkit-scrollbar {
+  width: 5px;
+}
+
+.suggestions-container::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 5px;
+}
+
+.suggestions-container::-webkit-scrollbar-track {
+  background-color: #f0f0f0;
+}
+
+
 
 .srchbtn {
   background: #62389c;
@@ -729,6 +754,9 @@ h1 {
     display: none;
   }
 
+  .suggestions-container {
+    top: 140%;
+  }
 
   .search-container input {
     width: 100%;
@@ -758,8 +786,14 @@ h1 {
     gap: 0px
   }
 
+
   .search-container {
     max-width: 300px;
+  }
+
+  .suggestions-container {
+    max-width: 300px;
+
   }
 }
 </style>

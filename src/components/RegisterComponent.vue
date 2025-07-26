@@ -214,6 +214,8 @@ span {
 
 .registration-content {
   position: relative;
+  width: 365px;
+  margin: auto;
   bottom: 10px;
 }
 

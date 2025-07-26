@@ -354,10 +354,10 @@ span {
 }
 
 .login-content {
-    position: relative;
-    width: 365px;
-
-    bottom: 10px;
+  position: relative;
+  width: 365px;
+  margin: auto;
+  bottom: 10px;
 }
 
 #loginform {

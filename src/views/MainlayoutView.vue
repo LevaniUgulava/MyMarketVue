@@ -32,6 +32,7 @@ export default {
   data() {
     return {
       isMobile: window.innerWidth <= 768,
+      platform: Capacitor.getPlatform()
     };
   },
   mounted() {
@@ -43,11 +44,13 @@ export default {
   },
   methods: {
     checkPlatform() {
-      const isIos = Capacitor.getPlatform() === "ios";
+      const isIos = this.platform === "ios";
+
       const el = document.querySelector('.main-content');
 
       if (isIos && window.matchMedia('(max-width: 768px)').matches) {
         el.style.paddingTop = "calc(60px + env(safe-area-inset-top))";
+
       } else {
         el.style.paddingTop = "";
       }
@@ -78,6 +81,10 @@ export default {
   align-items: center;
 }
 
+.ios-banner {
+  padding-top: env(safe-area-inset-top) !important;
+}
+
 .sidebar {
   width: 250px;
   height: calc(100vh - 70px);
@@ -98,6 +105,7 @@ export default {
   width: 100%;
   box-sizing: border-box;
   min-height: calc(100vh - 60px);
+  overflow: hidden;
   margin-top: 130px;
 }
 
@@ -143,6 +151,7 @@ export default {
     margin-top: 0px;
     overflow: hidden;
     padding-top: 60px;
+    padding-bottom: 20px;
   }
 
   .footer {

@@ -62,7 +62,7 @@
                             </option>
                         </select>
                         <span v-if="messageofsize[item.pivot.id]" class="message">{{ messageofsize[item.pivot.id]
-                        }}</span>
+                            }}</span>
                     </div>
 
                     <div class="size-select"
@@ -80,18 +80,19 @@
                             </option>
                         </select>
                         <span v-if="messageofcolor[item.pivot.id]" class="message">{{ messageofcolor[item.pivot.id]
-                        }}</span>
+                            }}</span>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="payment-section">
-            <div class="details">
+            <!-- <div class="details">
                 <span>თანხა:</span>
                 <span>{{ allprice }} <i class="fa-solid fa-lari-sign"></i></span>
-            </div>
-            <button class="checkbtn" @click="checkout">გადახდა</button>
+            </div> -->
+            <button class="checkbtn" @click="checkout">გადასახდელი თანხა {{ allprice }} <i
+                    class="fa-solid fa-lari-sign"></i></button>
         </div>
     </div>
 
@@ -462,7 +463,7 @@ export default {
 }
 
 .custom-carousel {
-    width: 50%;
+    width: 70%;
     max-width: 300px;
     margin: 0 auto;
 }
@@ -594,6 +595,60 @@ export default {
         font-size: 12px;
         font-weight: 100
     }
+
+    .cart-container {
+        display: block;
+        padding: 0;
+    }
+
+    .data {
+        display: block;
+        width: 70%;
+
+    }
+
+    .quantity-control {
+        gap: 3px;
+        width: fit-content;
+    }
+
+    .product-name {
+        gap: 3px;
+        padding-bottom: 10px;
+
+    }
+
+    .size-select {
+        width: fit-content;
+        gap: 5px;
+        padding-bottom: 4px;
+    }
+
+    .price {
+        gap: 3px;
+    }
+
+    .payment-section {
+        padding-top: 30px;
+        flex-direction: row;
+    }
+
+
+
+    .checkbtn {
+        width: 90%;
+        margin: auto;
+    }
+
+    .details {
+        display: block !important;
+        width: 90%;
+        margin: auto;
+        gap: 20px;
+    }
+
+
+
 
     .empty-text {
         font-weight: 100
