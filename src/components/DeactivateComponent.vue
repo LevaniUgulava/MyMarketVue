@@ -1,11 +1,13 @@
 <template>
-    <div v-if="open" class="modal">
+    <h3 class="modal-title">ანგარიშის დეაქტივაცია</h3>
+
+    <div class="modal">
+
         <div class="deactivate-container">
             <button class="close" @click="closeModal">
                 <i class="fa-solid fa-xmark"></i>
             </button>
 
-            <h3 class="modal-title">ანგარიშის დეაქტივაცია</h3>
             <div class="info">
                 გაითვალისწინეთ! ანგარიშის დეაქტივაცისას დაიკარგება ყველანაირი ინფორმაცია თქვენს შესახებ.
                 გაუქმდება თქვენი სტატუსი, შეკვეთების ისტორია და რაც თქვენთანაა ასოცირებული.
@@ -190,7 +192,6 @@ export default {
     border-radius: 10px;
     max-width: 600px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     line-height: 1.5;
 }
 
@@ -201,29 +202,19 @@ export default {
 }
 
 .modal {
-    position: fixed;
-    inset: 0;
-    background-color: rgba(0, 0, 0, 0.4);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
-    animation: fadeIn 0.3s ease-in-out;
     padding: 20px;
 }
 
 .deactivate-container {
-    background-color: #fff;
     padding: 30px;
     border-radius: 15px;
-    box-shadow: 0px 15px 25px rgba(0, 0, 0, 0.15);
-    max-width: 600px;
     width: 100%;
     display: flex;
     flex-direction: column;
     gap: 25px;
-    animation: slideIn 0.3s ease-out;
-    position: relative;
 }
 
 .modal-title {

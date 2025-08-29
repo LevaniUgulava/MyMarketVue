@@ -5,7 +5,8 @@
                 <button class="close-button" @click="$emit('close')">&times;</button>
                 <div class="modal-body">
                     <p class="modal-title">მისამართის დამატება</p>
-                    <hr />
+                    <div class="line">
+                    </div>
 
                     <div class="form-group" style="position: relative;">
                         <label for="city">ქალაქი</label>
@@ -32,7 +33,7 @@
                     </div>
 
                     <div class="actions">
-                        <button class="save-button" @click.prevent="saveAddress">შენახვა</button>
+                        <button class="save-button" @click.prevent="saveAddress">მისამართის დამატება</button>
                     </div>
                 </div>
             </div>
@@ -149,10 +150,18 @@ export default {
     box-sizing: border-box;
 }
 
+.line {
+    background-color: #cfcdd3b3;
+    height: 1px;
+    width: 100%;
+    margin-bottom: 30px;
+
+}
+
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgb(102 97 97 / 35%);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -170,6 +179,8 @@ export default {
 }
 
 .modal-title {
+    display: flex;
+    justify-content: center;
     font-size: 18px;
     font-weight: 600;
     margin-bottom: 15px;
@@ -185,17 +196,20 @@ export default {
 label {
     margin-bottom: 6px;
     font-size: 14px;
-    color: #333;
+    color: #000000b3;
 }
 
 .form-control {
     padding: 10px 12px;
     font-size: 14px;
     border-radius: 6px;
-    border: 1px solid #ccc;
-    background-color: #f9f9f9;
-    transition: border-color 0.2s ease;
+    border: 1px solid #cfcdd3b3;
+    background-color: #ffffff;
     width: 100%;
+}
+
+.form-control::placeholder {
+    color: #898690b3;
 }
 
 .form-control:focus {
@@ -211,7 +225,7 @@ label {
     background: white;
     border: 1px solid #ccc;
     max-height: 200px;
-    font-size: 13px;
+    font-size: 12px;
     overflow-y: auto;
     z-index: 999;
     list-style: none;
@@ -241,6 +255,7 @@ label {
     padding: 10px 18px;
     border: none;
     border-radius: 6px;
+    width: 100%;
     cursor: pointer;
     font-size: 14px;
     transition: background-color 0.2s ease;
@@ -269,6 +284,7 @@ label {
 .modal-body {
     margin-top: 15px;
 }
+
 
 @media (max-width: 768px) {
     .modal-content {

@@ -5,37 +5,35 @@
     <Message v-if="emitcartmessage" closable class="message" severity="error">{{ emitcartmessage }}</Message>
 
   </div>
-  <CountDownComponent v-if="status && status.start_data && status.end_date" :startTime="new Date(status.start_data)"
-    :endTime="new Date(status.end_date)" />
+
   <div>
-    <div class="products-wrapper">
+    <div class="products-wrapper" v-if="isAuth">
       <ProductCardComponent v-for="(item) in products" :key="item.id" :initialproduct="item"
         @show-comments="showCommentsModal(item.id)" @cart-updated="handleCartUpdated"
         @liked-message="handleunauthorizedlike" @cart-message="handleunauthorizedcart" />
     </div>
+    <div class="no-auth" v-else>
+      ეს არის გვერდი სადაც იხილავთ შემოთავაზებულ პრდუქციას პასდაკლებით მაგრამ აქ არის საჭირო სტატუსიკო
+    </div>
   </div>
 
-  <CommentModal v-if="showModal" :product="selectedProduct" :comments="selectedProductComments" @close="closeModal"
-    @comment-submitted="refreshComments(selectedProduct.id)" />
+
 </template>
 
 <script>
 import ProductCardComponent from '@/components/ProductCardComponent.vue';
-import CommentModal from '@/components/CommentModal.vue';
-import CountDownComponent from '../CountDownComponent.vue';
 import api from '@/api';
+import { authMixin } from '@/mixin/reuse';
 
 export default {
   name: 'ExclusivePage',
+  mixins: [authMixin],
   components: {
     ProductCardComponent,
-    CommentModal,
-    CountDownComponent,
   },
   data() {
     return {
       products: [],
-      status: [],
       showModal: false,
       selectedProduct: null,
       selectedProductComments: [],
@@ -79,18 +77,11 @@ export default {
 
     async getExclusive() {
       try {
-        const [productsResponse, statusResponse] = await Promise.all([
-          api.get('/exlusive', {
-            tokenRequired: true
-
-          }),
-          api.get('/current/status', {
-            tokenRequired: true
-          }),
-        ]);
+        const productsResponse = await api.get('/exlusive', {
+          tokenRequired: true
+        });
 
         this.products = productsResponse.data.products;
-        this.status = statusResponse.data.status;
 
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -111,9 +102,10 @@ export default {
     },
   },
   mounted() {
-    setTimeout(() => {
+    if (this.isAuth) {
       this.getExclusive();
-    }, 500);
+
+    }
   },
 };
 </script>
@@ -127,6 +119,10 @@ export default {
   100% {
     transform: rotate(360deg);
   }
+}
+
+.no-auth {
+  margin-top: 50px;
 }
 
 .explore-link {

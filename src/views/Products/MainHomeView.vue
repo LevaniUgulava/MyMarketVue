@@ -2,60 +2,115 @@
   <Message v-if="emitdata" :message="emitdata" @close="emitdata = ''" />
 
   <div>
-    <SwipeCarousel />
-    <BrandComponent />
-    <section v-for="(category, idx) in categories" :key="idx" class="category-section">
+    <div v-if="getApiLoaded">
+      <swipeCarousel />
+      <HomeCategory />
 
-      <section class="collection-section" v-if="sections.length > 0">
-        <div :class="['collection-grid', { 'more-than-two': sections.length > 4 }]">
-          <router-link v-for="(item, index) in sections.slice(idx * 2, (idx + 1) * 2)" :key="index"
-            :to="{ name: 'productsinglecollection', params: { id: item.id } }" class="grid-item"
-            :class="{ 'reduce-height': sections.length > 4 && index === 1 }">
+      <section class="collection-section">
+        <div :class="['collection-grid', { 'more-than-two': sections.length > 2 }]">
+          <router-link v-for="(item, index) in sections.slice(0, 2)" :key="index"
+            :to="{ name: 'productsinglecollection', params: { id: item.id } }" class="grid-item">
             <div class="grid-item-image" :style="{ backgroundImage: 'url(' + item.media_urls + ')' }">
-              <div class="grid-item-text">
-                <label class="collection-label">{{ item.title }}</label>
-                <p class="description">{{ item.description }}</p>
-                <span v-if="item.discount" class="discount">{{ item.discount }}%</span>
-              </div>
             </div>
             <div class="product-availability">
               <p>იხილეთ მეტი →</p>
             </div>
           </router-link>
-
-          <div v-if="sections.length > 4" class="show-all-collections">
-            <router-link to="/collection" class="show-all-button">იხილეთ მეტი კოლექცია →</router-link>
-          </div>
         </div>
       </section>
 
-      <div @click="see(category.key)" class="section-header">
-        <p>{{ category.title }}</p>
+      <div @pointerdown="see('all')" class="section-header">
+        <p>ყველა პროდუქტი</p>
       </div>
-
       <div class="product-grid">
-        <ProductCardComponent class="product-card" v-for="(item, index) in category.products" :key="index"
+        <ProductCardComponent class="product-card" v-for="(item, index) in allproducts" :key="index"
           :initialproduct="item" @cart-updated="handleCartUpdated" @liked-message="handleunauthorizedlike"
           @cart-message="handleunauthorizedcart" />
       </div>
+      <PosterView />
+      <swipeCarousel />
 
-    </section>
+      <BrandComponent />
+
+
+      <div @pointerdown="see('discount')" class="section-header">
+        <p>ფასდაკლებული პროდუქტი</p>
+      </div>
+      <div class="product-grid">
+        <ProductCardComponent class="product-card" v-for="(item, index) in getDiscountproducts" :key="index"
+          :initialproduct="item" @cart-updated="handleCartUpdated" @liked-message="handleunauthorizedlike"
+          @cart-message="handleunauthorizedcart" />
+      </div>
+      <section class="collection-section">
+        <div :class="['collection-grid', { 'more-than-two': sections.length > 2 }]">
+          <router-link v-for="(item, index) in sections.slice(2, 4)" :key="index"
+            :to="{ name: 'productsinglecollection', params: { id: item.id } }" class="grid-item">
+            <div class="grid-item-image" :style="{ backgroundImage: 'url(' + item.media_urls + ')' }">
+            </div>
+            <div class="product-availability">
+              <p>იხილეთ მეტი →</p>
+            </div>
+          </router-link>
+        </div>
+      </section>
+      <div @pointerdown="see('new')" class="section-header">
+        <p>ახალი პროდუქტები</p>
+      </div>
+      <div class="product-grid">
+        <ProductCardComponent class="product-card" v-for="(item, index) in newproducts" :key="index"
+          :initialproduct="item" @cart-updated="handleCartUpdated" @liked-message="handleunauthorizedlike"
+          @cart-message="handleunauthorizedcart" />
+      </div>
+      <LastComponent />
+
+    </div>
+
+
+
+    <div v-else>
+      <section v-for="(category, idx) in 2" :key="idx" class="category-section">
+        <section class="collection-section">
+          <div class="collection-grid">
+            <div class="grid-item-image-skeleton"></div>
+            <div class="grid-item-image-skeleton"></div>
+          </div>
+        </section>
+
+        <div @pointerdown="see(category.key)" class="section-header">
+          <p>{{ category.title }}</p>
+        </div>
+
+        <div class="product-grid">
+          <SkeletonComponent :isMain="true" />
+        </div>
+      </section>
+    </div>
+
+
   </div>
 </template>
-
 <script>
 import ProductCardComponent from '@/components/ProductCardComponent.vue';
 import Message from '@/components/Message/MessageComponent.vue';
 import SwipeCarousel from '@/components/SwipeCarousel.vue';
 import BrandComponent from '@/components/BrandComponent.vue';
+import SkeletonComponent from '@/components/SkeletonComponent.vue';
+
 import { mapActions, mapGetters } from 'vuex';
+import PosterView from '../PosterView.vue';
+import HomeCategory from './HomeCategory.vue';
+import LastComponent from '@/components/LastComponent.vue';
 
 export default {
   components: {
     ProductCardComponent,
     SwipeCarousel,
     Message,
-    BrandComponent
+    BrandComponent,
+    SkeletonComponent,
+    PosterView,
+    HomeCategory,
+    LastComponent
   },
   data() {
     return {
@@ -72,6 +127,9 @@ export default {
       },
       showModal: false,
       sections: [],
+      allproducts: [],
+      discountproducts: [],
+      newproducts: [],
       categories: [],
     };
   },
@@ -83,14 +141,16 @@ export default {
       this.$router.push({ path: `/product`, query: { section: category } });
     },
 
-
-
-    handleCartUpdated(message) {
+    handleunauthorizedlike(message) {
       this.emitdata = message.message;
+
+    },
+    handleCartUpdated(message) {
+      this.emitdata = message;
     },
   },
   computed: {
-    ...mapGetters('product', ["getCategories", "getSections"])
+    ...mapGetters('product', ["getAllproducts", "getDiscountproducts", 'getNewproducts', "getCategories", "getSections", "getApiLoaded"])
   },
   watch: {
     getCategories(newCategories) {
@@ -99,6 +159,17 @@ export default {
     getSections(newSections) {
       this.sections = newSections;
     },
+    getAllproducts(newProduct) {
+      this.allproducts = newProduct;
+    },
+    getDiscountproducts(newProduct) {
+      this.discountproducts = newProduct;
+
+    },
+    getNewproducts(newProduct) {
+      this.newproducts = newProduct;
+
+    }
   },
   async mounted() {
     await this.displayAction();
@@ -189,7 +260,6 @@ button:hover {
 
 .collection-section {
   padding: 20px;
-  border-radius: 12px;
 }
 
 .collection-title {
@@ -209,24 +279,42 @@ button:hover {
   width: 100%;
 }
 
+
 .grid-item {
   display: flex;
   flex-direction: column;
-  border-radius: 12px;
   overflow: hidden;
   text-decoration: none;
   transition: transform 0.3s;
-  height: 280px;
+  height: 60vh;
   width: 100%;
   position: relative;
 }
 
-.grid-item.reduce-height {
-  height: 220px;
-}
-
 .grid-item:hover {
   transform: translateY(-5px);
+}
+
+.grid-item-image-skeleton {
+  width: 100%;
+  height: 280px;
+  background-color: #e0e0e0;
+  border-radius: 10px;
+  animation: skeleton-loading 1.5s infinite linear;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-color: #e0e0e0;
+  }
+
+  50% {
+    background-color: #d0d0d0;
+  }
+
+  100% {
+    background-color: #e0e0e0;
+  }
 }
 
 .grid-item-image {
@@ -236,36 +324,10 @@ button:hover {
   background-position: center;
   background-repeat: no-repeat;
   position: relative;
-  border-radius: 12px;
   transition: all 0.3s ease;
 }
 
-.grid-item-text {
-  position: absolute;
-  color: #fff;
-  padding: 20px;
-  font-size: 1.2rem;
-  font-weight: 900;
-  text-transform: uppercase;
-  font-family: 'Roboto', sans-serif;
-  font-weight: bold;
-  text-align: left;
-}
 
-.grid-item-text .description {
-  font-size: 0.8rem;
-  line-height: 1.5;
-  flex-grow: 1;
-}
-
-.grid-item-text .discount {
-  background: #ff5555;
-  color: white;
-  border-radius: 4px;
-  padding: 5px 8px;
-  font-size: 0.7rem;
-  align-self: flex-start;
-}
 
 .product-availability {
   position: absolute;
@@ -286,35 +348,8 @@ button:hover {
   visibility: visible;
 }
 
-.show-all-collections {
-  position: absolute;
-  bottom: 0px;
-  right: 0px;
-  text-align: center;
-  z-index: 1;
-}
-
-.show-all-button {
-  padding: 10px 20px;
-  font-size: 1rem;
-  border: solid 1px black;
-  color: black;
-  width: 680px;
-  height: 50px;
-  border-radius: 25px;
-  cursor: pointer;
-  text-align: center;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-decoration: none;
-}
 
 
-.show-all-button:hover {
-  color: white;
-  background-color: black;
-}
 
 @media (max-width: 768px) {
   .collection-label {
@@ -333,10 +368,7 @@ button:hover {
   }
 
 
-  .show-all-button {
-    width: 150px;
-    font-size: 0.8rem;
-  }
+
 
   .grid-item {
     flex-direction: column;

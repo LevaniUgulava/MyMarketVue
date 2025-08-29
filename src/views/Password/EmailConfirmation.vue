@@ -18,21 +18,14 @@
                     <div class="dotted-line">
                         <span></span>
                     </div>
-                    <div class="verification-message" v-if="data.from !== 'register'">
-                        <h3>ვერიფიკაციის კოდი თქვენი ელ.ფოსტაზე</h3>
-                        <p>თქვენმა სისტემამ უკვე გაგზავნა ვერთიფიკაციის კოდი თქვენს ელ.ფოსტის მისამართზე. გთხოვთ,
-                            შეიყვანოთ კოდი ქვემოთ მოცემულ ველში, რათა დაადასტუროთ თქვენი ანგარიში.</p>
-                        <div class="email-info">
-                            <p><strong>ელ.ფოსტის მისამართი:</strong> {{ data.email }}</p>
-                        </div>
-                        <p class="note">თუ არ მიიღეთ კოდი, შეგიძლიათ დააჭიროთ "გაგზავნა".</p>
-                    </div>
-                    <div class="verification-message" v-else>
+
+                    <div class="verification-message">
                         <h3>ვერიფიკაციის კოდი თქვენი ელ.ფოსტაზე</h3>
                         <p>გაიარეთ ვერიფიკაცია, რათა გამოიყენოთ ყველა ფუნქცია და უზრუნველყოთ უსაფრთხოება, რაც საშუალებას
                             მოგცემთ წვდომა მიიღოთ სრულად ყველა სერვისზე და შესაძლებლობაზე..</p>
                         <div class="email-info">
-                            <p><strong>ელ.ფოსტის მისამართი:</strong> {{ data.email }}</p>
+                            <div><strong>ელ.ფოსტის მისამართი:</strong></div>
+                            <div> {{ data.email }}</div>
                         </div>
                         <p class="note">კოდის მისაღებად დააჭირეთ <strong>"გაგზავნა"</strong>.</p>
                     </div>
@@ -52,12 +45,6 @@
 
                         <button class="loginbtn">გაგრძელება</button>
                     </form>
-
-                    <div class="dotted-line">
-                        <span>{{ data.from === 'register' ? 'ან' : '' }}</span>
-                    </div>
-                    <button v-if="data.from === 'register'" @click="closeModal" class="verifypass">ვერიფიკაციის
-                        გამოტოვება</button>
 
                     <div class="Error" v-if="ErrorName && ErrorText">
                         <strong>{{ ErrorName }}</strong>
@@ -255,9 +242,7 @@ export default {
 
 .verification-message {
     padding: 10px;
-    background-color: #f4f7fa;
     border-radius: 8px;
-    border: 1px solid #e0e6ed;
     text-align: center;
     font-family: Arial, sans-serif;
     color: #333;
@@ -270,19 +255,16 @@ export default {
     margin-bottom: 10px;
 }
 
-.verification-message p {
+.verification-message {
     font-size: 13px;
     line-height: 1.5;
     color: #666;
 }
 
 .email-info {
-    background-color: #f0f4f8;
     padding: 10px;
     margin: 15px 0;
     border-radius: 4px;
-    border: 1px solid #e0e6ed;
-    text-align: left;
     font-weight: bold;
 }
 
@@ -354,15 +336,15 @@ span {
 }
 
 .login-content {
-  position: relative;
-  width: 365px;
-  margin: auto;
-  bottom: 10px;
+    position: relative;
+    width: 365px;
+    margin: auto;
+    bottom: 10px;
 }
 
 #loginform {
     position: relative;
-    top: 20px;
+    padding: 20px;
 }
 
 input {
@@ -427,7 +409,7 @@ input:not(:placeholder-shown)+label {
 h2 {
     display: flex;
     justify-content: center;
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     font-family: 'Roboto', sans-serif;
 }
 

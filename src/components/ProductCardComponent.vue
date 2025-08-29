@@ -1,16 +1,11 @@
 <template>
-  <router-link :to="{
-    name: 'single', params: {
-      id: initialproduct.id,
-      maincategory: initialproduct.MainCategory.en_name,
-      category: initialproduct.Category.en_name,
-      subcategory: initialproduct.SubCategory.en_name,
-      slug: initialproduct.slug
-    }
-  }" class="card-container">
-    <div class="card">
+  <div @pointerup="redirectproduct" class="card-container">
+    <div class="card" @mouseover="isHovered = true" @mouseleave="isHovered = false">
       <div class="img-container">
-        <img :src="initialproduct.image_urls[0]" alt="Product Image" class="img" />
+        <div class="image-wrapper">
+          <img :src="initialproduct.image_urls[0]" alt="Main Image" class="main-img" />
+          <img :src="initialproduct.image_urls[1]" alt="Hover Image" class="hover-img" />
+        </div>
         <span
           v-if="initialproduct.discount > 0 || (initialproduct.discountstatus && initialproduct.discountstatus.discount > 0)"
           :class="{
@@ -20,8 +15,13 @@
           -{{ initialproduct.discountstatus && initialproduct.discountstatus.discount > 0 ?
             initialproduct.discountstatus.discount : initialproduct.discount }}%
         </span>
-        <button class="likebtn" @click.prevent="toggleLike(initialproduct.id)"
-          title="isLiked ? 'მოწონების გაუქმება' : 'მოწონება' ">
+        <span v-if="initialproduct.isNew" class="new-badge"
+          :style="{ top: (initialproduct.discount > 0 || (initialproduct.discountstatus && initialproduct.discountstatus.discount > 0)) ? '40px' : '10px' }">
+          ახალი
+        </span>
+
+        <button v-show="isHovered" class="likebtn" :aria-pressed="isLiked.toString()"
+          @pointerup.stop.prevent="toggleLike(initialproduct.id)" :title="isLiked ? 'მოწონების გაუქმება' : 'მოწონება'">
           <i :class="isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
         </button>
       </div>
@@ -33,20 +33,28 @@
         </p>
       </div>
 
-      <div @click.prevent="addToCart(initialproduct.id)" class=" button-group">
+      <div @pointerup.stop.prevent="addToCart(initialproduct.id)" class="button-group">
         <button class="add-btn">
-          <i class="fa-solid fa-cart-plus"></i> დამატება
+          <div v-if="!isHovered"><i class="fa-solid fa-cart-plus"></i> დამატება</div>
+          <div v-else class="size-div">
+            <div v-for="(item, index) in initialproduct.size" :key="index" class="size">
+              <div @pointerup.stop.prevent="addToCart(initialproduct.id, item.size)">{{ item.size }}</div>
+            </div>
+          </div>
+
         </button>
       </div>
     </div>
-  </router-link>
+  </div>
 </template>
 
 <script>
 import api from '@/api';
+import { authMixin } from '@/mixin/reuse';
 
 export default {
   name: 'ProductCardComponent',
+  mixins: [authMixin],
   props: {
     initialproduct: {
       type: Object,
@@ -56,23 +64,43 @@ export default {
   data() {
     return {
       isLiked: this.initialproduct.isLiked,
-      currentLanguage: localStorage.getItem('selectedLanguage'),
+      isHovered: false
     };
   },
   methods: {
-    async addToCart(id) {
+    async redirectproduct() {
+      this.$router.push({
+        name: 'single',
+        params: {
+          id: this.initialproduct.id,
+          maincategory: this.initialproduct.MainCategory.en_name,
+          category: this.initialproduct.Category.en_name,
+          subcategory: this.initialproduct.SubCategory.en_name,
+          slug: this.initialproduct.slug
+        }
+      });
+
+    },
+    async addToCart(id, size) {
       try {
         const response = await api.post(
           `addcart/${id}`,
-          { type: this.initialproduct.size_type },
+          { type: this.initialproduct.size_type, size: size },
           { tokenRequired: true }
         );
-        this.$emit('cart-updated', response.data);
+        this.$emit('cart-updated', response.data.message);
       } catch (error) {
-        console.log(error);
+        if (error.response.status === 403) {
+          this.$emit('cart-updated', "ავტორიზაცია აუცილებელია");
+
+        }
       }
     },
     async toggleLike(id) {
+      if (!this.isAuth) {
+        this.$emit('liked-message', { message: "ავტორიზაცია აუცილებელია" });
+        return;
+      }
       const previousState = this.isLiked;
       this.isLiked = !this.isLiked;
       try {
@@ -88,11 +116,6 @@ export default {
     },
     async like(id) {
       try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          this.$emit('liked-message', { ka: "არ არის ავტორიზირებული", en: "Not Authorized" });
-          return;
-        }
         await api.post(`like/${id}`, {}, { tokenRequired: true });
         this.isLiked = true;
       } catch (error) {
@@ -100,9 +123,8 @@ export default {
       }
     },
     async unlike(id) {
+
       try {
-        const token = localStorage.getItem('token');
-        if (!token) return;
         await api.post(`unlike/${id}`, {}, { tokenRequired: true });
         this.isLiked = false;
       } catch (error) {
@@ -114,6 +136,21 @@ export default {
 </script>
 
 <style scoped>
+.size-div {
+  display: flex;
+  flex-direction: row;
+}
+
+.size {
+  font-size: 12px;
+  padding: 5px;
+}
+
+.size:hover {
+  background-color: #7d23fc31;
+  border-radius: 20px;
+}
+
 .card-container {
   display: flex;
   justify-content: center;
@@ -124,7 +161,7 @@ export default {
 }
 
 .card {
-  width: 250px;
+  width: 260px;
   border-radius: 12px;
   overflow: hidden;
   text-align: center;
@@ -140,22 +177,69 @@ export default {
   position: relative;
 }
 
-.img {
-  width: 100%;
-  height: 260px;
-  object-fit: cover;
-  border-radius: 12px 12px 0 0;
+.image-wrapper {
+  position: relative;
+  width: 250px;
+  height: 250px;
+  overflow: hidden;
 }
+
+.image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: opacity 0.8s ease;
+}
+
+.main-img {
+  z-index: 1;
+  opacity: 1;
+}
+
+.hover-img {
+  z-index: 2;
+  opacity: 0;
+}
+
+.image-wrapper:hover .main-img {
+  opacity: 0;
+}
+
+.image-wrapper:hover .hover-img {
+  opacity: 1;
+}
+
+
 
 .discount-badge {
   position: absolute;
   top: 10px;
-  left: 10px;
+  left: 0px;
   background: #ff5555;
   color: #fff;
-  border-radius: 4px;
-  padding: 4px 6px;
-  font-size: 0.8rem;
+  z-index: 3;
+  border-bottom-right-radius: 4px;
+  border-top-right-radius: 4px;
+  padding: 5px 4px;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.new-badge {
+  position: absolute;
+  left: 0px;
+  background: #62389c;
+  color: #fff;
+  z-index: 3;
+  border-bottom-right-radius: 4px;
+  border-top-right-radius: 4px;
+  padding: 5px 4px;
+  font-size: 11px;
+  font-weight: 400;
 }
 
 .discount-badge-status {
@@ -165,12 +249,18 @@ export default {
 .likebtn {
   position: absolute;
   top: 10px;
-  right: 10px;
+  right: 20px;
   background: transparent;
+  z-index: 3;
   border: none;
   cursor: pointer;
-  font-size: 1.3rem;
-  color: #ff0000;
+  background-color: aliceblue;
+  justify-content: center;
+  align-items: center;
+  border-radius: 20px;
+  padding: 10px;
+  font-size: 14px;
+  color: black;
 }
 
 .product-info {
@@ -198,30 +288,31 @@ h3 {
 .button-group {
   display: flex;
   justify-content: center;
-  padding: 10px;
   border-radius: 8px;
   background-color: #7e23fc1a;
   width: 200px;
+  height: 40px;
   margin: 0 auto;
+  overflow: hidden;
 }
 
 
-button {
+.add-btn {
   border: none;
   background: transparent;
   font-family: 'Noto Sans Georgian', sans-serif;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 13px;
   color: #751bf2;
   transition: color 0.2s ease-in-out;
 }
 
-button:hover {
+.add-btn:hover {
   color: #62389c;
 }
 
 .likebtn:hover {
-  color: #ff0000;
+  color: rgb(68, 67, 67);
 }
 
 @media (max-width: 576px) {
@@ -234,11 +325,11 @@ button:hover {
     margin: 0 auto;
   }
 
-  .img {
+  .image-wrapper {
     height: 200px;
     width: 170px;
-
   }
+
 }
 
 @media (min-width: 768px) and (max-width: 1024px) {
@@ -246,12 +337,13 @@ button:hover {
     width: 100%;
   }
 
+
   .button-group {
     width: 200px;
     margin: 0 auto;
   }
 
-  .img {
+  .image-wrapper {
     height: 200px;
     width: 170px;
   }

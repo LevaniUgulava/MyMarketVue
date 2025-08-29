@@ -1,12 +1,13 @@
 <template>
-    <div class="cart-container" v-if="apiLoaded && mycarts.length > 0">
+    <div class="cart-container" v-if="apiLoaded && mycarts && mycarts.length > 0">
         <Message v-if="message" :message="message" @close="message = ''" />
 
         <div class="product-section">
             <div class="card" v-for="(item, index) in mycarts" :key="index">
                 <div class="action">
                     <div>
-                        <i @click.prevent="deleteCart(item.pivot.id)" class="fa-solid fa-trash outline-icon"></i>
+                        <i @pointerup.stop.prevent="deleteCart(item.pivot.id)"
+                            class="fa-solid fa-trash outline-icon"></i>
                     </div>
                     <div>
                         <i class="fa-solid fa-heart outline-icon"></i>
@@ -34,7 +35,8 @@
                                 <div class="arrow-down"></div>
                             </div>
                         </div>
-                        <button class="quantitybtn" @click="updateQuantity(item.pivot.id, 'decrement')">-</button>
+                        <button class="quantitybtn"
+                            @pointerup.stop.prevent="updateQuantity(item.pivot.id, 'decrement')">-</button>
                         <span class="quantity">{{ item.pivot.quantity }}</span>
                         <div class="increment-wrapper">
                             <div v-if="quantitymessage[item.pivot.id]" class="popup-message">
@@ -42,7 +44,8 @@
                                 <div class="arrow-down"></div>
                             </div>
                         </div>
-                        <button class="quantitybtn" @click="updateQuantity(item.pivot.id, 'increment')">+</button>
+                        <button class="quantitybtn"
+                            @pointerup.stop.prevent="updateQuantity(item.pivot.id, 'increment')">+</button>
                     </div>
 
                     <div class="price">
@@ -91,8 +94,8 @@
                 <span>თანხა:</span>
                 <span>{{ allprice }} <i class="fa-solid fa-lari-sign"></i></span>
             </div> -->
-            <button class="checkbtn" @click="checkout">გადასახდელი თანხა {{ allprice }} <i
-                    class="fa-solid fa-lari-sign"></i></button>
+            <button class="checkbtn" @pointerup.stop.prevent="checkout">გადასახდელი თანხა {{
+                allprice }} <i class="fa-solid fa-lari-sign"></i></button>
         </div>
     </div>
 
@@ -239,9 +242,7 @@ export default {
         },
         async checkout() {
             try {
-                this.getGuestToken();
                 const mappedcart = this.getMappedCart();
-                console.log(mappedcart);
                 await api.post("/temporder", { products: mappedcart }, { tokenRequired: true });
                 this.$router.push({ name: "checkout" });
             } catch (error) {
@@ -261,7 +262,6 @@ export default {
                 }
             }
             return {
-                guest_token: this.getGuestToken(),
                 quantity: item.pivot.quantity || 1,
                 name: item.name,
                 product_id: item.id,
@@ -276,17 +276,6 @@ export default {
             if (error.response?.status === 403) {
                 this.message = `ელფოსტა არ არის ვერიფიცირებული, <a href='/profile' style="color:white" target='_blank'>დაადასტურეთ აქ</a>`;
             }
-        },
-        getGuestToken() {
-            if (!this.isAuthenticated) {
-                let guest_token = localStorage.getItem("guest_token") || crypto.randomUUID();
-                if (!localStorage.getItem("guest_token")) {
-                    localStorage.setItem("guest_token", guest_token);
-                }
-                return guest_token;
-            }
-            localStorage.removeItem("guest_token");
-            return "";
         },
         async checkmaxquantity(item) {
             if (item.pivot.color != null) {

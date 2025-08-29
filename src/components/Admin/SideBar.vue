@@ -26,7 +26,6 @@
         <li><a href="/admin/category"><i class="fas fa-tags"></i>კატეგორიების მართვა</a></li>
 
         <li v-if="isadmin"><a href="/admin/roles"><i class="fas fa-user-cog"></i>როლების მართვა</a></li>
-        <!-- <li><a href="/admin/logs"><i class="fas fa-clipboard-list"></i>ჩანაწერები</a></li> -->
         <li><a href="#other"><i class="fas fa-ellipsis-h"></i>სხვა</a></li>
       </ul>
     </div>

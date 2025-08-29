@@ -15,9 +15,13 @@
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
+          <div class="social-login">
+            <FacebookComponentVue class="fb" />
+            <GoogleComponent class="google" />
+          </div>
 
           <div class="dotted-line">
-            <span></span>
+            <span>ან</span>
           </div>
           <form @submit.prevent="login" method="post" id="loginform">
             <div class="input-container">
@@ -53,18 +57,17 @@
           </div>
 
           <div class="dotted-line">
-            <span>გააგრძელეთ</span>
+            <span></span>
           </div>
 
-          <div class="social-login">
-            <FacebookComponentVue class="fb" />
-            <GoogleComponent class="google" />
-          </div>
         </div>
         <div class="Error" v-if="ErrorName && ErrorText">
           <strong>{{ ErrorName }}</strong>
           <hr />
           <p>{{ ErrorText }}</p>
+          <button v-if="showVerifyButton" class="link-verify" @pointerdown="redirectVerify">
+            დაადასტურე ელფოსტა
+          </button>
         </div>
 
 
@@ -92,6 +95,7 @@ export default {
       password: '',
       emailError: '',
       passwordError: '',
+      showVerifyButton: false,
       isPassword: true,
       ErrorName: "",
       ErrorText: "",
@@ -102,6 +106,13 @@ export default {
     ...mapActions('auth', {
       loginAction: 'login',
     }),
+    redirectVerify() {
+      let data = {
+        "email": this.email,
+        "from": "register"
+      }
+      this.$emit('emaildata', data);
+    },
     async login() {
       const valid = validateInputFields(this, [
         { model: 'email', errorKey: 'emailError', message: 'ელ.ფოსტა აუცილებელია' },
@@ -111,20 +122,28 @@ export default {
       if (!valid) return;
 
       try {
+
         const response = await this.loginAction({
           email: this.email,
-          password: this.password
+          password: this.password,
+          client_type: this.platform
         });
+        console.log(response);
 
-        if (response === 200) {
+        if (response.status === 200) {
           this.closeModal();
         } else {
-          if (response === 422) {
+          if (response.status === 422) {
             this.ErrorName = "არასწორი ფორმატი"
             this.ErrorText = "გაითვალისწინეთ, პაროლი უნდა შედგებოდეს არანკლებ 8 სიმბოლოსგან, ასევე შეამოწმეთ ელ.ფოსტის ფორმატი"
-          } else if (response === 401) {
+          } else if (response.status === 404) {
             this.ErrorName = "არასწორი ელ.ფოსტა ან პაროლი"
             this.ErrorText = "შეყვანილი მონაცემები არ ემთხვევა ჩანაწერებს"
+          }
+          else if (response.status === 403 && response.action === "verify_email") {
+            this.ErrorName = "ვერიფიკაცია არ დასრულებულა";
+            this.ErrorText = "ვერიფიკაციის გარეშე წვდომას ვერ მიიღებთ ანგარიშზე. გსურთ გააგრძელოთ ვერიფიკაცია?";
+            this.showVerifyButton = true;
           }
         }
 
@@ -145,26 +164,15 @@ export default {
       this.$emit('openforget');
       this.closeModal();
     },
-    // CheckPlatform() {
-    //   const isIos = Capacitor.getPlatform() === "ios";
-    //   if (isIos) {
-    //     const loginCard = document.querySelector(".login-card");
-    //     if (loginCard) {
-    //       loginCard.style.paddingTop = 'calc(30px + env(safe-area-inset-top))';
-    //     }
-    //   }
-    // }
+
   },
-  // mounted() {
-  //   this.CheckPlatform();
-  // },
+
 }
 </script>
 
 <style scoped>
 .Error {
   background-color: #ffe5e5;
-  border: 1px solid #ffaea8;
   color: #b71c1c;
   padding: 16px 24px;
   margin: 20px auto;
@@ -186,6 +194,18 @@ export default {
   font-size: 12px;
 
 }
+
+.link-verify {
+  background: none;
+  border: none;
+  color: #0000ff;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  font-size: 12px !important;
+  font: inherit;
+}
+
 
 .input-container {
   position: relative;
@@ -329,6 +349,7 @@ span {
 #loginform {
   position: relative;
   top: 20px;
+  padding: 20px;
 }
 
 
@@ -398,6 +419,7 @@ h2 {
 
 .social-login {
   display: flex;
+  flex-direction: column;
   gap: 10px;
   margin-top: 20px;
   width: 100%;
@@ -406,7 +428,7 @@ h2 {
 
 .fb,
 .google {
-  flex: 1;
+  cursor: pointer;
 }
 
 .login-wrapper {

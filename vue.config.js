@@ -6,10 +6,10 @@ module.exports = defineConfig({
   devServer: {
     proxy: {
       "/api": {
-        target: "http://127.0.0.1:8000", // Your backend (Laravel) URL
-        changeOrigin: true, // Handles host header changes
-        pathRewrite: { "^/api": "" }, // Rewrites "/api" prefix if not used in the backend
-      },
+        target: "http://192.168.0.109:8001",
+        changeOrigin: true,
+        secure: false,
+      }
     },
   },
 });

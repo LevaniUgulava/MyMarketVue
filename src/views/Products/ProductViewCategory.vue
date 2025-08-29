@@ -1,8 +1,8 @@
 <template>
     <div class="category-modal">
-        <button @click="resetFilters" class="reset-button">ფილტრის გასუფთავება</button>
+        <button @pointerdown="resetFilters" class="reset-button">ფილტრის გასუფთავება</button>
         <div class="filter-section">
-            <h3 @click="toggleSection('mainCategory')">
+            <h3 @pointerdown="toggleSection('mainCategory')">
                 მთავრი კატეგორია
                 <svg v-if="collapsed.mainCategory" class="icon icon-chevron-up icon-md" viewBox="0 0 24 24"
                     stroke="currentColor" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -23,7 +23,7 @@
         </div>
 
         <div class="filter-section">
-            <h3 @click="toggleSection('category')">
+            <h3 @pointerdown="toggleSection('category')">
                 კატეგორია
                 <svg v-if="collapsed.category" class="icon icon-chevron-up icon-md" viewBox="0 0 24 24"
                     stroke="currentColor" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -45,7 +45,7 @@
 
         <!-- Subcategory Section -->
         <div class="filter-section">
-            <h3 @click="toggleSection('subcategory')">
+            <h3 @pointerdown="toggleSection('subcategory')">
                 ქვეკატეგორია
                 <svg v-if="collapsed.subcategory" class="icon icon-chevron-up icon-md" viewBox="0 0 24 24"
                     stroke="currentColor" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -67,7 +67,7 @@
         </div>
         <!-- Brand Section -->
         <div class="filter-section">
-            <h3 @click="toggleSection('brand')">
+            <h3 @pointerdown="toggleSection('brand')">
                 მწარმოებელი
                 <svg v-if="collapsed.brand" class="icon icon-chevron-up icon-md" viewBox="0 0 24 24"
                     stroke="currentColor" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -89,7 +89,7 @@
 
         <!-- Price Range Section -->
         <div class="filter-section">
-            <h3 @click="toggleSection('price')">
+            <h3 @pointerdown="toggleSection('price')">
                 ფასი
                 <svg v-if="collapsed.price" class="icon icon-chevron-up icon-md" viewBox="0 0 24 24"
                     stroke="currentColor" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -111,7 +111,7 @@
         </div>
 
         <div class="filter-section">
-            <h3 @click="toggleSection('size')">
+            <h3 @pointerdown="toggleSection('size')">
                 ზომა
                 <svg v-if="collapsed.size" class="icon icon-chevron-up icon-md" viewBox="0 0 24 24"
                     stroke="currentColor" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -145,7 +145,7 @@
 
 
         <div class="filter-section">
-            <h3 @click="toggleSection('color')">
+            <h3 @pointerdown="toggleSection('color')">
                 ფერი
                 <svg v-if="collapsed.color" class="icon icon-chevron-up icon-md" viewBox="0 0 24 24"
                     stroke="currentColor" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -257,28 +257,52 @@ export default {
         },
         async fetchCategories() {
             try {
-                const [response, responsee, responseee, responsecolor, responsesize, responsebrand] = await Promise.all([
-                    api.get('maincategory', { tokenRequired: false }),
-                    api.get('category', { tokenRequired: false }),
-                    api.get('subcategory', { tokenRequired: false }),
-                    api.get('colors', { tokenRequired: false }),
-                    api.get('sizes', { tokenRequired: false }),
-                    api.get('/brand/display', { tokenRequired: false })
-                ]);
+                const storedCategories = sessionStorage.getItem('categories');
 
-                this.mainCategories = response.data;
-                this.Categories = responsee.data;
-                this.subCategories = responseee.data;
-                this.colors = responsecolor.data;
-                this.sizes = responsesize.data;
-                this.brands = responsebrand.data;
+                if (storedCategories) {
+                    const parsedCategories = JSON.parse(storedCategories);
+                    this.mainCategories = parsedCategories.mainCategories;
+                    this.Categories = parsedCategories.Categories;
+                    this.subCategories = parsedCategories.subCategories;
+                    this.colors = parsedCategories.colors;
+                    this.sizes = parsedCategories.sizes;
+                    this.brands = parsedCategories.brands;
+                } else {
+                    const [response, responsee, responseee, responsecolor, responsesize, responsebrand] = await Promise.all([
+                        api.get('maincategory', { tokenRequired: false }),
+                        api.get('category', { tokenRequired: false }),
+                        api.get('subcategory', { tokenRequired: false }),
+                        api.get('colors', { tokenRequired: false }),
+                        api.get('sizes', { tokenRequired: false }),
+                        api.get('/brand/display', { tokenRequired: false })
+                    ]);
+
+                    const categoriesData = {
+                        mainCategories: response.data,
+                        Categories: responsee.data,
+                        subCategories: responseee.data,
+                        colors: responsecolor.data,
+                        sizes: responsesize.data,
+                        brands: responsebrand.data
+                    };
+
+                    sessionStorage.setItem('categories', JSON.stringify(categoriesData));
+
+                    this.mainCategories = response.data;
+                    this.Categories = responsee.data;
+                    this.subCategories = responseee.data;
+                    this.colors = responsecolor.data;
+                    this.sizes = responsesize.data;
+                    this.brands = responsebrand.data;
+                }
+
                 this.setCategoryFromQuery();
 
             } catch (error) {
                 console.error('Failed to fetch categories:', error);
             }
-
         },
+
         setCategoryFromQuery() {
             const currentQuery = { ...this.$route.query };
             if (currentQuery.maincategory) {
@@ -496,7 +520,7 @@ export default {
     content: "✔";
     position: absolute;
     left: 5px;
-    top: 2px;
+    top: 3px;
     color: #fff;
     font-size: 10px;
 }

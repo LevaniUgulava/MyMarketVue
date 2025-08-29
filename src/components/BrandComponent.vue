@@ -1,36 +1,34 @@
 <template>
-    <div class="smallsection-container">
-        <div @click="handle(item.id)" v-for="(item, index) in brands" :key="index" class="section">
+    <div v-if="getApiLoaded" class="smallsection-container">
+        <div @click="handle(item.id)" v-for="(item, index) in getBrands" :key="index" class="section">
             <div class="seperate-section">
                 <img class="image" :src="item.media_url" alt="brand logo" />
             </div>
-            <!-- <span class="name">{{ item.name }}</span> -->
+        </div>
+    </div>
+    <div v-else class="smallsection-container">
+        <div @click="handle(item.id)" v-for="(item, index) in placeholderArray" :key="index" class="section">
+            <div class="seperate-section-skeleton">
+                <div class="skeleton-image"></div>
+            </div>
         </div>
     </div>
 </template>
 
 
 <script>
-import api from '@/api';
+import { mapGetters } from 'vuex';
 
 export default {
-    data() {
-        return {
-            brands: []
+
+    computed: {
+        ...mapGetters('product', ["getBrands", "getApiLoaded"]),
+        placeholderArray() {
+            return Array(5).fill(null);
         }
     },
     methods: {
-        async display() {
-            try {
-                const response = await api.get("/brand/display");
 
-                this.brands = response.data;
-
-            } catch (error) {
-                console.log(error.response)
-            }
-
-        },
         handle(id) {
             const currentQuery = { ...this.$route.query };
 
@@ -44,13 +42,41 @@ export default {
             });
         },
     },
-    mounted() {
-        this.display();
-    },
 }
 </script>
 
 <style scoped>
+.skeleton-image {
+    width: 100px;
+    background-color: #ddd;
+    border-radius: 10px;
+}
+
+.seperate-section-skeleton {
+    background-color: #333;
+    height: 100px;
+    width: 100px;
+    margin-top: 20px;
+    border-radius: 100px;
+    animation: pulse 1.5s infinite ease-in-out;
+
+
+}
+
+@keyframes pulse {
+    0% {
+        background-color: #f0f0f0;
+    }
+
+    50% {
+        background-color: #e0e0e0;
+    }
+
+    100% {
+        background-color: #f0f0f0;
+    }
+}
+
 .image {
     width: 100px;
     transition: width 0.5s ease, height 0.5s ease;

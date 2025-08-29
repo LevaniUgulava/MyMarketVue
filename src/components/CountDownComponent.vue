@@ -1,23 +1,24 @@
 <template>
   <div class="timer-container">
     <div class="timer-horizontal">
-      <div class="header">{{ header }}</div>
       <div class="timer-display" v-if="showcountdown">
         <div class="time-group">
           <span class="time">{{ countdown.days }}</span>
-          <span class="label">Days</span>
         </div>
+        <div class="separator">:</div>
+
         <div class="time-group">
           <span class="time">{{ countdown.hours }}</span>
-          <span class="label">Hours</span>
         </div>
+        <div class="separator">:</div>
+
         <div class="time-group">
           <span class="time">{{ countdown.minutes }}</span>
-          <span class="label">Minutes</span>
         </div>
+        <div class="separator">:</div>
+
         <div class="time-group">
           <span class="time">{{ countdown.seconds }}</span>
-          <span class="label">Seconds</span>
         </div>
       </div>
     </div>
@@ -44,7 +45,6 @@ export default {
         minutes: "00",
         seconds: "00",
       },
-      header: "",
       showcountdown: true
     };
   },
@@ -99,9 +99,7 @@ export default {
 <style scoped>
 .timer-container {
   text-align: center;
-  font-family: 'Poppins', sans-serif;
   color: #495057;
-  padding: 10px;
   max-width: 600px;
   margin: auto;
 }
@@ -113,23 +111,10 @@ export default {
   justify-content: center;
 }
 
-.header {
-  font-size: 0.6rem;
-  font-weight: bold;
-  color: #000;
-  text-align: center;
-  margin-bottom: 10px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  padding: 5px 10px;
-  border-radius: 5px;
-}
-
 .timer-display {
   display: flex;
-  gap: 15px;
   font-weight: bold;
-  color: #343a40;
+  color: white;
 }
 
 .time-group {
@@ -139,16 +124,21 @@ export default {
 }
 
 .time {
-  font-size: 1.5rem;
-  background: #e9ecef;
-  padding: 5px 10px;
-  border-radius: 5px;
+  font-size: 14px;
 }
 
-.label {
-  font-size: 0.6rem;
-  color: #6c757d;
-  margin-top: 5px;
-  text-transform: uppercase;
+.separator {
+  font-size: 14px;
+  margin: 0 3px;
+}
+
+@media (max-width: 768px) {
+  .time {
+    font-size: 12px;
+  }
+
+  .separator {
+    font-size: 12px;
+  }
 }
 </style>

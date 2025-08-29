@@ -1,118 +1,78 @@
 <template>
-    <div>
-        <ProfileComponent @load="handleload" />
-        <div class="btnclass">
-            <button v-if="!loading" class="logout" @click.prevent="logout">გამოსვლა</button>
-            <button v-if="!loading" @click.prevent="toggleOpen" class="deactivate">ანგარიშის დეაქტივაცია</button>
+    <div class="profile-container">
+        <div v-if="!isMobile" class="web">
+            <profile-sidebar />
+            <div class="main-content">
+                <router-view />
+            </div>
         </div>
 
-        <DeactivateComponent :open="open" @close="open = false" />
+        <div v-else class="native">
+            <div v-if="$route.path === '/profile'">
+                <profile-sidebar />
+            </div>
+            <div class="main-content">
+                <router-view />
+            </div>
+        </div>
     </div>
 </template>
 
 <script>
-import ProfileComponent from '../components/ProfileComponent.vue';
-import DeactivateComponent from '@/components/DeactivateComponent.vue';
-import { mapActions } from 'vuex';
+import profileSidebar from '@/components/profile/profileSidebar.vue';
 
 export default {
     name: "ProfileView",
     components: {
-        ProfileComponent,
-        DeactivateComponent
-    },
-    watch: {
-        open(newVal) {
-            this.noscroll(newVal);
-            localStorage.setItem("deactivate", newVal);
-        }
+        profileSidebar
     },
     data() {
         return {
-            open: JSON.parse(localStorage.getItem("deactivate")) || false,
-            loading: true,
+            isMobile: window.innerWidth <= 768,
         };
     },
 
+    watch: {
+        $route() {
+            this.isMobile = window.innerWidth <= 768;
+        }
+    },
     methods: {
-        ...mapActions("auth", {
-            logoutAction: 'logout',
-        }),
-        logout() {
-            this.logoutAction();
-            this.$router.push('/');
+        checkScreenSize() {
+            this.isMobile = window.innerWidth <= 768;
         },
-        handleload(data) {
-            this.loading = data;
-        },
-        toggleOpen() {
-            this.open = !this.open;
-        },
-        noscroll(newVal) {
-            this.$nextTick(() => {
-                if (newVal) {
-                    document.body.classList.add('no-scroll');
-                } else {
-                    document.body.classList.remove('no-scroll');
-                }
-            });
-        },
-    }
+    },
+    mounted() {
+        window.addEventListener('resize', this.checkScreenSize);
+    },
+    beforeUnmount() {
+        window.removeEventListener('resize', this.checkScreenSize);
+    },
+
+
 }
 </script>
 
 <style scoped>
-.no-scroll {
-    overflow: hidden;
-}
-
-.deactivate {
-    display: block;
-    margin-left: auto;
-    font-size: 15px;
-    margin-right: 10px;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    padding: 15px 25px;
-    border: none;
-    background-color: #f44336;
-    color: white;
-    border-radius: 10px;
-    cursor: pointer;
-}
-
-.deactivate:hover {
-    background-color: #eb281a;
-}
-
-.logout {
-    display: none;
-}
-
-.btnclass {
+.web {
     display: flex;
+    flex-direction: row;
+}
+
+.main-content {
+    width: 70%;
+    margin: 0 auto;
+    padding-right: 50px;
+    padding-top: 50px;
 }
 
 @media (max-width: 768px) {
-    .deactivate {
-        font-size: 12px;
-        padding: 10px 15px;
-
+    .main-content {
+        width: 95%;
+        margin: 0 auto;
+        padding-right: 0px;
+        padding-top: 20px;
     }
 
-    .logout {
-        display: block;
-        font-size: 12px;
-        margin-right: auto;
-        margin-top: 10px;
-        margin-left: 10px;
-        margin-bottom: 10px;
-        padding: 10px 15px;
-        border: none;
-        background-color: #f44336;
-        color: white;
-        border-radius: 10px;
-        cursor: pointer;
-    }
 }
 </style>

@@ -19,8 +19,8 @@ const store = createStore({
   },
   plugins: [
     createPersistedState({
-      key: 'modals',
-      paths: ['modals'],
+      key: 'app-state', 
+      paths: ['modals'], 
     }),
   ],
 });

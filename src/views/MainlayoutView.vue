@@ -20,9 +20,10 @@ import HeaderComponentVue from '@/components/HeaderComponent.vue';
 import HomeSideBarVue from '@/components/HomeSideBar.vue';
 import FooterComponentVue from '@/components/FooterComponent.vue';
 import SwiperContent from '@/components/SwiperContent.vue';
-import { Capacitor } from '@capacitor/core';
+import { getPlatform } from '@/mixin/reuse';
 export default {
   name: 'MainLayout',
+  mixins: [getPlatform],
   components: {
     HeaderComponentVue,
     HomeSideBarVue,
@@ -32,7 +33,7 @@ export default {
   data() {
     return {
       isMobile: window.innerWidth <= 768,
-      platform: Capacitor.getPlatform()
+      platform: this.currentPlatform
     };
   },
   mounted() {
@@ -68,14 +69,13 @@ export default {
   position: fixed;
   top: 0;
   left: 0;
-  height: 30px;
+  height: 40px;
   width: 100%;
-  background-color: #62389c;
-  color: white;
+  background-color: #F7F9FD;
+  color: #191919;
   text-align: center;
   font-size: 0.7rem;
-  font-weight: bold;
-  z-index: 1000;
+  z-index: 999;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -106,14 +106,12 @@ export default {
   box-sizing: border-box;
   min-height: calc(100vh - 60px);
   overflow: hidden;
-  margin-top: 130px;
+  margin-top: 160px;
 }
 
 .footer {
-  width: 100%;
   text-align: center;
-  font-size: 0.9em;
-  padding: 15px 0;
+  padding: 0;
   position: relative;
 }
 

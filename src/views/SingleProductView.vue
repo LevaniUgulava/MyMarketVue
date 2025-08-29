@@ -16,7 +16,8 @@
           </div>
         </div>
 
-        <div class="product-main-image">
+
+        <div class="product-main-image" @pointerup.stop.prevent="openimagemodal">
           <img :src="selectedImage" alt="Product Image" class="product-image" />
         </div>
 
@@ -46,8 +47,8 @@
                 </div>
                 <div class="color-container">
                   <div v-for="(item, index) in (selectedSize ? sizecolors : allcolors)" :key="index"
-                    :class="['color-item', { active: selectedColor === item }]" @click="colorclick(item)">
-                    {{ selectedSize ? item.color : item }}
+                    :class="['color-item', { active: selectedColor === item }]" @click="colorclick(item)"
+                    :style="{ background: (typeof item === 'string' ? item : item.hex) }">
                   </div>
                 </div>
               </li>
@@ -75,10 +76,10 @@
           </span>
           <span v-if="singleproduct.discountstatus" class="discount-square status-discount">-{{
             singleproduct.discountstatus.discount
-            }}%</span>
+          }}%</span>
 
           <span v-else-if="singleproduct.discount" class="discount-square default-discount">-{{ singleproduct.discount
-          }}%</span>
+            }}%</span>
         </p>
         <div class="quantity-control">
           <div class="increment-wrapper">
@@ -87,7 +88,7 @@
               <div class="arrow-down"></div>
             </div>
           </div>
-          <button class="quantitybtn" @click="updatequantity('decrement')">-</button>
+          <button class="quantitybtn" @pointerdown="updatequantity('decrement')">-</button>
 
           <span class="quantity">{{ quantity }}</span>
 
@@ -96,26 +97,19 @@
               {{ quantitymessage }}
               <div class="arrow-down"></div>
             </div>
-            <button class="quantitybtn" @click="updatequantity('increment')">+</button>
+            <button class="quantitybtn" @pointerdown="updatequantity('increment')">+</button>
           </div>
         </div>
 
-        <button class="buy" @click="redirect()">ყიდვა</button>
-        <button class="addbtn" @click="addToCart()">კალათაში დამატება</button>
-      </div>
-    </div>
-    <hr class="custom-line" />
-    <div class="similar">
-      <div class="title">
-        <span>მსგავსი პროდუქტები</span>
+        <button class="buy" @pointerdown.stop.prevent="redirect">ყიდვა</button>
+        <button class="addbtn" @pointerdown.stop.prevent="addToCart">კალათაში დამატება</button>
 
       </div>
-      <div class="products-wrapper">
-        <ProductCardComponent v-for="(item, index) in similarproduct" :key="index" :initialproduct="item"
-          @cart-updated="handleCartUpdated" @liked-message="handleunauthorizedlike"
-          @cart-message="handleunauthorizedcart" />
-      </div>
     </div>
+    <ImageComponent :open="openImage" :selectedImage="selectedImage" :name="singleproduct.name"
+      :images="singleproduct.image_urls" @update:open="openImage = $event" />
+    <hr class="custom-line" />
+
 
   </div>
 </template>
@@ -126,21 +120,21 @@ import 'vue3-carousel/dist/carousel.css';
 import Message from '@/components/Message/MessageComponent.vue';
 import Breadcrumb from '@/components/BreadcrumbComponent.vue';
 import api from '@/api';
-import ProductCardComponent from '@/components/ProductCardComponent.vue';
+import ImageComponent from './ImageComponent.vue';
 
 export default {
   props: ['id'],
   components: {
     Breadcrumb,
     Message,
-    ProductCardComponent
+    ImageComponent
 
   },
   data() {
     return {
+      openImage: false,
       additionalinfo: [],
       singleproduct: null,
-      similarproduct: [],
       message: null,
       quantitymessage: null,
       quantitydemessage: null,
@@ -169,7 +163,7 @@ export default {
       if (newVal) {
         setTimeout(() => {
           this.message = null;
-        }, 5000);
+        }, 2000);
       }
     },
     singleproduct(newProduct) {
@@ -179,10 +173,21 @@ export default {
     },
     selectedColor() {
       this.quantity = 1;
+    },
+    openImage(newVal) {
+      if (newVal) {
+        document.body.style.overflow = 'hidden'; // Disabled scroll
+      } else {
+        document.body.style.overflow = ''; // Enabled scroll again
+      }
     }
 
   },
   methods: {
+    async openimagemodal() {
+      this.openImage = !this.openImage
+
+    },
     async redirect() {
       try {
         if (!this.selectedSize) {
@@ -284,12 +289,8 @@ export default {
         const response = await api.get(`display/${this.id}`, {
           tokenRequired: true
         });
-        const res = await api.get(`/similar/${this.id}/products`, {
-          tokenRequired: true
-        });
 
         this.singleproduct = response.data.data;
-        this.similarproduct = res.data.data;
         this.additionalinfo = JSON.parse(this.singleproduct.additionalinfo);
 
 
@@ -297,7 +298,7 @@ export default {
           ...new Set(
             this.singleproduct.size.flatMap(element =>
               element.details.map(item =>
-                item.color
+                item.hex
               )
             )
           )
@@ -325,29 +326,21 @@ export default {
         console.log(error);
       }
     },
+
   },
   mounted() {
     this.getproduct();
   },
+
+
 };
 </script>
 <style scoped>
-.similar .title {
-  display: flex;
-  margin-top: 10px;
+.red {
+  background-color: red;
 }
 
-.similar span {
-  font-size: 20px;
-  font-weight: bolder;
-  margin: 0 30px auto;
-}
 
-.products-wrapper {
-  display: flex;
-  margin-top: 20px;
-  gap: 10px;
-}
 
 .message-container {
   display: flex;
@@ -458,7 +451,16 @@ export default {
   margin-top: 5px;
 }
 
-.color-item,
+.color-item {
+  display: flex;
+  height: 30px;
+  width: 30px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
 .size-item {
   padding: 5px 10px;
   display: flex;
@@ -525,10 +527,10 @@ ul li {
 
 .discount-square {
   color: #fff;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: bold;
-  padding: 4px 8px;
-  border-radius: 6px;
+  padding: 2px 4px;
+  border-radius: 2px;
 }
 
 .status-discount {
@@ -634,7 +636,7 @@ ul li {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 5px;
+  border-radius: 10px;
 }
 
 
@@ -659,6 +661,7 @@ ul li {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
+  cursor: zoom-in;
 }
 
 .product-info {
@@ -706,6 +709,7 @@ ul li {
   font-size: 15px;
   padding: 0 10px;
   min-width: 30px;
+  justify-content: center;
   text-align: center;
 }
 

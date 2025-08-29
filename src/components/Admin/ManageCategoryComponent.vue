@@ -21,23 +21,28 @@
         </div>
 
         <div class="container" v-if="showMainCategory">
-            <h1>Add Main Category</h1>
+            <h1>მთავარი კატეგორია</h1>
             <form @submit.prevent="createMainCategory" class="form">
                 <input class="maincategoryinput" type="text" v-model="mainCategoryName"
-                    placeholder="Enter main category name" />
+                    placeholder="შეიყვანე მთავარი კატეგორიის სახელი ქართულად" />
+                <input class="maincategoryinput" type="text" v-model="mainCategoryName_en"
+                    placeholder="შეიყვანე მთავარი კატეგორიის სახელი ინგლისურად" />
                 <button type="submit" class="add">დამატება</button>
             </form>
 
             <table class="category-table">
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Action</th>
+                        <th>იდენტიფიკაცია</th>
+                        <th>სახელი</th>
+                        <th>მოქმედებები</th>
                     </tr>
                 </thead>
                 <tbody>
 
                     <tr v-for="category in mainCategories" :key="category.id">
+                        <td>{{ category.id }}</td>
+
                         <td>{{ category.ka_name }}</td>
                         <td>
                             <button @click="deleteMainCategory(category.id)" class="btn btn-danger">
@@ -54,17 +59,23 @@
 
 
         <div class="container" v-if="showCategory">
-            <h1>Add Category</h1>
+            <h1>კატეგორია</h1>
             <form @submit.prevent="createCategory" class="form">
-                <input class="maincategoryinput" type="text" v-model="categoryName" placeholder="Enter category name" />
+                <input class="maincategoryinput" type="text" v-model="categoryName"
+                    placeholder="შეიყვანე კატეგორიის სახელი ქართულად" />
+                <input class="maincategoryinput" type="text" v-model="categoryName_en"
+                    placeholder="შეიყვანე კატეგორიის სახელი ინგლისურად" />
+                <input class="maincategoryinput" type="file" @change="onFileChange" />
+
                 <button type="submit" class="add">დამატება</button>
             </form>
 
             <table class="category-table">
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Action</th>
+                        <th>იდენტიფიკაცია</th>
+                        <th>სახელი</th>
+                        <th>მოქმედებები</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -73,6 +84,8 @@
                         <td colspan="2">No categories available.</td>
                     </tr>
                     <tr v-for="category in categories" :key="category.id">
+                        <td>{{ category.id }}</td>
+
                         <td>{{ category.ka_name }}</td>
                         <td>
                             <button @click="deleteCategory(category.id)" class="btn btn-danger">
@@ -92,15 +105,19 @@
             <h1>Add Subcategory</h1>
             <form @submit.prevent="createSubCategory" class="form">
                 <input class="maincategoryinput" type="text" v-model="subcategoryName"
-                    placeholder="Enter subcategory name" />
+                    placeholder="შეიყვანეთ ქვეკატეგორიის სახელი ქართულად" />
+                <input class="maincategoryinput" type="text" v-model="subcategoryName_en"
+                    placeholder="შეიყვანეთ ქვეკატეგორიის სახელი ინგლისურად" />
                 <button type="submit" class="add">დამატება</button>
             </form>
 
             <table class="category-table">
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Action</th>
+                        <th>იდენტიფიკაცია</th>
+
+                        <th>სახელი</th>
+                        <th>მოქმედებები</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -109,6 +126,7 @@
                         <td colspan="2">No subcategories available.</td>
                     </tr>
                     <tr v-for="subcategory in subcategories" :key="subcategory.id">
+                        <td>{{ subcategory.id }}</td>
                         <td>{{ subcategory.ka_name }}</td>
                         <td>
                             <button @click="deleteSubCategory(subcategory.id)" class="btn btn-danger">
@@ -132,8 +150,11 @@ export default {
     data() {
         return {
             mainCategoryName: '',
+            mainCategoryName_en: '',
             categoryName: '',
+            categoryName_en: '',
             subcategoryName: '',
+            subcategoryName_en: "",
             mainCategories: [],
             categories: [],
             filteredCategories: [],
@@ -145,9 +166,13 @@ export default {
             selectedMainCategory: '',
             selectedMainCategoryForSub: '',
             selectedCategoryForSub: '',
+            image: null
         };
     },
     methods: {
+        onFileChange(event) {
+            this.image = event.target.files[0];
+        },
         toggleMainCategory() {
             this.showMainCategory = !this.showMainCategory;
             if (this.showMainCategory) {
@@ -177,7 +202,7 @@ export default {
             try {
                 const response = await api.post(
                     'admin/categories/maincategory/create',
-                    { name: this.mainCategoryName },
+                    { ka_name: this.mainCategoryName, en_name: this.mainCategoryName_en },
                     {
                         tokenRequired: true
 
@@ -212,10 +237,14 @@ export default {
             }
         },
         async createCategory() {
+            const formData = new FormData();
+            formData.append("ka_name", this.categoryName);
+            formData.append("en_name", this.categoryName_en);
+            formData.append('image', this.image);
             try {
                 const response = await api.post(
                     'admin/categories/category/create',
-                    { name: this.categoryName },
+                    formData,
                     {
                         tokenRequired: true
 
@@ -251,7 +280,7 @@ export default {
             try {
                 const response = await api.post(
                     'admin/categories/subcategory/create',
-                    { name: this.subcategoryName },
+                    { ka_name: this.subcategoryName, en_name: this.subcategoryName_en },
                     {
                         tokenRequired: true
 
@@ -400,12 +429,8 @@ h1 {
 .btn-danger {
     background-color: #dc3545;
     color: white;
-    transition: background-color 0.3s;
 }
 
-.btn-danger:hover {
-    background-color: #c82333;
-}
 
 button {
     padding: 10px 20px;
@@ -415,7 +440,6 @@ button {
     color: #3b3838;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s;
     font-size: 16px;
 }
 

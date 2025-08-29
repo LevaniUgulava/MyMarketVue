@@ -1,23 +1,27 @@
 <template>
   <div>
     <h3 class="status-title">სტატუსის უპირატესობები</h3>
-    <p class="status-description">
-      გახსენით ექსკლუზიური ფასდაკლებები კონკრეტულ პროდუქტებზე თქვენი სტატუსის დონის მიხედვით.</p>
-    <div class="status-bar">
-      <div class="progress" :style="{ width: `${progressPercentage}%` }"></div>
+    <div class="status-contianer">
+
+      <p class="status-description">
+        გახსენით ექსკლუზიური ფასდაკლებები კონკრეტულ პროდუქტებზე თქვენი სტატუსის დონის მიხედვით.</p>
+      <div class="status-bar">
+        <div class="progress" :style="{ width: `${progressPercentage}%` }"></div>
+      </div>
+      <div class="status-info">
+        <span class="status-label">მიმდინარე სტატუსი: {{ CurrentStatus }}</span>
+        <span class="status-label">შემდეგი სტატუსი: {{ NextStatus || 'None' }}</span>
+      </div>
+      <div class="status-details">
+        <p>სულ დახარჯული: {{ totalSpent }}</p>
+        <p>შემდეგი სტატუსის მისაღწევად: {{ nextToAchieve }}</p>
+        <p>
+          შემდეგი სტატუსის მისაღწევად დარჩენილია:
+          {{ remainingAmount > 0 ? remainingAmount : 'Achieved' }}
+        </p>
+      </div>
     </div>
-    <div class="status-info">
-      <span class="status-label">მიმდინარე სტატუსი: {{ CurrentStatus }}</span>
-      <span class="status-label">შემდეგი სტატუსი: {{ NextStatus || 'None' }}</span>
-    </div>
-    <div class="status-details">
-      <p>სულ დახარჯული: {{ totalSpent }}</p>
-      <p>შემდეგი სტატუსის მისაღწევად: {{ nextToAchieve }}</p>
-      <p>
-        შემდეგი სტატუსის მისაღწევად დარჩენილია:
-        {{ remainingAmount > 0 ? remainingAmount : 'Achieved' }}
-      </p>
-    </div>
+
   </div>
 </template>
 
@@ -43,12 +47,10 @@ export default {
       );
     },
     determineStatuses(statuses, totalSpent) {
-      // Sort statuses by `toachieve` in ascending order
       const sortedStatuses = statuses.sort(
         (a, b) => parseFloat(a.toachieve) - parseFloat(b.toachieve)
       );
 
-      // Determine the current status
       let currentStatus = null;
       for (const status of sortedStatuses) {
         if (totalSpent >= parseFloat(status.toachieve)) {
@@ -56,7 +58,6 @@ export default {
         }
       }
 
-      // Determine the next status
       const nextStatus = sortedStatuses.find(
         (status) => parseFloat(status.toachieve) > totalSpent
       );
@@ -99,6 +100,10 @@ export default {
 </script>
 
 <style scoped>
+.status-contianer {
+  padding: 20px;
+}
+
 .status-title {
   font-size: 20px;
   font-weight: 700;
@@ -148,7 +153,7 @@ export default {
 }
 
 .status-details p {
-  margin: 5px 0;
+  margin: 10px 0;
 }
 
 @media (min-width: 375px) and (max-width: 430px) {

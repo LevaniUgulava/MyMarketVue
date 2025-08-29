@@ -161,6 +161,12 @@ export default {
             current_page: response.data.discount.meta.current_page || 1,
             total: response.data.discount.meta.last_page
           };
+        } else if (this.Section == "new") {
+          this.products = response.data.new.data;
+          this.pagination = {
+            current_page: response.data.discount.meta.current_page || 1,
+            total: response.data.new.meta.last_page
+          };
         }
 
 
@@ -203,10 +209,11 @@ export default {
 
 
     handleCartUpdated(cartData) {
-      this.emitdata = cartData.message;
+      this.emitdata = cartData;
     },
-    handleunauthorizedlike(likedmessage) {
-      this.emitlikemessage = likedmessage;
+    handleunauthorizedlike(message) {
+      this.emitdata = message.message;
+
     },
     handleunauthorizedcart(cartmessage) {
       this.emitcartmessage = cartmessage;

@@ -1,15 +1,22 @@
 <template>
-    <div class="carousel-container">
+    <div v-if="getApiLoaded" class="carousel-container">
         <swiper :modules="[Autoplay, Navigation, EffectFade]" :slides-per-view="1" :loop="true"
             :autoplay="{ delay: 5000, disableOnInteraction: false }" :pagination="{ clickable: true }"
             :navigation="true" :effect="'fade'" class="carousel">
-            <swiper-slide v-for="(image, index) in images" :key="index">
+            <swiper-slide v-for="(image, index) in getBanners" :key="index">
                 <a :href="image.url" target="_blank" rel="noopener noreferrer">
                     <img :src="[isMobile ? image.media_mobile : image.media_desktop]" class="carousel-image"
                         alt="carousel slide" />
                 </a>
             </swiper-slide>
         </swiper>
+    </div>
+    <div v-else class="carousel-container">
+
+        <div class="carousel-skeleton">
+            <div class="skeleton-image"></div>
+
+        </div>
     </div>
 </template>
 
@@ -20,7 +27,7 @@ import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
 import "swiper/css/effect-fade";
-import api from "@/api";
+import { mapGetters } from 'vuex';
 
 export default {
     components: {
@@ -36,28 +43,21 @@ export default {
     },
     data() {
         return {
-            images: [],
-            isMobile: window.innerWidth <= 768
+            isMobile: window.innerWidth <= 768,
+
         };
     },
     methods: {
-        async getbanner() {
-            try {
-                const response = await api.get('/banner/display');
-                this.images = response.data;
-                console.log(this.images);
-
-            } catch (error) {
-                console.log(error);
-            }
-        },
         handleResize() {
             this.isMobile = window.innerWidth <= 768;
         }
     },
+    computed: {
+        ...mapGetters('product', ["getBanners", "getApiLoaded"]),
+
+    },
 
     mounted() {
-        this.getbanner();
         window.addEventListener('resize', this.handleResize);
 
     },
@@ -68,10 +68,40 @@ export default {
 </script>
 
 
-<style>
+<style scoped>
+.carousel-skeleton {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.skeleton-image {
+    width: 100%;
+    height: 300px;
+    background-color: #ddd;
+    border-radius: 10px;
+    animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse {
+    0% {
+        background-color: #f0f0f0;
+    }
+
+    50% {
+        background-color: #e0e0e0;
+    }
+
+    100% {
+        background-color: #f0f0f0;
+    }
+}
+
 .carousel-container {
     width: auto;
-    padding-top: 40px;
+    padding: 10px;
+    padding-top: 30px;
     overflow: hidden;
 }
 
@@ -85,7 +115,6 @@ export default {
     width: 100%;
     height: 100%;
     margin: auto;
-    border-radius: 10px;
     object-fit: contain;
 }
 
@@ -134,6 +163,11 @@ export default {
     .swiper-button-next::after {
         padding: 8px 10px;
         font-size: 13px;
+    }
+
+    .carousel-container {
+        padding-top: 0px;
+
     }
 
 

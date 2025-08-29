@@ -26,8 +26,14 @@
               <label for="name">სახელი</label>
             </div>
             <div class="input-container">
+              <span v-if="surnameError" class="error-text">{{ surnameError }}</span>
+              <input v-model="surname" :class="{ 'input-error': surnameError }" type="text" name="surname" id="surname"
+                placeholder="" />
+              <label for="surname">გვარი</label>
+            </div>
+            <div class="input-container">
               <span v-if="emailError" class="error-text">{{ emailError }}</span>
-              <input v-model="email" :class="{ 'input-error': emailError }" type="email" name="email" id="email"
+              <input v-model="email" :class="{ 'input-error': emailError }" type="text" name="email" id="email"
                 placeholder="" />
               <label for="email">ელ.ფოსტა</label>
             </div>
@@ -69,6 +75,7 @@ export default {
   data() {
     return {
       name: '',
+      surname: '',
       email: '',
       password: '',
       nameError: '',
@@ -84,14 +91,16 @@ export default {
     async register() {
       const valid = validateInputFields(this, [
         { model: 'name', errorKey: 'nameError', message: 'სახელი აუცილებელია' },
+        { model: 'surname', errorKey: 'surnameError', message: 'გვარი აუცილებელია' },
         { model: 'email', errorKey: 'emailError', message: 'ელ.ფოსტა აუცილებელია' },
         { model: 'password', errorKey: 'passwordError', message: 'პაროლი აუცილებელია' },
       ]);
 
       if (!valid) return;
       try {
-        await api.post('register', {
+        await api.post('/register', {
           name: this.name,
+          surname: this.surname,
           email: this.email,
           password: this.password
         });
@@ -104,6 +113,9 @@ export default {
         if (error.response.status === 422) {
           this.ErrorName = "არასწორი ფორმატი"
           this.ErrorText = "გაითვალისწინეთ, პაროლი უნდა შედგებოდეს არანკლებ 8 სიმბოლოსგან, ასევე შეამოწმეთ ელ.ფოსტის ფორმატი"
+        } else if (error.response.status === 409) {
+          this.ErrorName = "ანგარიში არსებობს"
+          this.ErrorText = "ამ ელ.ფოსტის მისამართზე ანგარიში უკვე არსებობს"
         }
       }
     },
@@ -122,7 +134,6 @@ export default {
 <style scoped>
 .Error {
   background-color: #ffe5e5;
-  border: 1px solid #ffaea8;
   color: #b71c1c;
   padding: 16px 24px;
   margin: 20px auto;
@@ -221,8 +232,7 @@ span {
 
 #registrationform {
   position: relative;
-  width: 365px;
-  top: 20px;
+  padding: 20px;
 }
 
 input {

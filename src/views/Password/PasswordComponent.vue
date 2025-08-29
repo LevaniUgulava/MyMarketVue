@@ -254,7 +254,7 @@ span {
 
 #loginform {
   position: relative;
-  top: 20px;
+  padding: 20px;
 }
 
 input {

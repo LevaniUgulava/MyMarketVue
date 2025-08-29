@@ -8,49 +8,45 @@
             d="M 17.5565 0 C 18.9051 0 20 1.09492 20 2.44352 V 17.5565 C 20 18.9051 18.9051 20 17.5565 20 H 13.3976 V 12.4643 H 15.9991 L 16.4941 9.23688 H 13.3976 V 7.14246 C 13.3976 6.25953 13.8301 5.39887 15.2171 5.39887 H 16.625 V 2.65121 C 16.625 2.65121 15.3473 2.43316 14.1257 2.43316 C 11.5754 2.43316 9.90852 3.97883 9.90852 6.77707 V 9.23688 H 7.07363 V 12.4643 H 9.90852 V 20 H 2.44352 C 1.09492 20 0 18.9051 0 17.5565 V 2.44352 C 0 1.09492 1.09488 0 2.44352 0 H 17.5565 V 0 Z"
             fill="rgb(23, 119, 242)" />
         </svg>
-        Facebook</span>
+        Facebook ავტორიზაცია</span>
     </HFaceBookLogin>
   </div>
 </template>
 
 <script>
-import api from '@/api';
+import { getPlatform } from '@/mixin/reuse';
 import { HFaceBookLogin } from '@healerlab/vue3-facebook-login';
+import { mapActions, mapGetters } from 'vuex';
 export default {
   name: 'FacebookComponent',
+  mixins: [getPlatform],
   components: {
     HFaceBookLogin
   },
+  computed: {
+    ...mapGetters('auth', ['getHasPassword']),
+  },
   methods: {
-    async login(accessToken, name) {
+    ...mapActions('auth', {
+      loginAction: 'facebookLogin',
+    }),
+    async onSuccess(response) {
       try {
-        const response = await api.post('auth/facebook', {
+        const accessToken = response.authResponse.accessToken;
+        const result = await this.loginAction({
           accessToken: accessToken,
-          tokenRequired: false
-
+          client_type: this.platformType
         });
-        console.log(response.data);
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('roles', response.data.roles[0]);
 
-        localStorage.setItem('name', name);
-        this.$emit('updateDisplayName');
-
-
-
+        if (result?.ok && !this.getHasPassword.password) {
+          this.$router.push('/profile/reset');
+        }
+        else {
+          console.error('Login failed', result?.message || 'No details');
+        }
       } catch (error) {
-        console.log(error);
+        console.error('Unexpected error during Facebook login:', error);
       }
-
-    },
-
-    onSuccess(response) {
-      console.log(response);
-      const accessToken = response.authResponse.accessToken;
-      const name = response.authInfo.name;
-      this.login(accessToken, name);
-      this.$router.push('/');
-
     },
     onFailure(error) {
       console.log('Failure: Authentication failed', error);
@@ -65,8 +61,12 @@ export default {
   border: 1px solid #dbdbdb;
   gap: 10px;
   border-radius: 5px;
-  font-size: 14px;
-  padding: 15px 45px;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  padding: 10px;
+  margin: auto;
+  width: 70%;
 }
 
 

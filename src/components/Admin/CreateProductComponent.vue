@@ -77,7 +77,14 @@
           <div v-for="(item, colorindex) in Array.from({ length: colorquantity[index] || 1 })"
             :key="'size-' + index + '-color-' + colorindex">
             <input type="number" v-model="form.quantity[index][colorindex]" placeholder="შეიყვანეთ რაოდენობა" required>
-            <input type="text" v-model="form.color[index][colorindex]" placeholder="შეიყვანეთ ფერი" required>
+            <div class="both-color">
+              <input type="text" v-model="form.color[index][colorindex]" placeholder="შეიყვანეთ ფერის სახელი" required>
+              <div class="color-string">
+                <input class="color-input" type="color" v-model="form.hex[index][colorindex]" required>
+                <input class="color-input" type="text" v-model="form.hex[index][colorindex]"
+                  placeholder="შეიყვანეთ hex ტიპის ფერი" required>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -102,8 +109,18 @@
           </label>
           <div v-for="(item, colorindex) in Array.from({ length: colorquantity[index] || 1 })"
             :key="'size-' + index + '-color-' + colorindex">
-            <input type="number" v-model="form.quantity[index][colorindex]" placeholder="შეიყვანეთ სახელი" required>
-            <input type="text" v-model="form.color[index][colorindex]" placeholder="შეიყვანეთ ინფორმაცია" required>
+            <input type="number" v-model="form.quantity[index][colorindex]"
+              placeholder="შეიყვანეთ პროდუქციის ფერის რაოდენობა" required>
+            <div class="both-color">
+              <input type="text" v-model="form.color[index][colorindex]" placeholder="შეიყვანეთ ფერის სახელი" required>
+              <div class="color-string">
+                <input class="color-input" type="color" v-model="form.hex[index][colorindex]" required>
+                <input class="color-input" type="text" v-model="form.hex[index][colorindex]"
+                  placeholder="შეიყვანეთ hex ტიპის ფერი" required>
+              </div>
+            </div>
+
+
           </div>
         </div>
       </div>
@@ -183,6 +200,7 @@ export default {
         Sizes: [],
         quantity: [],
         color: [],
+        hex: [],
         brand: []
       },
     };
@@ -223,6 +241,9 @@ export default {
           }
           if (!Array.isArray(this.form.quantity[index])) {
             this.form.quantity[index] = [];
+          }
+          if (!Array.isArray(this.form.hex[index])) {
+            this.form.hex[index] = [];
           }
         });
       },
@@ -317,6 +338,7 @@ export default {
           this.form.color[index].forEach((color, colorIndex) => {
             formData.append(`color[${index}][${colorIndex}]`, color);
             formData.append(`quantity[${index}][${colorIndex}]`, this.form.quantity[index][colorIndex]);
+            formData.append(`hex[${index}][${colorIndex}]`, this.form.hex[index][colorIndex]);
           });
         }
       });
@@ -351,6 +373,19 @@ export default {
 </script>
 
 <style scoped>
+.color-input {
+  height: 50px;
+}
+
+.color-string {
+  width: 500px;
+}
+
+.both-color {
+  display: flex;
+  gap: 15px;
+}
+
 .form-container {
   max-width: 100%;
   margin: 0 auto;
@@ -446,7 +481,8 @@ export default {
 
 .size-detail input {
   width: 100%;
-  padding: 12px;
+  text-indent: 15px;
+  height: 50px;
   border: 1px solid #ddd;
   border-radius: 10px;
   font-size: 16px;

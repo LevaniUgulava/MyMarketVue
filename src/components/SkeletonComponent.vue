@@ -1,6 +1,6 @@
 <template>
-    <div class="skeletondiv">
-        <div class="skeleton" v-for="index in 8" :key="index">
+    <div :class="['skeletondiv', isMain ? 'isMain' : 'isProduct']">
+        <div class="skeleton" v-for="index in (isMain ? 6 : 8)" :key="index">
             <div class="skeleton-item">
                 <div class="skeleton-image"></div>
                 <div class="skeleton-name"></div>
@@ -12,17 +12,31 @@
 </template>
 <script>
 export default {
-
+    props: {
+        isMain: {
+            type: Boolean,
+            default: false
+        }
+    }
 }
 </script>
 <style scoped>
 .skeletondiv {
     margin-top: 20px;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
     flex-wrap: wrap;
     gap: 15px;
 }
+
+.isMain {
+    grid-template-columns: repeat(6, 1fr);
+}
+
+.isProduct {
+    grid-template-columns: repeat(4, 1fr);
+
+}
+
 
 .skeleton-item {
     width: 250px;

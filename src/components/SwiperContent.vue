@@ -7,7 +7,6 @@
                 <div class="slide-content">{{ item }}</div>
             </swiper-slide>
 
-
         </swiper>
     </div>
 </template>

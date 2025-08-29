@@ -14,7 +14,7 @@
         </template>
 
 
-        <template v-if="getMainCategory && getMainCategory.length">
+        <template v-if="getMainCategory && getMainCategory.length && isShown">
             <span class="separator"> / </span>
             <span v-for="(item, index) in getMainCategory" :key="index" class="clickable background">
                 {{ item.ka_name }}
@@ -29,7 +29,7 @@
             </span>
         </template>
 
-        <template v-if="getCategory && getCategory.length">
+        <template v-if="getCategory && getCategory.length && isShown">
             <span class="separator"> / </span>
             <span v-for="(item, index) in getCategory" :key="index" class="clickable background">
                 {{ item.ka_name }}
@@ -43,7 +43,7 @@
             </span>
         </template>
 
-        <template v-if="getSubCategory && getSubCategory.length">
+        <template v-if="getSubCategory && getSubCategory.length && isShown">
             <span class="separator"> / </span>
             <span v-for="(item, index) in getSubCategory" :key="index" class="clickable background">
                 {{ item.ka_name }}
@@ -73,6 +73,9 @@ export default {
             'getCategory',
             'getSubCategory',
         ]),
+        isShown() {
+            return this.$route.query.section
+        }
     },
     props: {
         maincategory: {

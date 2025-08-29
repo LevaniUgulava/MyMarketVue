@@ -1,7 +1,7 @@
 <template>
   <div>
-    <GoogleLogin :callback="handleLogin">
-      <span class="button"> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="20" height="20">
+    <GoogleLogin class="googlebtn" :callback="handleLogin">
+      <span> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="20" height="20">
           <path fill-rule="evenodd" clip-rule="evenodd"
             d="M 4.31016 10 C 4.31016 9.35047 4.41797 8.72766 4.61063 8.14359 L 1.24031 5.57 C 0.58344 6.90359 0.21344 8.40641 0.21344 10 C 0.21344 11.5923 0.583127 13.0941 1.23891 14.4269 L 4.60735 11.8483 C 4.41656 11.2669 4.31016 10.6464 4.31016 10 Z"
             fill="rgb(251, 188, 5)" />
@@ -18,7 +18,7 @@
             d="M 19.7866 10 C 19.7866 9.40906 19.6955 8.77266 19.5589 8.18188 H 10.2277 V 12.0455 H 15.5989 C 15.3303 13.3628 14.5994 14.3755 13.5533 15.0345 L 16.7523 17.5077 C 18.5908 15.8014 19.7866 13.2595 19.7866 10 Z"
             fill="rgb(66, 133, 244)" />
         </svg>
-        Google</span>
+        Google ავტორიზაცია</span>
     </GoogleLogin>
   </div>
 </template>
@@ -54,13 +54,23 @@ const handleLogin = async (googleResponse) => {
 </script>
 
 <style>
-.button {
-  display: flex;
+.googlebtn {
+  display: flex !important;
   border: 1px solid #dbdbdb;
-  gap: 10px;
   border-radius: 5px;
-  font-size: 14px;
-  padding: 15px 45px;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  padding: 10px;
+  margin: auto;
+  width: 70%;
+
+}
+
+span {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 
 }
 </style>

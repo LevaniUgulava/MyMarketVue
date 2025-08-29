@@ -43,6 +43,39 @@ const routes = [
         meta: {
           needsauth: true,
         },
+        children:[
+          {
+          path: "info",
+          name:"profile-info",
+          component: () => import("@/components/profile/Components/PersonalInfo.vue")
+          },
+          {
+          path: "address",
+          name:"address-info",
+          component: () => import("@/components/profile/Components/AddressComponent.vue")
+          },
+          {
+          path: "status",
+          name:"status-info",
+          component: () => import("@/components/UserStatusComponent.vue")
+          },
+          {
+          path: "verification",
+          name:"verification",
+          component: () => import("@/components/profile/Components/VerificationComponent.vue")
+          },
+          {
+          path: "reset",
+          name:"reset",
+          component: () => import("@/components/profile/Components/ResetpasswordComponent.vue")
+          },
+          {
+          path: "delete",
+          name:"deleteacc",
+          component: () => import("@/components/DeactivateComponent.vue")
+          }
+          
+        ]
         
       },
       {
@@ -105,6 +138,7 @@ const routes = [
     path: "/email-verify/:id",
     component: () => import("@/components/Verify/VerificationComponent.vue"),
   },
+  
   {
     path: "/admin",
     name: "Admin",
@@ -117,7 +151,7 @@ const routes = [
         path: "dashboard",
         name: "Admindashboard",
         component: () => import("@/components/Admin/DashboardComponent.vue"),
-      },
+      },    
       {
         path: "create",
         name: "Admincreate",
@@ -248,6 +282,18 @@ const routes = [
     path: "/admin/login",
     name: "AdminLogin",
     component: () => import("@/views/Admin/AdminLoginView.vue"),
+  },
+    {
+    path: "/fastlogin",
+    component: () => import("@/components/PinCode/PincodeComponent.vue")
+  },
+     {
+    path: "/setpin",
+    component: () => import("@/components/PinCode/SetPincodeComponent.vue")
+  },
+  {
+    path: "/pincode-biometric",
+    component: () => import("@/components/PinCode/PincodeBiometricComponent.vue")
   },
 ];
 

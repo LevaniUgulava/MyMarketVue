@@ -28,9 +28,8 @@ export default {
                     password: this.password
                 });
                 response.data.roles[0]
-                localStorage.setItem('name', response.data.name);
                 localStorage.setItem('roles', response.data.roles[0]);
-                localStorage.setItem('token', response.data.token);
+                localStorage.setItem('token', response.data.access_token);
                 this.$router.push("/admin/dashboard");
 
             } catch (error) {

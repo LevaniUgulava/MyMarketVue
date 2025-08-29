@@ -8,8 +8,9 @@
         შესრულებული შეკვეთები
       </button>
     </div>
-
+  
     <div v-if="apiLoaded && showPending" class="order-section">
+
       <div v-if="OrderProducts.length > 0" class="order-box">
         <div v-for="order in OrderProducts" :key="order.order_id" class="order-card">
           <div class="left-section">
@@ -21,20 +22,20 @@
               <h3 class="order-id">შეკვეთის ნომერი: #{{ order.order_id }}</h3>
               <h3 class="order-amount">გადახდილი თანხა: {{ order.order_amount }} <i class="fa-solid fa-lari-sign"></i>
               </h3>
-              <h3 class="order-amount">მიმღები: {{ order.order_fullname }}
-              </h3>
-              <h3 class="order-amount">მისამართი : {{ order.address.town }}, {{ order.address.address }}
-              </h3>
+              <h3 class="order-amount">მიმღები: {{ order.order_fullname }}</h3>
+              <h3 class="order-amount">მისამართი : {{ order.address.town }}, {{ order.address.address }}</h3>
             </div>
           </div>
         </div>
       </div>
-      <div v-else class="no-order-message ">
+
+      <div v-else class="no-order-message">
         <i class="fas fa-box-open"></i>
         <p>თქვენ არ გაქვთ შეკვეთა</p>
         <a href="/shop" class="shop-link">მთავარი გვერდი</a>
       </div>
     </div>
+
 
     <div v-if="apiLoaded && !showPending" class="order-section">
       <div v-if="CompletedProducts.length > 0" class="order-box">
@@ -74,7 +75,8 @@ export default {
     return {
       OrderProducts: [],
       CompletedProducts: [],
-      apiLoaded: false
+      apiLoaded: false,
+      loading: true,
     };
   },
   computed: {
@@ -98,6 +100,8 @@ export default {
       } catch (error) {
         console.error(error);
         this.apiLoaded = true;
+      } finally {
+        this.loading = false;
       }
     },
     toggleSection(section) {
@@ -119,6 +123,8 @@ export default {
 
 
 <style scoped>
+
+
 .container {
   margin: 20px auto;
   padding: 20px;

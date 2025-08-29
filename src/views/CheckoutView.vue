@@ -3,98 +3,160 @@
 
     <div class="checkout-container">
         <div class="left-section">
-            <div class="input-group">
-                <button
-                    :class="['address-button', addresses.length == 0 && selectedAddressError ? 'radio-error' : null]"
-                    @click.prevent="addressmodal = !addressmodal">
+            <div class="up-section">
+                <div class="desc-info">
+                    <h4 class="title">მიმღების ინფორმაცია</h4>
+                    <span class="desc">შეიყვანეთ მიმღების პერსონალური ინფორმაცია</span>
+                </div>
+                <div class="div">
+                    <div class="input-group">
+                        <button
+                            :class="['address-button', addresses.length == 0 && selectedAddressError ? 'radio-error' : null]"
+                            @click.prevent="addressmodal = !addressmodal">
 
-                    <div>
-                        <i class="fa-solid fa-plus"></i> მისამართის დამატება
+                            <div>
+                                <i class="fa-solid fa-plus"></i> მისამართის დამატება
+                            </div>
+                        </button>
+                        <div v-for="(option, index) in addresses" :key="index"
+                            :class="['radio-button', selectedAddressError ? 'radio-error' : null]">
+                            <input type="radio" :id="'address-' + index" name="selectedAddress" :value="option.id"
+                                v-model="selectedAddress" />
+                            <label :for="'address-' + index">
+                                {{ option.town }} {{ option.address }} {{ option.additionalInfo }}
+                            </label>
+                            <p @click="deleteAddress(option.id)" class="delete-button">წაშლა</p>
+                        </div>
+
                     </div>
-                </button>
-                <div v-for="(option, index) in addresses" :key="index"
-                    :class="['radio-button', selectedAddressError ? 'radio-error' : null]">
-                    <input type="radio" :id="'address-' + index" name="selectedAddress" :value="option.id"
-                        v-model="selectedAddress" />
-                    <label :for="'address-' + index">
-                        {{ option.town }} {{ option.address }} {{ option.additionalInfo }}
-                    </label>
-                    <p @click="deleteAddress(option.id)" class="delete-button">წაშლა</p>
-                </div>
+                    <div class="grid-container">
 
-            </div>
-            <div class="grid-container">
+                        <div class="input-group">
+                            <label for="firstName">სახელი <span class="required">*</span></label>
+                            <span v-if="firstNameError" class="error-text">{{ firstNameError }}</span>
 
-                <div class="input-group">
-                    <label for="firstName">სახელი <span class="required">*</span></label>
-                    <span v-if="firstNameError" class="error-text">{{ firstNameError }}</span>
+                            <input :class="{ 'input-error': firstNameError }" id="firstName" type="text"
+                                v-model="firstName" required />
+                        </div>
+                        <div class="input-group">
+                            <label for="lastName">გვარი <span class="required">*</span></label>
+                            <span v-if="lastNameError" class="error-text">{{ lastNameError }}</span>
 
-                    <input :class="{ 'input-error': firstNameError }" id="firstName" type="text" v-model="firstName"
-                        required />
-                </div>
-                <div class="input-group">
-                    <label for="lastName">გვარი <span class="required">*</span></label>
-                    <span v-if="lastNameError" class="error-text">{{ lastNameError }}</span>
+                            <input :class="{ 'input-error': lastNameError }" id="lastName" type="text"
+                                v-model="lastName" required />
+                        </div>
+                    </div>
 
-                    <input :class="{ 'input-error': lastNameError }" id="lastName" type="text" v-model="lastName"
-                        required />
-                </div>
-            </div>
-
-            <div class="input-group">
-                <label for="phone">ტელეფონი <span class="required">*</span></label>
-                <span v-if="phoneError" class="error-text">{{ phoneError }}</span>
-                <input :class="{ 'input-error': phoneError }" id="phone" type="tel" v-model="phone" required />
-            </div>
-
-        </div>
-
-        <div class="right-section">
-            <h3>თქვენი შეკვეთა</h3>
-            <div class="order-items" v-if="cart.length > 0">
-                <div v-for="(item, index) in cart" :key="index" class="order-item">
-                    <span>{{ item.name }} ({{ item.color }})</span>
-                    <span>{{ item.retail_price }}₾ x {{ item.quantity }}</span>
-                    <span>სულ: {{ item.total_price }}₾</span>
-                </div>
-            </div>
-            <div class="empty" v-else-if="isload">
-                <p> შეკვეთა ცარიელია</p>
-            </div>
-
-            <hr />
-            <div class="info">
-                <div class="sub-info">გადასახდელი თანხა: {{ totalPrice > 0 ? totalPrice + " ₾" : "---" }} </div>
-                <div class="sub-info">მიწოდების საფასური: ---</div>
-                <div class="sub-info">მისამართი: {{ visibleAddress }} <div class="additionalinfo">{{ additionalInfoClass
-                }}
+                    <div class="input-group">
+                        <label for="phone">ტელეფონი <span class="required">*</span></label>
+                        <span v-if="phoneError" class="error-text">{{ phoneError }}</span>
+                        <input :class="{ 'input-error': phoneError }" id="phone" type="tel" v-model="phone" required />
                     </div>
                 </div>
-                <div>
-                    <label>გადახდის მეთოდი: </label>
-
+            </div>
+            <div class="down-section">
+                <div class="desc-info">
+                    <h4 class="title">გადახდის მეთოდი</h4>
+                    <span class="desc">აირჩიეთ სასურველი გადახდის მეთოდი</span>
+                </div>
+                <div class="div">
                     <div class="payment-button">
-                        <div class="bog option">
+                        <div :class="[
+                            'bog option',
+                            { 'disabled': disablePayment('bog') }
+                        ]">
                             <input id="bog-pay" type="radio" value="bog" v-model="paymentmethod">
                             <label for="bog-pay">საქართველოს ბანკი</label>
                             <img src="../assets/svg/bog.svg" alt="BOG Bank">
                         </div>
 
-                        <div class="tbc option">
-                            <input id="tbc-pay" type="radio" value="tbc" v-model="paymentmethod">
+                        <div :class="[
+                            'tbc option',
+                            { 'disabled': disablePayment('tbc') }
+                        ]"> <input id="tbc-pay" type="radio" value="tbc" v-model="paymentmethod">
                             <label for="tbc-pay">თიბისი ბანკი</label>
                             <img src="../assets/svg/tbc.svg" alt="TBC Bank">
                         </div>
+                        <div :class="[
+                            'tbc option',
+                            { 'disabled': disablePayment('cash') }
+                        ]">
+                            <input id="cash-pay" type="radio" value="cash" v-model="paymentmethod">
+                            <label for="cash-pay">კურიერთან გადახდა</label>
+                        </div>
                     </div>
-
 
                 </div>
             </div>
 
 
-            <hr />
-            <p><strong>სულ: {{ totalWithShipping }} ₾</strong></p>
-            <button class="button" @click="checkout">განათავსეთ შეკვეთა</button>
+        </div>
+
+        <div class="right-section">
+            <div class="checkout">
+                <h3>თქვენი შეკვეთა</h3>
+                <div class="order-items" v-if="cart.orders.length > 0">
+                    <div v-for="(item, index) in cart.orders" :key="index" class="order-item">
+                        <span>{{ item.name }} ({{ item.color }})</span>
+                        <span>{{ item.retail_price }}₾ x {{ item.quantity }}</span>
+                        <span>სულ: {{ item.total_price }}₾</span>
+                    </div>
+                </div>
+                <div class="empty" v-else-if="isload">
+                    <p> შეკვეთა ცარიელია</p>
+                </div>
+
+                <hr />
+                <div class="info">
+                    <div class="sub-info">გადასახდელი თანხა: {{ cart.total_price > 0 ? cart.total_price + " ₾" :
+                        "---"
+                    }}
+                    </div>
+                    <div class="sub-info">მიწოდების საფასური: ---</div>
+                    <div class="sub-info">მისამართი: {{ visibleAddress }} <div class="additionalinfo">{{
+                        additionalInfoClass
+                            }}
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <hr />
+                <p><strong>სულ: {{ cart.total_price > 0 ? cart.total_price + " ₾" :
+                    "---"
+                        }} </strong></p>
+                <button class="button" @click="checkout">განათავსეთ შეკვეთა</button>
+
+                <div class="slider">
+                    <SliderbuttonComponent @confirm="checkout" />
+
+                </div>
+
+
+            </div>
+
+            <div class="promocode-div">
+                <span :class="{
+                    promocode: true,
+                    disabled: paymentmethod === null
+                }" @click.prevent="paymentmethod !== null && showpromocode()">
+                    ფასდაკლების კოდის გამოყენება
+                </span>
+                <span v-if="paymentmethod === null" class="sub-title">აირჩიეთ გადახდის მეთოდი</span>
+
+                <div v-if="promocodeinput" class="input-with-button">
+                    <input v-model="promocode" type="text" class="promocode-input" placeholder="შეიყვანეთ კოდი">
+                    <button @click="applypromocode" class="promocode-button"> <i class="fa fa-check"></i>
+                    </button>
+                    <div class="changepay">
+                        <span @click="changePayment" class="changepayment">გადახდის ტიპის შეცვლა</span>
+                    </div>
+                </div>
+
+
+            </div>
+
         </div>
         <Address :open="addressmodal" @save="getAddresses()" @close="addressmodal = false" />
     </div>
@@ -103,14 +165,21 @@
 import api from '@/api';
 import Address from "@/components/AddressModal.vue"
 import Message from '@/components/Message/MessageComponent.vue';
+import SliderbuttonComponent from '@/components/SliderbuttonComponent.vue';
 import { validateInputFields } from '@/components/utils/validate';
 export default {
     data() {
         return {
             firstName: "",
+            sliding: false,
+
             lastName: "",
             phone: "",
-            cart: [],
+            cart: {
+                orders: [],
+                payment: null,
+                total_price: 0
+            },
             shippingCost: 0,
             addressmodal: false,
             addresses: [],
@@ -121,18 +190,18 @@ export default {
             lastNameError: "",
             phoneError: "",
             addressdeletemessage: null,
-            paymentmethod: ''
+            paymentmethod: null,
+            promocode: null,
+            promocodeinput: false
 
         };
     },
     components: {
         Address,
-        Message
+        Message,
+        SliderbuttonComponent
     },
     computed: {
-        totalPrice() {
-            return Array.isArray(this.cart) ? this.cart.reduce((sum, item) => sum + (item.retail_price * item.quantity), 0) : 0;
-        },
         totalWithShipping() {
             return this.totalPrice + (this.shippingCost || 0);
         },
@@ -144,37 +213,102 @@ export default {
         additionalInfoClass() {
             const selected = this.addresses.find(address => address.id === this.selectedAddress);
             return selected && selected.additionalInfo
-        }
+        },
+
     },
     watch: {
         addressdeletemessage() {
             setTimeout(() => {
                 this.addressdeletemessage = ''
             }, 2000);
-        }
+        },
 
     },
+
+
     methods: {
-
-        async getTemp() {
+        async changePayment() {
             try {
-
-                const response = await api.get("get/temporder", {
+                const response = await api.put('/changepayment', {}, {
                     tokenRequired: true
                 });
-                this.cart = response.data;
-                this.isload = true;
+                console.log(response);
+                this.refreshTempData();
+            } catch (error) {
+                console.log(error.message);
+            }
+        },
+        disablePayment(type) {
+            return this.cart.payment !== type && this.cart.payment !== null
+        },
+        async applypromocode() {
+            try {
+                await api.post('/test/promo', {
+                    promocode: this.promocode,
+                    type: this.paymentmethod
+                }, {
+                    tokenRequired: true
+                });
+                this.refreshTempData();
 
+
+            } catch (error) {
+                if (error.response) {
+                    console.error("Error response data:", error.response.data);
+                    console.error("Error response status:", error.response.status);
+                } else if (error.request) {
+                    console.error("Error request:", error.request);
+                } else {
+                    console.error("Error message:", error.message);
+                }
+            }
+        },
+
+        showpromocode() {
+            this.promocodeinput = !this.promocodeinput
+        },
+        async fetchTempDataFromAPI() {
+            try {
+                const response = await api.get("get/temporder", { tokenRequired: true });
+                const data = {
+                    cart: response.data,
+                    paymentmethod: response.data.payment,
+                    promocode: response.data.promocode,
+                    isload: true
+                };
+                window.sessionStorage.setItem('temporder', JSON.stringify(data));
+
+                this.cart = response.data;
+                this.paymentmethod = response.data.payment;
+                this.promocode = response.data.promocode;
+                this.isload = true;
+                console.log("Data fetched from API");
             } catch (error) {
                 console.log("Error fetching temporary order:", error);
             }
         },
+        async getTemp() {
+            const storedData = window.sessionStorage.getItem('temporder');
+            if (storedData) {
+                const parsedData = JSON.parse(storedData);
+                this.cart = parsedData.cart;
+                this.paymentmethod = parsedData.paymentmethod;
+                this.promocode = parsedData.promocode;
+                this.isload = parsedData.isload;
+            } else {
+                await this.fetchTempDataFromAPI();
+
+            }
+        },
+
 
         async deleteTemp() {
             try {
                 await api.delete("delete/temporder", {
                     tokenRequired: true
                 });
+                window.sessionStorage.removeItem('temporder');
+
             } catch (error) {
                 console.log("Error fetching temporary order:", error);
             }
@@ -196,11 +330,12 @@ export default {
                     lastname: this.lastName,
                     phone: this.phone,
                     address_id: this.selectedAddress,
-                    products: this.cart
+                    products: this.cart.orders
                 }, {
                     tokenRequired: true
                 });
                 response
+                window.sessionStorage.removeItem('temporder');
                 this.deleteTemp();
             } catch (error) {
                 if (error.response) {
@@ -223,6 +358,16 @@ export default {
                     console.error('Error:', error.message);
                     alert('An error occurred: ' + error.message);
                 }
+            }
+        },
+        async refreshTempData() {
+            try {
+                window.sessionStorage.removeItem('temporder');
+                console.log("Session data cleared");
+
+                await this.getTemp();
+            } catch (error) {
+                console.log("Error refreshing data:", error);
             }
         },
         async getAddresses() {
@@ -259,11 +404,13 @@ export default {
 
     beforeRouteLeave(to, from, next) {
         this.deleteTemp();
+        window.sessionStorage.removeItem('temporder');
         next();
     },
 
     beforeRouteUpdate(to, from, next) {
         this.deleteTemp();
+        window.sessionStorage.removeItem('temporder');
         next();
     }
 
@@ -273,12 +420,113 @@ export default {
 
 
 <style scoped>
+.changepay {
+    padding-top: 5px;
+}
+
+.changepayment {
+    color: #888;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.disabled {
+    opacity: 0.8;
+    pointer-events: none;
+}
+
+.promocode {
+    color: blue;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.promocode.disabled {
+    pointer-events: none;
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+
+.promocode-div {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sub-title {
+    color: #a3a0a0;
+}
+
+.input-with-button {
+    position: relative;
+    width: 60%;
+}
+
+.promocode-input {
+    padding: 10px 50px 10px 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 100%;
+}
+
+.promocode-button {
+    position: absolute;
+    right: 10px;
+    top: 35%;
+    transform: translateY(-50%);
+    background-color: #7a1dff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    cursor: pointer;
+}
+
+.promocode-button:hover {
+    color: black;
+}
+
+
+.title {
+    font-size: 16px;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.desc {
+    font-size: 13px;
+    color: #888;
+}
+
+.desc-info {
+    width: 30%;
+}
+
+.up-section,
+.down-section {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.up-section {
+    border-bottom: 1px solid #dbd8d8;
+}
+
+
+.div {
+    min-height: 300px;
+    font-size: 14px;
+    width: 60%;
+}
+
 .payment-button {
     display: flex;
     justify-content: space-between;
     width: 100%;
     padding-top: 10px;
-    gap: 20px;
+    gap: 10px;
 }
 
 .option {
@@ -287,8 +535,8 @@ export default {
     border: 2px solid #916ac7;
     border-radius: 10px;
     padding: 10px;
-    width: 45%;
-    gap: 13px;
+    width: 35%;
+    gap: 8px;
     cursor: pointer;
     color: #916ac7;
 }
@@ -303,7 +551,7 @@ export default {
 .option label {
     cursor: pointer;
     margin: 0;
-    font-size: 14px;
+    font-size: 12px;
     padding: 0;
 }
 
@@ -333,11 +581,10 @@ export default {
     display: flex;
     align-items: center;
     flex-direction: row;
-    gap: 20px;
 }
 
 .additionalinfo {
-    font-size: 12px;
+    font-size: 10px;
     color: #888;
 }
 
@@ -348,12 +595,25 @@ export default {
     border-radius: 10px;
 }
 
-.left-section,
+.left-section {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    background: white;
+    padding: 20px;
+    gap: 50px;
+    border-radius: 8px;
+}
+
 .right-section {
-    flex: 1;
+    display: grid;
+    width: 40%;
+    gap: 20px;
+    height: fit-content;
     background: white;
     padding: 20px;
     border-radius: 8px;
+    font-size: 14px;
 }
 
 .grid-container {
@@ -418,7 +678,7 @@ input {
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 14px;
 }
 
 .button:hover {
@@ -434,7 +694,7 @@ input {
     border: 2px solid #966bd3;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 500;
 }
 
@@ -476,6 +736,8 @@ input {
     cursor: pointer;
     font-weight: 500;
     color: #916ac7;
+    font-size: 14px;
+    padding-top: 5px;
     flex: 1;
     white-space: nowrap;
     overflow: hidden;
@@ -483,10 +745,14 @@ input {
 }
 
 .delete-button {
-    font-size: 14px;
+    font-size: 12px;
     color: rgb(221, 109, 109);
 }
 
+
+.slider {
+    display: none;
+}
 
 @media (max-width: 768px) {
     .checkout-container {
@@ -504,11 +770,54 @@ input {
     }
 
     .button {
-        font-size: 13px;
+        display: none;
+    }
+
+    .slider {
+        display: block;
     }
 
     * {
         font-size: 13px;
+    }
+
+    .up-section,
+    .down-section {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .desc-info {
+        width: 100%;
+    }
+
+    .div {
+        width: 100%;
+    }
+
+    .right-section {
+        width: 100%;
+        padding: 0;
+        gap: 0;
+    }
+
+    .checkout {
+        padding: 20px;
+    }
+
+    .promocode-div {
+        justify-content: center;
+        align-items: center;
+        min-height: 100px;
+    }
+
+    .payment-button {
+        flex-direction: column;
+    }
+
+    .option {
+        width: auto;
+        height: 30px;
     }
 }
 </style>

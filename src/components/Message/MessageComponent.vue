@@ -23,13 +23,14 @@ export default {
 .messagecomponent {
   display: flex;
   position: fixed;
-  top: 21%;
-  right: 0.1%;
+  top: 25%;
+  right: 0;
   color: white;
   padding: 20px;
   background-color: #62389c;
   border: none;
-  border-radius: 12px;
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
@@ -51,6 +52,5 @@ export default {
 .messagecomponent div {
   font-weight: 900;
   text-transform: uppercase;
-  font-family: 'Roboto', sans-serif;
 }
 </style>
