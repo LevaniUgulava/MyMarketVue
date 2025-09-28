@@ -1,352 +1,574 @@
-<template lang="">
-    <div>
-    <div class="action-container">
-  
-      <div class="search-category">
-        <button @click="isModalVisible=true">Search by category</button>
+<template>
+  <section class="ap">
+    <!-- Actions -->
+    <header class="bar">
+      <div class="bar__group">
+        <div class="field">
+          <label class="field__label">კატეგორიით ძიება</label>
+          <button class="btn" @click="isModalVisible = true" :disabled="loading.fetch">
+            <i class="fa-regular fa-filter"></i> Category
+          </button>
+        </div>
       </div>
-    <div class="searchbtn">
-    <input type="text" v-model="Searchname" placeholder="Search...">
-    <button @click="performSearch">Search</button>
-    </div>
+
+      <div class="bar__group">
+        <div class="field">
+          <label class="field__label">ძებნა</label>
+          <div class="inline">
+            <input type="search" class="input" v-model.trim="Searchname" placeholder="სახელი / აღწერა"
+              @input="performSearch" :disabled="loading.fetch" />
+            <button class="btn btn--ghost" @click="performSearch(true)" :disabled="loading.fetch">ძებნა</button>
+          </div>
+        </div>
       </div>
+    </header>
 
+    <!-- Toast -->
+    <transition name="fade">
+      <div v-if="toast.show" class="toast" :class="`toast--${toast.type}`" role="status" aria-live="polite">
+        <strong class="toast__title">
+          {{ toast.type === 'success' ? 'წარმატება' : toast.type === 'error' ? 'შეცდომა' : 'ინფო' }}
+        </strong>
+        <span class="toast__msg">{{ toast.message }}</span>
+        <span v-if="toast.code" class="toast__code">[{{ toast.code }}]</span>
+        <button class="toast__close" @click="toast.show = false" aria-label="დახურვა">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    </transition>
 
-    <CategoryModalVue
-    :isModalVisible="isModalVisible"
-    @close-modal="closeModal"
-    @search-category="searchCategory"
-     />
-      
-        <table>
-          <thead>
+    <!-- Modal -->
+    <CategoryModalVue :isModalVisible="isModalVisible" @close-modal="closeModal" @search-category="searchCategory" />
 
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Price</th>
-                <th>MainCategory</th>
-                <th>Category</th>
-                <th>SubCategory</th>
-                <th>Image</th>
-                <th>Actions</th>
-            </tr>
-          </thead>
-              <tbody>
+    <!-- Table -->
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th style="width:80px;">ID</th>
+            <th>დასახელება</th>
+            <th>აღწერა</th>
+            <th>ფასი</th>
+            <th>მთავარი კატეგორია</th>
+            <th>კატეგორია</th>
+            <th>ქვეკატეგორია</th>
+            <th>სურათი</th>
+            <th style="width:120px;">მოქმედებები</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="p in products" :key="p.id">
+            <td class="mono">{{ p.id }}</td>
+            <td class="strong">{{ p.name }}</td>
+            <td class="muted ellipsis" :title="p.description">{{ p.description }}</td>
+            <td>{{ formatMoney(p.price) }}</td>
+            <td>{{ p.MainCategory?.name || p.MainCategory?.ka_name || '—' }}</td>
+            <td>{{ p.Category?.name || p.Category?.ka_name || '—' }}</td>
+            <td>{{ p.SubCategory?.name || p.SubCategory?.ka_name || p.Subcategory?.ka_name || '—' }}</td>
+            <td>
+              <img :src="imgSrc(p)" class="img" @error="onImgError($event)" alt="product" />
+            </td>
+            <td>
+              <button v-if="p.active" class="btn btn--success" @click="toggleActive(p, false)"
+                :disabled="loading.toggleId === p.id" :aria-busy="loading.toggleId === p.id" title="გააუქმე აქტიური">
+                <i v-if="loading.toggleId === p.id" class="fa-solid fa-spinner fa-spin"></i>
+                <i v-else class="fa-regular fa-eye"></i>
+              </button>
+              <button v-else class="btn btn--warning" @click="toggleActive(p, true)"
+                :disabled="loading.toggleId === p.id" :aria-busy="loading.toggleId === p.id" title="გააქტიურება">
+                <i v-if="loading.toggleId === p.id" class="fa-solid fa-spinner fa-spin"></i>
+                <i v-else class="fa-regular fa-eye-slash"></i>
+              </button>
+            </td>
+          </tr>
 
-            <tr v-for="product in products" :key="product.id">
-                <td>{{ product.id }}</td>
-                <td>{{ product.name }}</td>
-                <td>{{ product.description }}</td>
-                <td>{{ product.price }} lari</td>
-                <td>{{ product.MainCategory.name }}</td>
-                <td>{{ product.Category.name }}</td>
-                <td>{{ product.SubCategory.name }}</td>
-                <td>
-                    <img :src="product.image_urls" class="img">
-                </td>
-                <td>
-                    <div v-if="product.active">
-                        <form @click.prevent="notactive(product.id)">
-                            <button class="btnsuccess"><i class="fa-regular fa-eye"></i></button>
-                        </form>
-                    </div>
-                    <div v-else>
-                        <form @click.prevent="active(product.id)">
-                            <button class="btnwarning"><i class="fa-regular fa-eye-slash"></i></button>
-                        </form>
-                    </div>
-                </td>
-            </tr>
-          </tbody>
-
-        </table>
+          <tr v-if="!loading.fetch && !products.length">
+            <td colspan="9" class="empty">პროდუქტები ვერ მოიძებნა</td>
+          </tr>
+          <tr v-if="loading.fetch">
+            <td colspan="9" class="empty"><i class="fa-solid fa-spinner fa-spin"></i> იტვირთება…</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
+    <!-- Pagination -->
+    <nav v-if="pagination.total" class="pager">
+      <button class="page" :disabled="pagination.current_page <= 1" @click="goPage(pagination.current_page - 1)">
+        წინა
+      </button>
+      <button v-for="pg in pageList" :key="pg" class="page" :class="{ 'page--active': pg === pagination.current_page }"
+        @click="goPage(pg)">
+        {{ pg }}
+      </button>
+      <button class="page" :disabled="pagination.current_page >= pagination.last_page"
+        @click="goPage(pagination.current_page + 1)">
+        შემდეგი
+      </button>
+      <div class="pager__meta">
+        სულ: {{ pagination.total }} | გვერდი: {{ pagination.current_page }} / {{ pagination.last_page }}
+      </div>
+    </nav>
+  </section>
 </template>
 
 <script>
 import CategoryModalVue from '../CategoryModal.vue';
 import api from '@/api';
+
 export default {
   name: "ActiveProductComponent",
-  components: {
-    CategoryModalVue
-
-  },
+  components: { CategoryModalVue },
   data() {
     return {
       products: [],
       isModalVisible: false,
-      selectedProducts: [],
       pagination: {},
-      message: '',
       Searchname: '',
       selectedmainCategory: null,
       selectedCategory: null,
       selectedsubCategory: null,
-
-    }
+      loading: { fetch: false, toggleId: null },
+      toast: { show: false, type: 'info', message: '', code: null },
+      debounceTimer: null,
+      placeholderImg: 'https://via.placeholder.com/80x60?text=IMG',
+    };
+  },
+  computed: {
+    pageList() {
+      const cur = this.pagination.current_page || 1;
+      const last = this.pagination.last_page || 1;
+      const span = 2;
+      const from = Math.max(1, cur - span);
+      const to = Math.min(last, cur + span);
+      const arr = [];
+      for (let i = from; i <= to; i++) arr.push(i);
+      if (from > 1) arr.unshift(1);
+      if (to < last) arr.push(last);
+      return [...new Set(arr)];
+    },
   },
   watch: {
     '$route.query': {
-      handler() {
-        this.fetchProductData();
-      },
-      immediate: true
-    }
+      handler() { this.fetchProductData(); },
+      immediate: true,
+    },
   },
   methods: {
+    // UI helpers
+    showToast(type, message, code = null) {
+      this.toast = { show: true, type, message, code };
+      clearTimeout(this._toastTimer);
+      this._toastTimer = setTimeout(() => (this.toast.show = false), 3500);
+    },
+    formatMoney(v) {
+      const n = Number(v);
+      if (!Number.isFinite(n)) return '—';
+      return new Intl.NumberFormat('ka-GE', { style: 'currency', currency: 'GEL', maximumFractionDigits: 2 }).format(n);
+    },
+    imgSrc(p) {
+      if (Array.isArray(p.image_urls) && p.image_urls.length) return p.image_urls[0];
+      if (typeof p.image_urls === 'string' && p.image_urls) return p.image_urls;
+      if (p.media?.[0]?.original_url) return p.media[0].original_url;
+      return this.placeholderImg;
+    },
+    onImgError(e) { e.target.src = this.placeholderImg; },
+
+    // Modal / filters
+    openModal() { this.isModalVisible = true; },
+    closeModal() { this.isModalVisible = false; },
     searchCategory(data) {
-      this.selectedmainCategory = data.maincategory;
-      this.selectedCategory = data.category;
-      this.selectedsubCategory = data.subcategory;
+      this.selectedmainCategory = data.maincategory || null;
+      this.selectedCategory = data.category || null;
+      this.selectedsubCategory = data.subcategory || null;
+      this.isModalVisible = false;
+      this.updateRoute({ page: 1 });
+    },
 
+    // Search (debounced)
+    performSearch(force = false) {
+      clearTimeout(this.debounceTimer);
+      const run = () => this.updateRoute({ page: 1 });
+      if (force) run();
+      else this.debounceTimer = setTimeout(run, 250);
     },
-    openModal() {
-      this.isModalVisible = true
+
+    updateRoute(merge = {}) {
+      const cur = { ...this.$route.query };
+      const next = {
+        ...cur,
+        page: merge.page ?? cur.page ?? 1,
+        searchname: this.Searchname || undefined,
+        maincategory: this.selectedmainCategory || undefined,
+        category: this.selectedCategory || undefined,
+        subcategory: this.selectedsubCategory || undefined,
+      };
+      Object.keys(next).forEach(k => next[k] === undefined && delete next[k]);
+      this.$router.replace({ path: '/admin/actions', query: next });
     },
-    closeModal() {
-      this.isModalVisible = false
-    },
-    changePage(page) {
-      this.$router.push({ path: '/admin/actions', query: { ...this.$route.query, page } });
-    },
-    performSearch() {
-      const currentQuery = { ...this.$route.query };
-      this.$router.push({
-        path: '/admin/actions',
-        query: {
-          ...currentQuery,
-          searchname: this.Searchname,
-          maincategory: this.selectedmainCategory,
-          category: this.selectedCategory,
-          subcategory: this.selectedsubCategory,
-          page: 1
-        }
-      });
-    },
+
+    // Fetch
     async fetchProductData() {
-      const queryParams = new URLSearchParams(this.$route.query);
-      const page = parseInt(queryParams.get('page')) || 1;
+      const q = new URLSearchParams(this.$route.query);
+      const page = parseInt(q.get('page')) || 1;
+      this.loading.fetch = true;
       try {
-        const response = await api.get(`admindisplay`, {
+        const { data } = await api.get(`admindisplay`, {
           tokenRequired: true,
-
           params: {
-            page: page,
-            searchname: this.Searchname,
-            maincategory: this.selectedmainCategory,
-            category: this.selectedCategory,
-            subcategory: this.selectedsubCategory,
+            page,
+            searchname: this.Searchname || undefined,
+            maincategory: this.selectedmainCategory || undefined,
+            category: this.selectedCategory || undefined,
+            subcategory: this.selectedsubCategory || undefined,
           }
-
         });
-        if (response.data && response.data.data) {
-          this.products = response.data.data;
+        if (data && data.data) {
+          this.products = data.data;
           this.pagination = {
-            current_page: response.data.meta.current_page,
-            last_page: response.data.meta.last_page,
-            per_page: response.data.meta.per_page,
-            total: response.data.meta.total,
-            links: response.data.links
+            current_page: data.meta.current_page,
+            last_page: data.meta.last_page,
+            per_page: data.meta.per_page,
+            total: data.meta.total,
+            links: data.links
           };
-
-          console.log(response.data)
         } else {
-          console.error('Unexpected API response structure:', response.data);
+          this.products = [];
+          this.pagination = {};
+          console.error('Unexpected API response structure:', data);
         }
       } catch (error) {
+        this.showToast('error', 'პროდუქტების წამოღება ვერ მოხერხდა', error?.response?.status);
         console.error('Error fetching product data:', error);
+      } finally {
+        this.loading.fetch = false;
       }
     },
-    async notactive(id) {
 
+    // Toggle active
+    async toggleActive(product, makeActive) {
+      if (!product?.id) return;
+      this.loading.toggleId = product.id;
       try {
-        const response = await api.post(`notactive/${id}`, {}, {
-          tokenRequired: true
-
-        });
-        const product = this.products.find(product => product.id === id);
-        if (product) {
-          product.active = false;
-        }
-        console.log(response);
+        const url = makeActive ? `active/${product.id}` : `notactive/${product.id}`;
+        const res = await api.post(url, {}, { tokenRequired: true });
+        product.active = !!makeActive;
+        this.showToast('success', makeActive ? 'პროდუქტი გააქტიურდა' : 'პროდუქტი გააუქმდა', res?.status);
       } catch (error) {
-        console.log(error);
+        const code = error?.response?.status;
+        const msg = error?.response?.data?.message || 'მოქმედების შესრულება ვერ მოხერხდა';
+        this.showToast('error', msg, code);
+        console.error(error);
+      } finally {
+        this.loading.toggleId = null;
       }
     },
-    async active(id) {
 
-      try {
-        const response = await api.post(`active/${id}`, {}, {
-          tokenRequired: true
-
-        });
-        const product = this.products.find(product => product.id === id);
-        if (product) {
-          product.active = true;
-        }
-        console.log(response);
-      } catch (error) {
-        console.log(error);
-      }
-    }
+    // Pager
+    goPage(pg) {
+      if (pg === this.pagination.current_page) return;
+      this.updateRoute({ page: pg });
+    },
   },
-  created() {
-    this.fetchProductData();
-  },
-}
+};
 </script>
 
-<style>
-.action-container {
+<style scoped>
+/* ===== Tokens ===== */
+.ap {
+  --accent: #6B21A8;
+  --accent-ink: #4C1878;
+
+  --bg: #ffffff;
+  --surface: #f7f7fb;
+  --border: #e6e8ef;
+
+  --text: #111827;
+  --muted: #6b7280;
+
+  --success: #16a34a;
+  --warning: #f59e0b;
+  --error: #ef4444;
+
+  --radius: 14px;
+  --shadow: 0 12px 28px rgba(17, 24, 39, 0.06);
+}
+
+.ap {
+  padding: 20px;
+  color: var(--text);
+}
+
+/* ===== Top bar ===== */
+.bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 900px) {
+  .bar {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bar__group {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 12px;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+}
+
+.field__label {
+  font-size: .85rem;
+  color: var(--muted);
+}
+
+.inline {
   display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.discountbtn,
-.searchbtn,
-.search-category {
-  display: flex;
+  gap: 8px;
   align-items: center;
 }
 
-.discountbtn input,
-.searchbtn input {
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  width: 200px;
-  /* Adjust width as needed */
+.input {
+  height: 42px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text);
+  transition: border-color .2s ease, box-shadow .2s ease;
 }
 
-.discountbtn button,
-.searchbtn button,
-.search-category button {
-  margin-left: 8px;
-  padding: 8px 16px;
-  background-color: #007bff;
-  color: white;
+.input:focus {
+  border-color: color-mix(in oklab, var(--accent) 40%, var(--border));
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 15%, transparent);
+}
+
+/* ===== Toast ===== */
+.toast {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  border: 1px solid transparent;
+  box-shadow: var(--shadow);
+}
+
+.toast--success {
+  background: color-mix(in oklab, var(--success) 8%, #fff);
+  border-color: color-mix(in oklab, var(--success) 28%, transparent);
+}
+
+.toast--error {
+  background: color-mix(in oklab, var(--error) 8%, #fff);
+  border-color: color-mix(in oklab, var(--error) 28%, transparent);
+}
+
+.toast--info {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+.toast__title {
+  font-weight: 800;
+}
+
+.toast__msg {
+  color: var(--text);
+}
+
+.toast__code {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.toast__close {
+  background: transparent;
   border: none;
-  border-radius: 4px;
   cursor: pointer;
+  color: var(--muted);
+  padding: 6px;
+  border-radius: 8px;
 }
 
-.discountbtn button:hover,
-.searchbtn button:hover,
-.search-category button:hover {
-  background-color: #0056b3;
+.toast__close:hover {
+  background: #fff;
 }
 
-table {
-  border-collapse: collapse;
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity .2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* ===== Table ===== */
+.table-wrap {
+  overflow-x: auto;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+}
+
+.table {
   width: 100%;
+  border-collapse: collapse;
+  min-width: 1000px;
 }
 
-th,
-td {
-  padding: 8px;
+.table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--accent);
+  color: #fff;
   text-align: left;
-  border-bottom: 1px solid #ddd;
+  padding: 12px 14px;
+  font-weight: 700;
 }
 
+.table tbody td {
+  border-bottom: 1px solid var(--border);
+  padding: 12px 14px;
+  vertical-align: middle;
+}
+
+.table tbody tr:hover {
+  background: color-mix(in oklab, var(--accent) 6%, #fff);
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.strong {
+  font-weight: 800;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.ellipsis {
+  max-width: 320px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 .img {
-  width: 40px;
+  width: 64px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--border);
 }
 
-.btnsuccess,
-.btnwarning {
-  border: none;
-  border-radius: 5px;
-  width: 30px;
-  height: 30px;
-  /* Corrected to px */
+/* ===== Buttons ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text);
+  font-weight: 800;
   cursor: pointer;
-  color: white;
+  transition: transform .12s ease, background .2s ease, color .2s ease, border-color .2s ease;
 }
 
-.btnsuccess {
-  background-color: #28a745;
+.btn:hover {
+  background: var(--surface);
+  transform: translateY(-1px);
 }
 
-.btnsuccess:hover {
-  background-color: #218838;
-  /* Hover color for success button */
+.btn:disabled {
+  opacity: .6;
+  cursor: not-allowed;
 }
 
-.btnwarning {
-  background-color: #ffc107;
+.btn--ghost {
+  border-color: var(--border);
 }
 
-.btnwarning:hover {
-  background-color: #e0a800;
-  /* Hover color for warning button */
+.btn--success {
+  background: var(--success);
+  color: #fff;
+  border-color: var(--success);
 }
 
-.pagination {
+.btn--success:hover {
+  background: #138e3c;
+  transform: translateY(-1px);
+}
+
+.btn--warning {
+  background: var(--warning);
+  color: #fff;
+  border-color: var(--warning);
+}
+
+.btn--warning:hover {
+  background: #d48806;
+  transform: translateY(-1px);
+}
+
+/* ===== Pagination ===== */
+.pager {
   display: flex;
-  list-style-type: none;
-  padding: 0;
+  gap: 8px;
+  align-items: center;
   justify-content: center;
-  margin: 20px 0;
+  margin-top: 12px;
+  flex-wrap: wrap;
 }
 
-/* Pagination Items */
-.page-item {
-  margin: 0 5px;
+.page {
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #fff;
+  cursor: pointer;
+  font-weight: 800;
+  transition: transform .12s ease, background .2s ease, border-color .2s ease;
 }
 
-/* Pagination Links */
-.page-link {
-  display: block;
-  padding: 10px 15px;
-  color: #007bff;
-  text-decoration: none;
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-  transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+.page:hover {
+  background: var(--surface);
+  transform: translateY(-1px);
 }
 
-/* Active Pagination Link */
-.page-item.active .page-link {
-  background-color: #007bff;
-  color: white;
-  border-color: #007bff;
+.page:disabled {
+  opacity: .6;
+  cursor: not-allowed;
 }
 
-/* Hover and Focus States */
-.page-link:hover,
-.page-link:focus {
-  background-color: #0056b3;
-  color: white;
-  border-color: #0056b3;
-  text-decoration: none;
+.page--active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
 }
 
-/* Disabled State */
-.page-item.disabled .page-link {
-  color: #6c757d;
-  pointer-events: none;
-  background-color: #fff;
-  border-color: #dee2e6;
-}
-
-/* Additional styling for a more solid look */
-.page-link {
-  font-weight: bold;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.page-link:active {
-  background-color: #004085;
-  border-color: #004085;
-  color: white;
+.pager__meta {
+  color: var(--muted);
 }
 </style>

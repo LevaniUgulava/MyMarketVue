@@ -9,7 +9,8 @@ const state = {
   allproducts:[],
   discountproducts:[],
   newproducts:[],
-  lastLoadTime: null,  
+  lastLoadTime: null,
+  allcategory:[]
 };
 
 const mutations = {
@@ -36,42 +37,48 @@ const mutations = {
   },
   setNewproducts(state, products){
     state.newproducts = products;
+  },
+  setAllCategory(state, category){
+    state.allcategory = category;
+
   }
 
 };
 
 const actions = {
   async loadData({ commit }) {
-    
     try {
-      const [productsResponse, collectionResponse, brandResponse, bannerResponse] = await Promise.all([
+      const [productsResponse, collectionResponse, brandResponse, bannerResponse, categoryResponse] = await Promise.all([
         api.get('display', {
           tokenOptional: true,
-          params: { section: ['all', 'discount','new'] }
+          params: { section: ['all', 'discount', 'new'] }
         }),
         api.get('collection/display'),
         api.get("/brand/display"),
-        api.get('/banner/display')
+        api.get('/banner/display'),
+        api.get('/category')
       ]);
-
 
       let categoriesData = [
         { key: 'all', title: 'ყველა პროდუქტი', products: productsResponse.data.all.data },
         { key: 'discount', title: 'ფასდაკლებული პროდუქტი', products: productsResponse.data.discount.data },
       ];
 
+      commit("setAllCategory", categoryResponse.data);
 
-      commit("setAllproducts",productsResponse.data.all.data);
-      commit("setDiscountproducts",productsResponse.data.discount.data);
-      commit("setNewproducts",productsResponse.data.new.data);
+      commit("setAllproducts", productsResponse.data.all.data);
+      commit("setDiscountproducts", productsResponse.data.discount.data);
+      commit("setNewproducts", productsResponse.data.new.data);
       commit("setCategories", categoriesData);
       commit("setSections", collectionResponse.data);
       commit("setBrands", brandResponse.data);
       commit("setBanners", bannerResponse.data);
+      
       commit("setApiLoaded", true);
-
+      
     } catch (error) {
       console.error('Error loading data:', error);
+      commit("setApiLoaded", false);
     }
   },
 };
@@ -84,6 +91,7 @@ const getters = {
   getSections: (state) => state.sections,
   getBrands: (state) => state.brands,
   getBanners: (state) => state.banners,
+  getAllCategory:(state)=>state.allcategory,
   getApiLoaded: (state) => state.apiLoaded,
 };
 

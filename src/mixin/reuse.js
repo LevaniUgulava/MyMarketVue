@@ -1,4 +1,5 @@
 import { Capacitor } from "@capacitor/core";
+import { computed } from "vue";
 
 
 export const authMixin ={
@@ -7,6 +8,10 @@ export const authMixin ={
       return localStorage.getItem('token') ? true : false;
     }
     }
+}
+export function useAuth() {
+  const isAuth = computed(() => !!localStorage.getItem('token'))
+  return { isAuth }
 }
 
 export const getPlatform = {

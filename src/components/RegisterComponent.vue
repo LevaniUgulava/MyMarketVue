@@ -21,28 +21,44 @@
           <form @submit.prevent="register" method="post" id="registrationform">
             <div class="input-container">
               <span v-if="nameError" class="error-text">{{ nameError }}</span>
-              <input v-model="name" :class="{ 'input-error': nameError }" type="text" name="name" id="name"
-                placeholder="" />
-              <label for="name">სახელი</label>
+              <input @input="nameError = ''" v-model="name" :class="{ 'input-error': nameError }" type="text"
+                name="name" id="name" placeholder=" " />
+              <label class="label" for="name">სახელი</label>
             </div>
             <div class="input-container">
               <span v-if="surnameError" class="error-text">{{ surnameError }}</span>
-              <input v-model="surname" :class="{ 'input-error': surnameError }" type="text" name="surname" id="surname"
-                placeholder="" />
-              <label for="surname">გვარი</label>
+              <input @input="surnameError = ''" v-model="surname" :class="{ 'input-error': surnameError }" type="text"
+                name="surname" id="surname" placeholder=" " />
+              <label class="label" for="surname">გვარი</label>
             </div>
             <div class="input-container">
               <span v-if="emailError" class="error-text">{{ emailError }}</span>
-              <input v-model="email" :class="{ 'input-error': emailError }" type="text" name="email" id="email"
-                placeholder="" />
-              <label for="email">ელ.ფოსტა</label>
+              <input @input="emailError = ''" v-model="email" :class="{ 'input-error': emailError }" type="text"
+                name="email" id="email" placeholder=" " />
+              <label class="label" for="email">ელ.ფოსტა</label>
             </div>
             <div class="input-container">
               <span v-if="passwordError" class="error-text">{{ passwordError }}</span>
-              <input v-model="password" :class="{ 'input-error': passwordError }" type="password" name="password"
-                id="password" placeholder=" " />
-              <label for="email">პაროლი</label>
+              <input @input="passwordError = ''" v-model="password" :class="{ 'input-error': passwordError }"
+                type="password" name="password" id="password" placeholder=" " />
+              <label class="label" for="email">პაროლი</label>
             </div>
+            <div class="checkbox-group">
+              <label class="checkbox-wrapper">
+                <input @change="privacy_policyError = ''" type="checkbox" id="privacy" name="privacy_policy"
+                  v-model="privacy_policy" :class="['checkbox', { 'checkbox-error': privacy_policyError }]">
+                <span :class="{ 'span-error': privacy_policyError }">კონფიდენციალურობის პოლიტიკა</span>
+              </label>
+
+
+              <label class=" checkbox-wrapper">
+                <input type="checkbox" id="marketing" name="marketing_opt_in" v-model="marketing_opt_in"
+                  class="checkbox">
+                <span>მარკეტინგული მეილი</span>
+              </label>
+            </div>
+
+
             <button class="registrationbtn">რეგისტრაცია</button>
           </form>
           <div class="links">
@@ -78,9 +94,12 @@ export default {
       surname: '',
       email: '',
       password: '',
+      privacy_policy: false,
+      marketing_opt_in: false,
       nameError: '',
       emailError: '',
       passwordError: '',
+      privacy_policyError: '',
       ErrorName: "",
       ErrorText: "",
       platform: Capacitor.getPlatform()
@@ -94,6 +113,8 @@ export default {
         { model: 'surname', errorKey: 'surnameError', message: 'გვარი აუცილებელია' },
         { model: 'email', errorKey: 'emailError', message: 'ელ.ფოსტა აუცილებელია' },
         { model: 'password', errorKey: 'passwordError', message: 'პაროლი აუცილებელია' },
+        { model: 'privacy_policy', errorKey: 'privacy_policyError', message: 'აუცილებელია' },
+
       ]);
 
       if (!valid) return;
@@ -102,7 +123,9 @@ export default {
           name: this.name,
           surname: this.surname,
           email: this.email,
-          password: this.password
+          password: this.password,
+          privacy_policy_agreed: this.privacy_policy,
+          marketing_opt_in: this.marketing_opt_in
         });
         let data = {
           "email": this.email,
@@ -132,6 +155,59 @@ export default {
 </script>
 
 <style scoped>
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 5px 0 20px 0;
+}
+
+.checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  user-select: none;
+  color: #62389c;
+}
+
+.checkbox-wrapper input[type="checkbox"] {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #62389c;
+  border-radius: 4px;
+  position: relative;
+  transition: all 0.2s ease-in-out;
+}
+
+.checkbox-error {
+  border: 2px solid #dd072e !important
+}
+
+.span-error {
+  color: #dd072e !important;
+  font-weight: 500;
+}
+
+.checkbox-wrapper input[type="checkbox"]:checked {
+  background-color: #62389c;
+  border-color: #62389c;
+}
+
+.checkbox-wrapper input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  top: 0px;
+  left: 4px;
+  width: 4px;
+  height: 9px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
 .Error {
   background-color: #ffe5e5;
   color: #b71c1c;
@@ -163,14 +239,14 @@ export default {
   gap: 10px;
 }
 
-span {
+.link {
   color: #7c7878;
   font-size: 14px;
+  padding: 5px 20px 10px 20px;
 }
 
 .dotted-line {
   display: flex;
-  margin-top: 30px;
   align-items: center;
   justify-content: center;
   position: relative;
@@ -193,6 +269,11 @@ span {
   padding: 5px;
   border-radius: 5px;
   color: #4e4c4c;
+}
+
+.checkbox-wrapper span {
+  color: #7c7878;
+  font-size: 14px;
 }
 
 
@@ -232,7 +313,7 @@ span {
 
 #registrationform {
   position: relative;
-  padding: 20px;
+  padding: 20px 20px 0 20px;
 }
 
 input {
@@ -251,7 +332,7 @@ input {
   border-color: #e74c3c;
 }
 
-label {
+.label {
   position: absolute;
   top: 50%;
   left: 10px;
@@ -263,8 +344,8 @@ label {
   transition: all 0.3s ease;
 }
 
-input:focus+label,
-input:not(:placeholder-shown)+label {
+input:focus+.label,
+input:not(:placeholder-shown)+.label {
   top: -10px;
   font-size: 12px;
   color: #333;

@@ -76,10 +76,7 @@ export default {
         }
         this.$emit('emaildata', data);
       } catch (error) {
-        if (error.response.status === 422) {
-          this.ErrorName = "არასწორი ფორმატი"
-          this.ErrorText = "გაითვალისწინეთ, პაროლი უნდა შედგებოდეს არანკლებ 8 სიმბოლოსგან, ასევე შეამოწმეთ ელ.ფოსტის ფორმატი"
-        } else if (error.response.status === 500) {
+        if (error.response.status === 500) {
           this.ErrorName = "არასწორი ელ.ფოსტა"
           this.ErrorText = "ჩანაწერები არ ემთხევა"
         }
@@ -194,7 +191,6 @@ span {
 input {
   width: 100%;
   text-indent: 15px;
-
   font-size: 16px;
   height: 50px;
   border: 1px solid #dbdbdb;
@@ -306,7 +302,7 @@ h2 {
     position: fixed;
     top: 0px;
     right: 0px;
-    width: 100vh;
+    width: 100vw;
     border-radius: none;
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 1000;
@@ -320,8 +316,14 @@ h2 {
     justify-content: center;
     align-items: center;
     border-right: 2px solid #ccc;
+    max-width: 100vw;
+    width: 100%;
     height: 100%;
     box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+  }
+
+  .title {
+    padding-top: 35px;
   }
 }
 </style>

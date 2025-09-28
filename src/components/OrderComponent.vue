@@ -12,7 +12,7 @@
     <div class="order-details">
       <div class="product-title">
         <span>დასახელება</span>
-        {{ product.name }}
+        <div>{{ product.name.length > 15 ? product.name.substring(0, 15) + '...' : product.name }}</div>
       </div>
 
       <div class="product-title">
@@ -38,7 +38,7 @@
 
       <div class="product-title">
         <span>სტატუსი</span>
-        {{ order_status }}
+        {{ statusClass }}
       </div>
     </div>
   </div>
@@ -72,10 +72,9 @@ export default {
   computed: {
     statusClass() {
       switch (this.order_status.toLowerCase()) {
-        case 'pending': return 'status-pending'
-        case 'shipped': return 'status-shipped'
-        case 'delivered': return 'status-delivered'
-        case 'canceled': return 'status-canceled'
+        case 'completed': return 'შესრულებულია'
+        case 'pending': return 'მოლოდინის რეჟიმში'
+        case 'canceled': return 'გაუქმებულია'
         default: return 'status-default'
       }
     }

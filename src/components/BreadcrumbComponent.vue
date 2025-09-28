@@ -124,6 +124,8 @@ export default {
                     return "ყველა პროდუქტი";
                 case "discount":
                     return "ფასდაკლებული პროდუქტი";
+                case "new":
+                    return "ახალი პროდუქტი";
                 default:
                     return section;
             }

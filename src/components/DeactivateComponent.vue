@@ -1,54 +1,65 @@
 <template>
-    <h3 class="modal-title">ანგარიშის დეაქტივაცია</h3>
+    <div v-if="open" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title">ანგარიშის დეაქტივაცია</h3>
 
-    <div class="modal">
+                <div class="modal">
 
-        <div class="deactivate-container">
-            <button class="close" @click="closeModal">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-
-            <div class="info">
-                გაითვალისწინეთ! ანგარიშის დეაქტივაცისას დაიკარგება ყველანაირი ინფორმაცია თქვენს შესახებ.
-                გაუქმდება თქვენი სტატუსი, შეკვეთების ისტორია და რაც თქვენთანაა ასოცირებული.
-            </div>
-            <div class="main">
-                <form @submit.prevent="deactivateAccount" method="post" id="form">
-                    <div class="input-container">
-                        <span v-if="passwordMessagesuccess" class="success-text">{{ passwordMessagesuccess }}</span>
-                        <span v-if="passwordMessageerror" class="error-text">{{ passwordMessageerror }}</span>
-                        <input v-model="password" :class="{ 'input-error': passwordMessagesuccess }"
-                            :type="isPassword ? 'password' : 'text'" name="password" id="password" placeholder=" " />
-                        <label for="password">პაროლი</label>
-
-                        <button type="button" class="toggle-password" @click="isPassword = !isPassword"
-                            aria-label="Toggle password visibility">
-                            <i :class="isPassword ? 'fa fa-eye' : 'fa fa-eye-slash'"></i>
+                    <div class="deactivate-container">
+                        <button class="close" @click="closeModal">
+                            <i class="fa-solid fa-xmark"></i>
                         </button>
-                    </div>
-                    <button class="deactivatebtn">დეაქტივაცია</button>
-                </form>
-                <div class="dotted-line">
-                    <span>ან</span>
-                </div>
-                <div class="email-section">
-                    <form @submit.prevent="verifyemail" method="post" id="form">
-                        <div class="input-container">
-                            <span v-if="successtokenMessage" class="success-text">{{ successtokenMessage }}</span>
-                            <span v-if="errortokenMessage" class="error-text">{{ errortokenMessage }}</span>
-                            <input v-model="token" :class="{ 'input-error': errortokenMessage }" placeholder=" " />
-                            <label for="password">კოდი</label>
 
-                            <a class="resend" v-if="isSendEmail">
-                                {{ remainingTime }}s
-                            </a>
-                            <button v-else type="button" class="resend" @click.prevent="sendEmail"
-                                :disabled="isSendEmail">
-                                გაგზავნა
-                            </button>
+                        <p class="modal-info">
+                            ⚠️ გაითვალისწინეთ! ანგარიშის დეაქტივაციისას წაიშლება თქვენი პირადი ინფორმაცია, შეკვეთების
+                            ისტორია და ანგარიშის სტატუსი.
+                        </p>
+                        <div class="main">
+                            <form @submit.prevent="deactivateAccount" method="post" id="form">
+                                <div class="input-container">
+                                    <span v-if="passwordMessagesuccess" class="success-text">{{ passwordMessagesuccess
+                                    }}</span>
+                                    <span v-if="passwordMessageerror" class="error-text">{{ passwordMessageerror
+                                    }}</span>
+                                    <input v-model="password" :class="{ 'input-error': passwordMessageerror }"
+                                        :type="isPassword ? 'password' : 'text'" name="password" id="password"
+                                        placeholder=" " />
+                                    <label for="password">პაროლი</label>
+
+                                    <button type="button" class="toggle-password" @click="isPassword = !isPassword"
+                                        aria-label="Toggle password visibility">
+                                        <i :class="isPassword ? 'fa fa-eye' : 'fa fa-eye-slash'"></i>
+                                    </button>
+                                </div>
+                                <button class="primary-btn danger">ანგარიშის დეაქტივაცია</button>
+                            </form>
+                            <div class="dotted-line">
+                                <span>ან</span>
+                            </div>
+                            <div class="email-section">
+                                <form @submit.prevent="verifyemail" method="post" id="form">
+                                    <div class="input-container">
+                                        <span v-if="successtokenMessage" class="success-text">{{ successtokenMessage
+                                        }}</span>
+                                        <span v-if="errortokenMessage" class="error-text">{{ errortokenMessage }}</span>
+                                        <input v-model="token" :class="{ 'input-error': errortokenMessage }"
+                                            placeholder=" " />
+                                        <label for="password">კოდი</label>
+
+                                        <a class="resend" v-if="isSendEmail">
+                                            {{ remainingTime }}s
+                                        </a>
+                                        <button v-else type="button" class="resend" @click.prevent="sendEmail"
+                                            :disabled="isSendEmail">
+                                            გაგზავნა
+                                        </button>
+                                    </div>
+                                    <button class="primary-btn">ანგარიშის დეაქტივაცია ელ.ფოსტით</button>
+                                </form>
+                            </div>
                         </div>
-                        <button class="email-btn">ანგარიშის დეაქტივაცია ელ.ფოსტით</button>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -81,7 +92,7 @@ export default {
     },
     methods: {
         closeModal() {
-            this.$emit('close', false);
+            this.$emit('close');
         },
         async deactivateAccount() {
             try {
@@ -184,6 +195,38 @@ export default {
 </script>
 
 <style scoped>
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+
+.modal-container {
+    background: #fff;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 600px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    position: relative;
+}
+
+
+.modal-header {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
 .success {
     background-color: #ffe5e5;
     border: 1px solid #ffaea8;
@@ -205,11 +248,11 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 20px;
+    padding: 0 20px;
 }
 
 .deactivate-container {
-    padding: 30px;
+    padding: 10px;
     border-radius: 15px;
     width: 100%;
     display: flex;
@@ -218,20 +261,19 @@ export default {
 }
 
 .modal-title {
-    font-size: 15px;
     font-weight: bold;
     margin-bottom: 20px;
     color: #333;
 }
 
 
-.info {
-    font-size: 13px;
-    padding: 12px;
-    background-color: #f9f9f9;
-    border: 1px solid #ccc;
+.modal-info {
+    font-size: 14px;
+    color: #4b5563;
+    background: #f3f4f6;
+    padding: 16px;
+    border-left: 4px solid #ef4444;
     border-radius: 8px;
-    color: #555;
 }
 
 .error-text,
@@ -254,7 +296,7 @@ export default {
 
 
 .input-error {
-    border-color: #e74c3c;
+    border: 1px solid #d62f1c !important;
 }
 
 .main {
@@ -272,7 +314,7 @@ export default {
     width: 100%;
     font-size: 16px;
     text-indent: 15px;
-    height: 50px;
+    height: 40px;
     border: 1px solid #dbdbdb;
     border-radius: 10px;
     outline: none;
@@ -320,44 +362,42 @@ export default {
     background: none;
     border: none;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 12px;
     color: #3d2dec;
     padding: 4px;
     z-index: 2;
 }
 
-.deactivatebtn {
-    padding: 14px;
-    font-size: 13px;
-    cursor: pointer;
-    border-radius: 8px;
-    border: none;
-    background-color: #f44336;
-    color: white;
+
+
+.primary-btn {
+    padding: 12px;
+    font-size: 14px;
     width: 100%;
-    transition: background-color 0.3s;
-}
-
-.deactivatebtn:hover {
-    background-color: #e53935;
-}
-
-.email-btn {
-    padding: 14px;
-    font-size: 13px;
-    cursor: pointer;
-    border-radius: 8px;
     border: none;
-    background-color: #4caf50;
+    border-radius: 8px;
+    background-color: #3b82f6;
     color: white;
-    width: 100%;
-    font-weight: 500;
-    transition: background-color 0.3s;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s;
 }
 
-.email-btn:hover {
-    background-color: #388e3c;
+
+.primary-btn:hover {
+    background-color: #2563eb;
 }
+
+
+.primary-btn.danger {
+    background-color: #ef4444;
+}
+
+
+.primary-btn.danger:hover {
+    background-color: #dc2626;
+}
+
 
 .dotted-line {
     display: flex;
@@ -386,7 +426,7 @@ export default {
 
 .close {
     position: absolute;
-    top: 50px;
+    top: 15px;
     right: 20px;
     background: none;
     border: none;

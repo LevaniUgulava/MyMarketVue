@@ -215,6 +215,7 @@ export default {
 .input-container input {
   width: 100%;
   font-size: 16px;
+  padding: 0px 0px !important;
   text-indent: 15px;
   height: 50px;
   border: 1px solid #dbdbdb;
@@ -491,7 +492,7 @@ h2 {
   .login-card {
     background: white;
     border-radius: 0px;
-    padding: 20px;
+    padding: 0px;
     flex-direction: column;
     justify-content: center;
     align-items: center;
@@ -499,6 +500,10 @@ h2 {
     max-width: 100vw;
     height: 100%;
     box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+  }
+
+  .links {
+    padding: 0 10px
   }
 
   .title {

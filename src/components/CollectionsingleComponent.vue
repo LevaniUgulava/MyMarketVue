@@ -35,126 +35,135 @@
 
   </div>
 
-
 </template>
 
-<script>
+<script setup>
 import ProductCardComponent from '../components/ProductCardComponent.vue';
 import api from '@/api';
 import Breadcrumb from '@/components/BreadcrumbComponent.vue';
 import ProductViewCategory from '@/views/Products/ProductViewCategory.vue';
 import SkeletonComponent from './SkeletonComponent.vue';
-export default {
-  name: 'FavoriteView',
-  components: {
-    ProductCardComponent,
-    Breadcrumb,
-    ProductViewCategory,
-    SkeletonComponent
+import { onMounted, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
+import { useHead } from '@vueuse/head';
+const route = useRoute();
+// const router = useRouter();
+const props = defineProps({
+  id: {
+    type: Number,
+    required: true
+  }
+});
+
+const products = ref([]);
+const isloaded = ref(false);
+const emitdata = ref(null);
+const emitlikemessage = ref(null)
+const emitcartmessage = ref(null)
+// const pagination = ref({})
+const title = ref("")
+
+
+
+watch(emitdata, (newVal) => {
+  if (newVal) {
+    setTimeout(() => {
+      emitdata.value = null;
+    }, 3000);
+  }
+})
+watch(emitlikemessage, (newVal) => {
+  if (newVal) {
+    setTimeout(() => {
+      emitlikemessage.value = null;
+    }, 3000);
+  }
+})
+watch(emitcartmessage, (newVal) => {
+  if (newVal) {
+    setTimeout(() => {
+      emitcartmessage.value = null;
+    }, 3000);
+  }
+})
+watch(
+  () => route.query,
+  () => {
+    getcollection();
   },
-  props: ["id"],
-  data() {
-    return {
-      products: [],
-      isloaded: false,
-      showModal: false,
-      selectedProduct: null,
-      selectedProductComments: [],
-      emitdata: null,
-      emitlikemessage: null,
-      emitcartmessage: null,
-      pagination: {},
-      title: "",
-    };
-  },
-  watch: {
-    emitdata(newVal) {
-      if (newVal) {
-        setTimeout(() => {
-          this.emitdata = null;
-        }, 3000);
-      }
-    },
-    emitlikemessage(newVal) {
-      if (newVal) {
-        setTimeout(() => {
-          this.emitlikemessage = null;
-        }, 3000);
-      }
-    },
-    emitcartmessage(newVal) {
-      if (newVal) {
-        setTimeout(() => {
-          this.emitcartmessage = null;
-        }, 3000);
-      }
-    },
-    '$route.query': {
-      handler() {
-        this.getcollection();
+  { immediate: true }
+);
+
+async function getcollection() {
+  const queryParams = new URLSearchParams(route.query);
+  const page = parseInt(queryParams.get('page')) || 1;
+  let selectedmainCategory = queryParams.get('maincategory') || '';
+  let selectedCategory = queryParams.get('category') || '';
+  let selectedsubCategory = queryParams.get('subcategory') || '';
+  let Section = queryParams.get('section') || '';
+  let selectmin = queryParams.get('min') || '';
+  let selectmax = queryParams.get('max') || '';
+  let selectedColors = queryParams.get('colors') || '';
+  let selectedSizes = queryParams.get('sizes') || ''
+  let selectedBrands = queryParams.get('brand') || ''
+  try {
+    const response = await api.get(`product/collection/${props.id}`, {
+      tokenRequired: true,
+      params: {
+        maincategory: selectedmainCategory,
+        category: selectedCategory,
+        subcategory: selectedsubCategory,
+        brands: selectedBrands,
+        section: Section,
+        min: selectmin,
+        max: selectmax,
+        sizes: selectedSizes,
+        colors: selectedColors,
+        page: page,
       },
-      immediate: true,
-    },
-  },
-  methods: {
-    async getcollection() {
-      const queryParams = new URLSearchParams(this.$route.query);
-      const page = parseInt(queryParams.get('page')) || 1;
-      let selectedmainCategory = queryParams.get('maincategory') || '';
-      let selectedCategory = queryParams.get('category') || '';
-      let selectedsubCategory = queryParams.get('subcategory') || '';
-      let Section = queryParams.get('section') || '';
-      let selectmin = queryParams.get('min') || '';
-      let selectmax = queryParams.get('max') || '';
-      let selectedColors = queryParams.get('colors') || '';
-      let selectedSizes = queryParams.get('sizes') || ''
-      let selectedBrands = queryParams.get('brand') || ''
-      try {
-        const response = await api.get(`product/collection/${this.id}`, {
-          tokenRequired: true,
-          params: {
-            maincategory: selectedmainCategory,
-            category: selectedCategory,
-            subcategory: selectedsubCategory,
-            brands: selectedBrands,
-            section: Section,
-            min: selectmin,
-            max: selectmax,
-            sizes: selectedSizes,
-            colors: selectedColors,
-            page: page,
-          },
-        });
-        this.products = response.data.collection.products;
-        this.title = response.data.collection.title;
-        // this.pagination = response.data.pagination;
+    });
+    products.value = response.data.collection.products;
+    title.value = response.data.collection.title;
+    // this.pagination = response.data.pagination;
+
+    useHead({
+      title: `${title.value} | ${products.value.length} პროდუქტი`,
+      meta: [
+        { name: "description", content: `ჩვენ გვაქვს ${products.value.length} პროდუქტი თქვენს არჩევანში.` },
+        { name: "robots", content: "index, follow" },
+        { property: "og:title", content: `${title.value} კოლექცია` },
+        { property: "og:description", content: `შეიძინეთ ${products.value.length} პროდუქტი ${title.value}-დან` },
+        { property: "og:image", content: response.data.collection.media_url },
+        { property: "og:url", content: window.location.href }
+
+      ]
+    });
 
 
-      } catch (error) {
-        console.log(error);
-      } finally {
-        this.isloaded = true;
-      }
-    },
+  } catch (error) {
+    console.log(error);
+  } finally {
+    isloaded.value = true;
+  }
+}
 
-    handleCartUpdated(cartData) {
-      this.emitdata = cartData.message;
-    },
-    handleunauthorizedlike(likedmessage) {
-      this.emitlikemessage = likedmessage;
-    },
-    handleunauthorizedcart(cartmessage) {
-      this.emitcartmessage = cartmessage;
-    },
-    changePage(page) {
-      this.$router.push({ path: '/', query: { ...this.$route.query, page } });
-    },
+function handleCartUpdated(cartData) {
+  emitdata.value = cartData.message;
+}
+function handleunauthorizedlike(likedmessage) {
+  emitlikemessage.value = likedmessage;
+}
+function handleunauthorizedcart(cartmessage) {
+  emitcartmessage.value = cartmessage;
+}
+// function changePage(page) {
+//   router.push({ path: '/', query: { ...route.query, page } });
+// }
 
-  },
-  mounted() {
-    this.getcollection();
-  },
-};
+onMounted(() => {
+  getcollection()
+})
+
 </script>
 
 <style scoped>

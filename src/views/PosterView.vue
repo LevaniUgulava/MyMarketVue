@@ -1,8 +1,8 @@
 <template>
     <div class="advertise-container">
         <div class="left">
-            <img src="../assets/image-test/კლასიკური ბრენდბი.png">
-            <p>ყველაზე გაყიდვადი <img src="../assets/svg/arrow-down.svg"></p>
+            <img class="img-banner" src="../assets/image-test/კლასიკური ბრენდბი.png">
+            <p>ყველაზე გაყიდვადი <img class="icon" src="../assets/svg/arrow-down.svg"></p>
             <div class="btns">
                 <button class="btn">ბრენდები</button>
                 <button class="btn">კატეგორიები</button>
@@ -45,6 +45,8 @@ export default {
 }
 
 .left p {
+    display: flex;
+    align-items: center;
     color: #868689;
 
 }
@@ -77,5 +79,35 @@ export default {
     background-color: #7c317c;
     color: white;
     cursor: pointer;
+}
+
+@media(max-width: 767px) {
+    .advertise-container {
+        flex-direction: column;
+        width: auto;
+        gap: 20px;
+
+    }
+
+    .btn {
+        padding: 10px 10px;
+        font-size: 11px;
+
+    }
+
+    .icon {
+        width: 15px;
+    }
+
+    .left p {
+        font-size: 12px;
+        gap: 5px;
+    }
+
+    .left,
+    .right {
+        width: 100%;
+        padding: 0px;
+    }
 }
 </style>

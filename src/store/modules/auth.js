@@ -6,13 +6,20 @@ const state = {
     token: localStorage.getItem('token') || "", 
     roles: localStorage.getItem('roles') || "", 
     userId: localStorage.getItem('userid') || "",  
-  hasPassword: {
+    checkoutInfo:{
+      checkout_in_progress:false,
+      cart_items: 0
+    },
+   hasPassword: {
     password: localStorage.getItem('hasPassword') === "true",
     platform: localStorage.getItem('authPlatform') || '',
   },
   };
   
   const mutations = {
+    SetCheckoutInfo(state,checkInfo){
+    state.checkoutInfo = checkInfo
+    },
     setName(state, name) {
       state.name = name;
       localStorage.setItem('name', name);
@@ -48,6 +55,7 @@ const state = {
   };
   
   const getters = {
+    getCheckoutInfo:(state)=>state.checkoutInfo,
     isAuthenticated: (state) => !!state.token,
     getUser: (state) => state.name, 
     getEmail: (state) => state.email, 
@@ -84,11 +92,10 @@ const state = {
 
     if (meStatus >= 200 && meStatus < 300) {
       const user   = meRes?.data?.user || {};
-      const roles  = response?.data?.roles || [];
 
       if (user?.name)  commit('setName',  user.name);
       if (user?.email) commit('setEmail', user.email);
-      if (roles.length) commit('setRoles', roles[0]);
+       commit('setRoles',meRes.data.role);
       if (user?.id)    commit('setUserId', user.id);
       commit('setHasPassword', meRes?.data?.hasPassword);
 
@@ -97,6 +104,8 @@ const state = {
     if (status >= 200 && status < 300) {
       await dispatch('product/loadData', null, { root: true });
       commit('modals/closemodal', 'loginmodal', { root: true });
+      await dispatch('auth/checkoutInfo', null, { root: true })
+
     }
 
     return { ok: true, status: status };
@@ -183,6 +192,17 @@ const state = {
             console.error('Logout failed', error);
           }    
         },
+
+        async checkoutInfo({commit}){
+          try{
+            const response = await api.get('/checkoutinfo',{
+              tokenRequired:true
+            });
+            commit('SetCheckoutInfo',response.data)
+          }catch(error){
+            console.error('checkInfo Error',error)
+          }
+        }
   };
   
   export default {

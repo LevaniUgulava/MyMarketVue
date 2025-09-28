@@ -20,7 +20,7 @@
             </div>
         </div>
 
-        <div>
+        <div class="right">
 
         </div>
     </div>
@@ -87,8 +87,7 @@ export default {
 <style scoped>
 .smallsection-container {
     display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    /* მარცხენა და მარჯვენა თანაბარია, ცენტრი ყოველთვის შუაშია */
+    grid-template-columns: 1fr 2fr 1fr;
     align-items: center;
     gap: 15px;
     height: 60px;

@@ -6,14 +6,23 @@
 
   </div>
 
-  <div>
-    <div class="products-wrapper" v-if="isAuth">
+  <div v-if="isAuth">
+    <div class="products-wrapper" v-if="products.length > 0">
       <ProductCardComponent v-for="(item) in products" :key="item.id" :initialproduct="item"
         @show-comments="showCommentsModal(item.id)" @cart-updated="handleCartUpdated"
         @liked-message="handleunauthorizedlike" @cart-message="handleunauthorizedcart" />
     </div>
     <div class="no-auth" v-else>
-      ეს არის გვერდი სადაც იხილავთ შემოთავაზებულ პრდუქციას პასდაკლებით მაგრამ აქ არის საჭირო სტატუსიკო
+      ამჯერად არარის ხელმისაწვდომი პროდუქცია
+    </div>
+  </div>
+  <div v-else>
+    <div class="no-auth">
+      <h2>თქვენი ექსკლუზიური პროდუქტები</h2>
+      <p>ამჟამად არ არის ხელმისაწვდომი პროდუქცია. თუმცა, როგორც კი სტატუსი წარმატებით მიიღება, თქვენ მიიღებთ წვდომას
+        ჩვენს ექსკლუზიურ პროდუქტებზე!</p>
+      <p>რეგისტრაციის გასავლელად წაიკითხეთ სტატუსის შესახებ ინფორმაცია და მიიღეთ განსაკუთრებული პასდაკლებები.</p>
+      <a class="explore-link" href="#">სტატუსის დეტალების ნახვა</a>
     </div>
   </div>
 
@@ -111,6 +120,62 @@ export default {
 </script>
 
 <style>
+.no-auth {
+  margin-top: 80px;
+  padding: 40px;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 1.2rem;
+  color: #333;
+  line-height: 1.8;
+}
+
+
+
+.no-auth h2 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #212529;
+  margin-bottom: 20px;
+  font-family: 'Roboto', sans-serif;
+}
+
+.no-auth p {
+  font-size: 14px;
+  color: #555;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.explore-link {
+  margin-top: 20px;
+  font-size: 14px;
+}
+
+
+.message {
+  position: sticky;
+  top: 70px;
+  z-index: 999;
+  width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: #e3f2fd;
+  color: #007bff;
+}
+
+@media (max-width: 768px) {
+  .no-auth {
+    padding: 30px;
+    margin-top: 40px;
+  }
+
+  .explore-link {
+    padding: 10px 20px;
+    font-size: 1rem;
+  }
+}
+
 @keyframes spin {
   0% {
     transform: rotate(0deg);
@@ -125,24 +190,6 @@ export default {
   margin-top: 50px;
 }
 
-.explore-link {
-  text-decoration: none;
-  background-color: #007bff;
-  color: #fff;
-  padding: 10px 20px;
-  border-radius: 6px;
-  font-size: 1rem;
-  transition: background-color 0.3s ease;
-  font-weight: 500;
-}
-
-.explore-link:hover {
-  background-color: #0056b3;
-}
-
-.no-products-message:hover {
-  transform: scale(1.05);
-}
 
 .products-wrapper {
   display: grid;

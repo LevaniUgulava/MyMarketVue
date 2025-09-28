@@ -3,7 +3,6 @@
     <div class="contact-container">
       <div class="contact">
         <div class="logo">
-          logo
           <span>შეიყვანეთ მეილი სიახლეებისთის</span>
         </div>
         <div class="input">
@@ -12,9 +11,52 @@
           <span class="mail-icon">
             <img src="../assets/svg/mail.svg">
           </span>
-          <button v-if="isShown" class="srchbtn" @pointerdown="subscription">
-            <img src="../assets/svg/keyboard-arrow-right.svg">
-          </button>
+          <div class="btn">
+            <span v-if="loading" class="spinner" aria-hidden="true"></span>
+
+            <div class="div" v-else-if="status === 'success' && !loading">
+              <div v-if="showTooltip" class="popup-message">
+                {{ Message }}
+                <div class="arrow-down"></div>
+              </div>
+              <svg @pointerdown="clear" @mouseenter="showTooltip = true" @mouseleave="showTooltip = false"
+                xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#48752C">
+                <path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z" />
+              </svg>
+
+            </div>
+
+            <div class="div" v-else-if="status === 'error' && !loading">
+              <div v-if="showTooltip" class="popup-message">
+                {{ Message }}
+                <div class="arrow-down"></div>
+              </div>
+              <svg @pointerdown="clear" @mouseenter="showTooltip = true" @mouseleave="showTooltip = false"
+                xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#EA3323">
+                <path
+                  d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
+              </svg>
+            </div>
+            <div class="div" v-else-if="status === 'exist' && !loading">
+              <div v-if="showTooltip" class="popup-message">
+                {{ Message }}
+                <div class="arrow-down"></div>
+              </div>
+              <svg @pointerdown="clear" @mouseenter="showTooltip = true" @mouseleave="showTooltip = false"
+                xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#F19E39">
+                <path
+                  d="M440-280h80v-240h-80v240Zm40-320q17 0 28.5-11.5T520-640q0-17-11.5-28.5T480-680q-17 0-28.5 11.5T440-640q0 17 11.5 28.5T480-600Zm0 520q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" />
+              </svg>
+            </div>
+
+
+
+
+
+            <button class="button" v-else-if="isShown" @pointerdown="subscription"><img
+                src="../assets/svg/keyboard-arrow-right.svg"></button>
+
+          </div>
         </div>
       </div>
 
@@ -77,6 +119,10 @@ export default {
     return {
       email: '',
       isShown: false,
+      loading: false,
+      status: '',
+      showTooltip: false,
+      Message: '',
       items: [
         { "id": 1, "url": "bla", "name": "დადდს" },
         { "id": 2, "url": "bla", "name": "დადდს" },
@@ -92,10 +138,21 @@ export default {
   watch: {
     email() {
       this.checkValidation()
+    },
+    loading() {
+      setTimeout(() => {
+        this.status = ''
+      }, 8000);
     }
   },
 
   methods: {
+    clear() {
+      this.status = ''
+      this.Message = ''
+      this.email = ''
+
+    },
     checkValidation() {
       const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
       if (!emailRegex.test(this.email)) {
@@ -105,23 +162,94 @@ export default {
       }
     },
     async subscription() {
+      this.loading = true
       try {
-        const res = await api.post('/subscribe', {
-          email: this.email
-        });
-        this.email = '';
-        console.log(res);
+        const res = await api.post('/sendgrid/addContact', {
+          email: this.email,
+          source: 'footer',
 
-      } catch (err) {
-        console.log(err.message);
+        });
+
+        if (res.status === 200) {
+          this.email = '';
+          this.status = 'success'
+          this.Message = "ელ.ფოსტა წარმატებით დაემატა"
+        }
+
+      } catch (error) {
+        if (error.response.status === 409) {
+          this.status = "exist"
+          this.Message = "ელ.ფოსტა უკვე არსებობს"
+
+        } else {
+          this.status = "error"
+          this.Message = "ელ.ფოსტა დამატებისას მოხდა შეცდომა"
+
+
+        }
+      } finally {
+        this.loading = false;
       }
 
     }
   },
+
 };
 </script>
 
 <style scoped>
+.div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.popup-message {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #fff;
+  color: #333;
+  border: 1px solid #d1d1d1;
+  border-radius: 6px;
+  width: 160px;
+  padding: 8px 10px !important;
+  font-size: 12px;
+  white-space: wrap;
+  z-index: 9;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.popup-message .arrow-down {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid #d1d1d1;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  border-right-color: currentColor;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .footer,
 .footer * {
   box-sizing: border-box;
@@ -172,7 +300,6 @@ export default {
   align-items: center;
   font-size: 14px;
   color: white;
-  gap: 10px;
 }
 
 .logo span {
@@ -180,7 +307,8 @@ export default {
 }
 
 .mail-icon,
-.srchbtn {
+.btn,
+.button {
   width: 40px;
   height: 50px;
   position: absolute;
@@ -191,18 +319,32 @@ export default {
   left: 15px;
 }
 
-.srchbtn {
+.button {
+  display: flex;
+  border: none;
+  right: 0;
+  cursor: pointer;
+  background-color: transparent;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn {
   display: flex;
   align-items: center;
   border: none;
-  cursor: pointer;
   right: 0;
   font-size: 14px;
   padding: 8px;
-  background-color: rgb(231, 237, 243);
-  border-top-right-radius: 6px;
-  border-bottom-right-radius: 6px;
+  background-color: transparent;
   color: gray;
+}
+
+.button:hover {
+  background-color: aliceblue;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+
 }
 
 .container {
@@ -303,6 +445,21 @@ export default {
     gap: 15px;
     flex-wrap: wrap;
     justify-content: center;
+  }
+}
+
+@media(max-width:767px) {
+  .contact {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .logo {
+    justify-content: center;
+  }
+
+  .input {
+    width: 100%;
   }
 }
 </style>

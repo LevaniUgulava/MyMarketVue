@@ -78,10 +78,34 @@ export default {
 
         };
     },
+    watch: {
+        open: {
+            handler(isOpen) {
+                if (!isOpen) return;
+
+                const savedTime = localStorage.getItem('remainingTime');
+                const savedStatus = localStorage.getItem('isSendEmail');
+
+                if (savedStatus === 'true' && parseInt(savedTime, 10) > 0) {
+                    return;
+                }
+
+                this.isSendEmail = true;
+                this.remainingTime = 30;
+                this.startCountdown();
+                this.saveTimerState();
+            },
+            immediate: true
+        }
+    },
+
+
+
+
     methods: {
         async sendEmail() {
             if (this.data.from === "forget") {
-
+                console.log("from forgot")
                 try {
                     const response = await api.post('/forget/password', { email: this.data.email });
 
@@ -101,8 +125,11 @@ export default {
                     }
                 }
             } else {
+                console.log("from register")
+
                 try {
                     const response = await api.post("/resend-verify", { email: this.data.email });
+                    console.log(response.status);
                     if (response.status === 200) {
                         this.isSendEmail = true;
                         this.remainingTime = 30;
@@ -183,7 +210,20 @@ export default {
             }
         },
         closeModal() {
+            localStorage.removeItem('remainingTime');
+            localStorage.removeItem('isSendEmail');
+
+            this.remainingTime = 0;
+            this.isSendEmail = false;
+
+            if (this.intervalId) {
+                clearInterval(this.intervalId);
+                this.intervalId = null;
+            }
+
             this.$emit('close');
+
+
         },
     },
     mounted() {
@@ -238,6 +278,11 @@ export default {
     color: #3d2dec;
     padding: 4px;
     z-index: 2;
+}
+
+.resend:hover {
+    background-color: #ecebfd;
+    border-radius: 5px;
 }
 
 .verification-message {
@@ -458,12 +503,13 @@ h2 {
     justify-content: space-between;
 }
 
+
 @media (max-width: 768px) {
     .modal {
         position: fixed;
         top: 0px;
         right: 0px;
-        width: 100vh;
+        width: 100vw;
         border-radius: none;
         background-color: rgba(0, 0, 0, 0.5);
         z-index: 1000;
@@ -477,8 +523,14 @@ h2 {
         justify-content: center;
         align-items: center;
         border-right: 2px solid #ccc;
+        max-width: 100vw;
+        width: 100%;
         height: 100%;
         box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .title {
+        padding-top: 35px;
     }
 }
 </style>

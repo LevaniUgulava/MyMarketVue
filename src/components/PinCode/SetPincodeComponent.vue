@@ -52,8 +52,7 @@
 </template>
 
 <script>
-import { SecureStoragePlugin } from 'capacitor-secure-storage-plugin';
-
+import { setPincode } from '@/mixin/Capacitor'
 export default {
     props: {
         open: {
@@ -102,7 +101,7 @@ export default {
         confirmPin() {
             if (this.pin === this.confirmpin) {
                 this.pinStatus = 'confirmed';
-                this.setPincode(this.pin);
+                setPincode(this.pin);
                 setTimeout(() => {
                     this.pin = '';
                     this.confirmpin = '';
@@ -119,12 +118,7 @@ export default {
                 }, 3000);
             }
         },
-        async setPincode(pincode) {
-            await SecureStoragePlugin.set({
-                key: 'pincode',
-                value: pincode.toString()
-            });
-        }
+
     },
     watch: {
         pin() {

@@ -38,7 +38,7 @@
 
 </template>
 
-<script>
+<script setup>
 import ProductCardComponent from '../../components/ProductCardComponent.vue';
 import Message from '@/components/Message/MessageComponent.vue';
 import BreadcrumbComponent from '@/components/BreadcrumbComponent.vue';
@@ -46,183 +46,227 @@ import CustomPagination from '@/components/CustomPagination.vue';
 import ProductViewCategory from './ProductViewCategory.vue';
 import SkeletonComponent from '@/components/SkeletonComponent.vue';
 import api from '@/api';
-export default {
-  name: 'HomeView',
-  components: {
-    ProductCardComponent,
-    BreadcrumbComponent,
-    Message,
-    CustomPagination,
-    ProductViewCategory,
-    SkeletonComponent
+import { ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
+import { useHead } from '@vueuse/head';
+
+const route = useRoute()
+
+const productviewcategory = ref(null);
+
+const products = ref([]);
+const isloaded = ref(false);
+const selectmin = ref(0);
+const selectmax = ref(0);
+const searchname = ref('');
+const selectedmainCategory = ref([]);
+const selectedColors = ref([]);
+const selectedSizes = ref([]);
+const selectedBrands = ref([]);
+const emitselectedmainCategory = ref([]);
+const selectedCategory = ref([]);
+const emitselectedCategory = ref([]);
+const selectedsubCategory = ref([]);
+const emitselectedsubCategory = ref([]);
+const emitdata = ref(null);
+const emitlikemessage = ref(null);
+const emitcartmessage = ref(null);
+const Section = ref(null);
+const pagination = ref({});
+const title = ref(null)
+
+
+function formatSection(section) {
+  switch (section) {
+    case "all":
+      title.value = "ყველა პროდუქტი";
+      break;
+    case "discount":
+      title.value = "ფასდაკლებული პროდუქტი";
+      break;
+    case "new":
+      title.value = "ახალი პროდუქტი";
+      break;
+    default:
+      title.value = section;
+      break;
+  }
+
+}
+function formatTitle() {
+  const storedCategories = sessionStorage.getItem('categories');
+  const parsedCategories = JSON.parse(storedCategories);
+  const mainCategories = parsedCategories.mainCategories;
+
+  const filteredCategories = selectedmainCategory.value
+    .split(',')
+    .map(id => {
+      return mainCategories.filter(category => category.id === parseInt(id));
+    })
+    .flat();
+
+  if (filteredCategories.length === 0) {
+    return '';
+  }
+
+  const categoryNames = filteredCategories.map(category => { return `${category.ka_name}ს` });
+
+  return `${categoryNames.join(', ')} |`;
+}
+
+watch(emitdata, (newVal) => {
+  if (newVal) {
+    setTimeout(() => {
+      emitdata.value = null;
+    }, 5000);
+  }
+})
+watch(emitlikemessage, (newVal) => {
+  if (newVal) {
+    setTimeout(() => {
+      emitlikemessage.value = null;
+    }, 5000);
+  }
+})
+watch(emitcartmessage, (newVal) => {
+  if (newVal) {
+    setTimeout(() => {
+      emitcartmessage.value = null;
+    }, 5000);
+  }
+})
+watch(
+  () => route.query,
+  () => {
+    fetchProducts()
   },
-
-  data() {
-    return {
-      products: [],
-      showModal: false,
-      isloaded: false,
-      selectedProduct: null,
-      selectedProductComments: [],
-      selectmin: 0,
-      selectmax: 0,
-      searchname: '',
-      maincategories: [],
-      selectedmainCategory: [],
-      selectedColors: [],
-      selectedSizes: [],
-      selectedBrands: [],
-      emitselectedmainCategory: [],
-      selectedCategory: [],
-      emitselectedCategory: [],
-      selectedsubCategory: [],
-      emitselectedsubCategory: [],
-      emitdata: null,
-      emitlikemessage: null,
-      emitcartmessage: null,
-      Section: null,
-      pagination: {},
-      maincategory: {},
-      category: {},
-      subcategory: {},
-    };
-  },
-  watch: {
-    emitdata(newVal) {
-      if (newVal) {
-        setTimeout(() => {
-          this.emitdata = null;
-        }, 5000);
-      }
-    },
-    emitlikemessage(newVal) {
-      if (newVal) {
-        setTimeout(() => {
-          this.emitlikemessage = null;
-        }, 5000);
-      }
-    },
-    emitcartmessage(newVal) {
-      if (newVal) {
-        setTimeout(() => {
-          this.emitcartmessage = null;
-        }, 5000);
-      }
-    },
-
-    '$route.query': {
-      handler: 'fetchProducts',
-      immediate: true,
-    },
-  },
-  methods: {
-    async fetchProducts() {
-      const queryParams = new URLSearchParams(this.$route.query);
-      const page = parseInt(queryParams.get('page')) || 1;
-      this.searchname = queryParams.get('searchname') || '';
-      this.selectedmainCategory = queryParams.get('maincategory') || '';
-      this.selectedCategory = queryParams.get('category') || '';
-      this.selectedsubCategory = queryParams.get('subcategory') || '';
-      this.Section = queryParams.get('section') || '';
-      this.selectmin = queryParams.get('min') || '';
-      this.selectmax = queryParams.get('max') || '';
-      this.selectedColors = queryParams.get('colors') || '';
-      this.selectedSizes = queryParams.get('sizes') || ''
-      this.selectedBrands = queryParams.get('brand') || ''
-
-      try {
-        const response = await api.get('display', {
-          tokenOptional: true,
-          params: {
-            searchname: this.searchname,
-            maincategory: this.selectedmainCategory,
-            category: this.selectedCategory,
-            subcategory: this.selectedsubCategory,
-            brands: this.selectedBrands,
-            section: this.Section,
-            min: this.selectmin,
-            max: this.selectmax,
-            sizes: this.selectedSizes,
-            colors: this.selectedColors,
-            page: page,
-          },
-        },);
-
-        if (this.Section == "all") {
-          this.products = response.data.all.data;
-          this.pagination = {
-            current_page: response.data.all.meta.current_page || 1,
-            total: response.data.all.meta.last_page
-          };
-
-        } else if (this.Section == "discount") {
-          this.products = response.data.discount.data;
-          this.pagination = {
-            current_page: response.data.discount.meta.current_page || 1,
-            total: response.data.discount.meta.last_page
-          };
-        } else if (this.Section == "new") {
-          this.products = response.data.new.data;
-          this.pagination = {
-            current_page: response.data.discount.meta.current_page || 1,
-            total: response.data.new.meta.last_page
-          };
-        }
+  { immediate: true }
+)
 
 
-      } catch (error) {
-        console.error('Error fetching products:', error);
-      } finally {
-        this.isloaded = true;
-      }
-    },
-    handlemain(maincategory) {
-      if (maincategory.length) {
-        this.emitselectedmainCategory = maincategory;
+async function fetchProducts() {
+  const queryParams = new URLSearchParams(route.query);
+  const page = parseInt(queryParams.get('page')) || 1;
+  searchname.value = queryParams.get('searchname') || '';
+  selectedmainCategory.value = queryParams.get('maincategory') || '';
+  selectedCategory.value = queryParams.get('category') || '';
+  selectedsubCategory.value = queryParams.get('subcategory') || '';
+  Section.value = queryParams.get('section') || '';
+  selectmin.value = queryParams.get('min') || '';
+  selectmax.value = queryParams.get('max') || '';
+  selectedColors.value = queryParams.get('colors') || '';
+  selectedSizes.value = queryParams.get('sizes') || ''
+  selectedBrands.value = queryParams.get('brand') || ''
 
-      } else {
-        this.emitselectedmainCategory = [];
-      }
-    },
-    handlecat(category) {
-      if (category) {
-        this.emitselectedCategory = category;
-
-      } else {
-        this.emitselectedCategory = [];
-      }
-    },
-    handlesub(subcategory) {
-      this.emitselectedsubCategory = subcategory
-    },
-
-    handleremoved(data) {
-      const categoryArray = this.$refs.productviewcategory[data.category];
-
-      if (categoryArray && data.index >= 0 && data.index < categoryArray.length) {
-        categoryArray.splice(data.index, 1);
-        this.$refs.productviewcategory.performSearch();
-      } else {
-        console.error('Invalid index or category array not found.');
-      }
-    },
+  try {
+    const response = await api.get('display', {
+      tokenOptional: true,
+      params: {
+        searchname: searchname.value,
+        maincategory: selectedmainCategory.value,
+        category: selectedCategory.value,
+        subcategory: selectedsubCategory.value,
+        brands: selectedBrands.value,
+        section: Section.value,
+        min: selectmin.value,
+        max: selectmax.value,
+        sizes: selectedSizes.value,
+        colors: selectedColors.value,
+        page: page,
+      },
+    },);
 
 
-    handleCartUpdated(cartData) {
-      this.emitdata = cartData;
-    },
-    handleunauthorizedlike(message) {
-      this.emitdata = message.message;
 
-    },
-    handleunauthorizedcart(cartmessage) {
-      this.emitcartmessage = cartmessage;
-    },
-    changePage(page) {
-      this.$router.push({ path: '/product/all', query: { ...this.$route.query, page } });
-    },
-  },
-};
+    const titleCategory = formatTitle();
+
+    formatSection(Section.value);
+
+    useHead({
+      title: `${titleCategory} ტანსაცმელი, ფეხსაცმელი და აქსესუარები - ${title.value}`,
+      meta: [
+        { name: 'description', content: `${titleCategory} ტანსაცმელი, ფეხსაცმელი და აქსესუარები. ყიდვა საუკეთესო ფასებში.` },
+        { property: 'og:title', content: `${titleCategory} ტანსაცმელი, ფეხსაცმელი და აქსესუარები - ${title.value}` },
+        { property: 'og:description', content: `${titleCategory} ტანსაცმელი, ფეხსაცმელი და აქსესუარები. ყიდვა საუკეთესო ფასებში.` },
+        { property: 'og:type', content: 'website' },
+        { property: 'og:image', content: 'URL_TO_YOUR_IMAGE' }
+      ]
+    })
+
+
+    if (Section.value == "all") {
+      products.value = response.data.all.data;
+      pagination.value = {
+        current_page: response.data.all.meta.current_page || 1,
+        total: response.data.all.meta.last_page
+      };
+
+    } else if (Section.value == "discount") {
+      products.value = response.data.discount.data;
+      pagination.value = {
+        current_page: response.data.discount.meta.current_page || 1,
+        total: response.data.discount.meta.last_page
+      };
+    } else if (Section.value == "new") {
+      products.value = response.data.new.data;
+      pagination.value = {
+        current_page: response.data.discount.meta.current_page || 1,
+        total: response.data.new.meta.last_page
+      };
+    }
+
+
+  } catch (error) {
+    console.error('Error fetching products:', error);
+  } finally {
+    isloaded.value = true;
+  }
+}
+function handlemain(maincategory) {
+  if (maincategory.length) {
+    emitselectedmainCategory.value = maincategory;
+
+  } else {
+    emitselectedmainCategory.value = [];
+  }
+}
+function handlecat(category) {
+  if (category) {
+    emitselectedCategory.value = category;
+
+  } else {
+    emitselectedCategory.value = [];
+  }
+}
+function handlesub(subcategory) {
+  emitselectedsubCategory.value = subcategory
+}
+
+function handleremoved(data) {
+  const categoryArray = productviewcategory.value[data.category];
+
+  if (categoryArray && data.index >= 0 && data.index < categoryArray.length) {
+    categoryArray.splice(data.index, 1);
+    productviewcategory.value.performSearch();
+  } else {
+    console.error('Invalid index or category array not found.');
+  }
+}
+
+
+function handleCartUpdated(cartData) {
+  emitdata.value = cartData;
+}
+function handleunauthorizedlike(message) {
+  emitdata.value = message.message;
+
+}
+function handleunauthorizedcart(cartmessage) {
+  emitcartmessage.value = cartmessage;
+}
+// function changePage(page) {
+//   $router.push({ path: '/product/all', query: { ...$route.query, page } });
+// }
 </script>
 <style scoped>
 .empty {

@@ -8,26 +8,25 @@
     <nav>
       <p v-if="!isMobile" @pointerup="redirect">Dressing</p>
 
+
       <div class="search-desktop">
+        <div v-if="isMobile" class="menu-button" @pointerdown="openMobileModal">
+          <svg xmlns="http://www.w3.org/2000/svg" height="40px" viewBox="0 -960 960 960" width="30px" fill="black">
+            <path d="M120-240v-80h480v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z" />
+          </svg>
+        </div>
         <div class="search-container">
           <input type="text" v-model="searchname" placeholder="ძიება..." class="searchname" />
           <button @pointerup.stop.prevent="performSearch" class="srchbtn">
             <i class="fa-solid fa-magnifying-glass"></i>
           </button>
         </div>
-        <div class="search-container-mobile" @pointerup.stop.prevent>
-          <div>
-            logo
-          </div>
-          <input type="text" class="searchname-mobile" v-model="searchname" placeholder="ძიება..." />
-          <button @pointerup.stop.prevent="toggleSearch" class="srchbtn-mobile">
-            <i class="fas fa-search"></i>
-          </button>
-        </div>
+
         <div v-if="searchname.length > 0 && SuggestionNames.length > 0" class="suggestions-container">
           <div v-for="(item, index) in SuggestionNames" :key="index" class="suggestion-item"
             @pointerup.stop.prevent="selectSuggestion(item)">
-            <i class="fa-solid fa-magnifying-glass"></i> <span v-html="highlightedName(item)"></span>
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <span v-html="highlightedName(item)"></span>
           </div>
         </div>
       </div>
@@ -114,6 +113,7 @@
       </div>
     </nav>
 
+
     <div class="small-sections-wrapper">
       <SmallSections />
     </div>
@@ -129,8 +129,7 @@
     <EmailConfirmation :open="confirmmodal" :data="data" @close="() => closemodal('confirmmodal')"
       @openresetmodal="() => openmodal('passwordmmodal')" />
     <PasswordComponent :open="passwordmmodal" :email="data.email" @close="() => closemodal('passwordmmodal')" />
-
-
+    <MobileSidebarModal :open="openMobile" @close="openMobile = false" />
   </div>
 </template>
 
@@ -144,6 +143,7 @@ import ForgetPassword from '@/views/Password/ForgetPassword.vue';
 import EmailConfirmation from '@/views/Password/EmailConfirmation.vue';
 import PasswordComponent from '@/views/Password/PasswordComponent.vue';
 import { Capacitor } from '@capacitor/core';
+import MobileSidebarModal from './MobileSidebarModal.vue';
 
 
 export default {
@@ -155,7 +155,8 @@ export default {
     RegisterComponent,
     ForgetPassword,
     EmailConfirmation,
-    PasswordComponent
+    PasswordComponent,
+    MobileSidebarModal
   },
   props: {
     isMobile: Boolean,
@@ -167,6 +168,7 @@ export default {
       isInputVisible: false,
       searchname: '',
       selectedmainCategory: "",
+      openMobile: false,
       selectedCategory: '',
       selectedsubCategory: '',
       Searchnames: [],
@@ -224,6 +226,9 @@ export default {
     },
     confirmmodal(newVal) {
       this.noscroll(newVal)
+    },
+    openMobile(newVal) {
+      this.noscroll(newVal)
 
     },
     name(newValue) {
@@ -232,6 +237,9 @@ export default {
   },
 
   methods: {
+    openMobileModal() {
+      this.openMobile = !this.openMobile
+    },
     logout() {
       this.logoutAction();
       this.$router.push('/');
@@ -425,9 +433,10 @@ body {
   border-top: 1px solid #e0e0e0;
 }
 
-.no-scroll {
+:global(body.no-scroll) {
   overflow: hidden;
 }
+
 
 .redirects {
   display: flex;
@@ -636,8 +645,9 @@ h1 {
 
 .search-desktop {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   width: 100%;
+  gap: 20px;
   max-width: 500px;
   margin: auto;
   position: relative;
@@ -661,7 +671,7 @@ h1 {
 
 .search-container input {
   flex-grow: 1;
-  padding: 12px 40px;
+  text-indent: 35px;
   height: 30px;
   font-size: 13px;
   border: none;
@@ -732,21 +742,10 @@ h1 {
   font-size: 14px;
   padding: 8px;
   height: 40px;
-  border-top-right-radius: 6px;
-  border-bottom-right-radius: 6px;
   color: gray;
   position: absolute;
-}
-
-
-.srchbtn {
   left: 10px;
-}
 
-
-
-.search-container-mobile {
-  display: none;
 }
 
 
@@ -761,48 +760,6 @@ h1 {
     padding: 0;
   }
 
-  .search-container-mobile {
-    position: relative;
-    width: 100%;
-    margin: auto;
-    height: 30px;
-    display: flex;
-    justify-content: space-between;
-
-  }
-
-  .searchname-mobile {
-    width: 90%;
-    height: 40px;
-    padding: 0 40px 0 15px;
-    font-size: 14px;
-    border: 1px solid #7a1dff;
-    border-radius: 5px;
-    outline: none;
-  }
-
-  .srchbtn-mobile {
-    position: absolute;
-    right: 0;
-    top: 0;
-    width: 35px;
-    height: 40px;
-    background-color: #62389c;
-    border: none;
-    color: white;
-    border-top-right-radius: 5px;
-    border-bottom-right-radius: 5px;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 2;
-  }
-
-  .search-container {
-    display: none;
-  }
 
 
   .sticky-header {
@@ -825,9 +782,6 @@ h1 {
 
   }
 
-  .search-container {
-    display: none;
-  }
 
   .suggestions-container {
     top: 140%;
@@ -836,15 +790,14 @@ h1 {
   .search-container input {
     width: 100%;
     margin: 2px;
-    font-size: 0.5rem;
+    text-indent: 25px;
+
   }
 
-  .srchbtn,
-  .catbtn {
-    width: 50px;
-    height: 40px;
-    font-size: 1rem;
+  .srchbtn {
+    left: 5px;
   }
+
 
   .user-section {
     display: none;

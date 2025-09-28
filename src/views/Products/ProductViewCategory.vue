@@ -311,9 +311,22 @@ export default {
                     return ids.includes(String(main.id));
                 });
                 this.setMainCategory(obj);
-            } else {
-                console.log('No maincategory in query');
             }
+            if (currentQuery.category) {
+                const ids = currentQuery.category.split(',');
+                const obj = this.Categories.filter((main) => {
+                    return ids.includes(String(main.id));
+                });
+                this.setCategory(obj);
+            }
+            if (currentQuery.subcategory) {
+                const ids = currentQuery.subcategory.split(',');
+                const obj = this.subCategories.filter((main) => {
+                    return ids.includes(String(main.id));
+                });
+                this.setSubCategory(obj);
+            }
+
         },
 
 

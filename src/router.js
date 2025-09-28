@@ -1,4 +1,7 @@
 import { createWebHistory, createRouter } from "vue-router";
+import store from "./store";
+import { useHead } from "@vueuse/head";
+
 const routes = [
   {
     path: "/:pathMatch(.*)*",
@@ -15,8 +18,10 @@ const routes = [
         name: "Home",
         component: () => import("@/views/Products/MainHomeView.vue"),
         meta:{
-          title:"Lemale - მთავარი გვერდი",
-          description:"გვერდი სადაც შეიძენთ ქალისა და კაცის ტანსაცმელს,ფეხსაცმელს,სათვალეს,შარვალი,კაბა,ორეული"
+          title:"name - ტანსაცმელი, ფეხსაცმელი და აქსესუარები | ონლაინ მაღაზია | ბრენდები",
+          description:"შეიძინეთ ქალისა და კაცის ტანსაცმელი, ფეხსაცმელი, აქსესუარები და ფეშენული ბრენდები საუკეთესო ფასად ჩვენს ონლაინ მაღაზიაში. გადახედეთ კოლექციას და გააკეთეთ არჩევანი!",
+          ogtitle: "ტანსაცმელი, ფეხსაცმელი და აქსესუარები | ონლაინ მაღაზია | ბრენდები",
+          ogdescription:"შეიძინეთ ქალისა და კაცის ტანსაცმელი, ფეხსაცმელი, აქსესუარები და ფეშენული ბრენდები საუკეთესო ფასად ჩვენს ონლაინ მაღაზიაში. ეწვიეთ ჩვენს მთავარ გვერდს და მოძებნეთ საუკეთესო პროდუქტები!"
         }
       },
      
@@ -24,7 +29,6 @@ const routes = [
         path: "product",
         name: "allproduct",
         component: () => import("@/views/Products/ProductsView.vue"),
-        meta:{title:"პროდუქტები"}
 
       },
       {
@@ -35,6 +39,9 @@ const routes = [
         path: "cart",
         name: "Cart",
         component: () => import("@/views/CartView.vue"),
+        meta:{
+          title:"ჩემი კალათა - name"
+        }
       },
       {
         path: "profile",
@@ -42,6 +49,7 @@ const routes = [
         component: () => import("@/views/ProfileView.vue"),
         meta: {
           needsauth: true,
+          title:"პირადი კაბინეტი - პირადი ინფორმაცია"
         },
         children:[
           {
@@ -52,12 +60,20 @@ const routes = [
           {
           path: "address",
           name:"address-info",
-          component: () => import("@/components/profile/Components/AddressComponent.vue")
+          component: () => import("@/components/profile/Components/AddressComponent.vue"),
+          meta:{
+            title:"პირადი კაბინეტი - მისამართები"
+
+          }
           },
           {
           path: "status",
           name:"status-info",
-          component: () => import("@/components/UserStatusComponent.vue")
+          component: () => import("@/components/UserStatusComponent.vue"),
+           meta:{
+            title:"პირადი კაბინეტი - სტატუსი"
+          }
+          
           },
           {
           path: "verification",
@@ -67,8 +83,13 @@ const routes = [
           {
           path: "reset",
           name:"reset",
-          component: () => import("@/components/profile/Components/ResetpasswordComponent.vue")
+          component: () => import("@/components/profile/Components/ResetpasswordComponent.vue"),
+          meta:{
+            title:"პირადი კაბინეტი - პაროლის შეცვლა"
+
+          }
           },
+          
           {
           path: "delete",
           name:"deleteacc",
@@ -88,6 +109,10 @@ const routes = [
         path: "favorites",
         name: "favorite",
         component: () => import("@/views/FavoriteView.vue"),
+            meta:{
+            title:"სურვილების სია - name"
+
+          }
       },
       {
         path: "orders",
@@ -110,12 +135,19 @@ const routes = [
         path: "exclusive",
         name: "ExclusivePage",
         component: () => import("@/components/Status/ExclusivePage.vue"),
+        meta:{
+          title:"ექსკლუზიური პროდუქტების ჩამონათვალი",
+          description: "ექსკლუზიური პროდუქტები, მომხმარებელზე მორგებული შეთავაზებები, ფასდაკლებები ტანსაცმელზე, ფეხსაცმელზე და აქსესუარებზე",
+        }
       },
   
       {
         path: "checkout",
         name: "checkout",
         component: () => import("@/views/CheckoutView.vue"),
+         meta: {
+           needsauth: true,
+         },
       },
   
     ],
@@ -147,6 +179,17 @@ const routes = [
       needsauth: true,
     },
     children: [
+      {
+        path: "mail",
+        name: "mail",
+        component: () => import("@/components/Admin/Mail/MailComponent.vue"),
+      },  
+        {
+        path: "mail/:id",
+        name: "singlemail",
+        component: () => import("@/components/Admin/Mail/SingleMailComponent.vue"),
+        props:true
+      },  
       {
         path: "dashboard",
         name: "Admindashboard",
@@ -303,19 +346,21 @@ const router = createRouter({
 });
 
 router.afterEach((to,from) => {
-  document.title = to.meta.title || "ნაგულისხმევი სათაური";
-  const metaDescription = document.querySelector('meta[name="description"]');
-  if (metaDescription) {
-    metaDescription.setAttribute('content', to.meta.description || "ნაგულისხმევი აღწერა");
-  } else {
-    const newMetaDescription = document.createElement('meta');
-    newMetaDescription.name = "description";
-    newMetaDescription.content = to.meta.description || "ნაგულისხმევი აღწერა";
-    document.head.appendChild(newMetaDescription);
-  }
   if (from.path !== to.path) {
     window.scrollTo(0, 0);
   }
+    useHead({
+    title: to.meta.title,
+    meta: [
+      { name: "description", content: to.meta.description },
+      { name: "robots", content: "index, follow" },
+      { name: "og:title'", content: to.meta.ogtitle },
+      { property: 'og:description', content: to.meta.ogdescription || 'Default description for SEO purposes.' },
+      { property: 'og:image', content: 'URL_TO_DEFAULT_IMAGE' },
+      { property: 'og:url', content: window.location.href },
+
+    ]
+  });
 });
 
 router.beforeEach((to, from, next) => {
@@ -324,7 +369,7 @@ router.beforeEach((to, from, next) => {
 
   if (to.meta.needsauth) {
     if (to.path.startsWith('/admin')) {
-      if (isAuthenticated && roles !== "default") {
+      if (isAuthenticated && (roles !== "default" && roles !== null)) {
         next();
       } else {
         next(`/admin/login`);
@@ -334,8 +379,7 @@ router.beforeEach((to, from, next) => {
       if (isAuthenticated) {
         next();
       } else {
-        localStorage.setItem("loginmodal", true);
-        
+        store.commit('modals/openmodal', 'loginmodal', { root: true });
        next(`/`);   
     }
     }

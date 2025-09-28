@@ -5,13 +5,35 @@
 
     <HomeSideBarVue class="sidebar" v-if="isMobile" />
 
+
     <div class="main-content">
       <router-view v-slot="{ Component }">
         <component :is="Component" />
       </router-view>
     </div>
+    <div class="checkout" @pointerdown.stop.prevent="redirect" v-if="getCheckoutInfo.checkout_in_progress && !checkout">
+      <svg class="icon basket" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+        fill="white">
+        <path
+          d="m40-240 20-80h220l-20 80H40Zm80-160 20-80h260l-20 80H120Zm623 240 20-160 29-240 10-79-59 479ZM240-80q-33 0-56.5-23.5T160-160h583l59-479H692l-11 85q-2 17-15 26.5t-30 7.5q-17-2-26.5-14.5T602-564l9-75H452l-11 84q-2 17-15 27t-30 8q-17-2-27-15t-8-30l9-74H220q4-34 26-57.5t54-23.5h80q8-75 51.5-117.5T550-880q64 0 106.5 47.5T698-720h102q36 1 60 28t19 63l-60 480q-4 30-26.5 49.5T740-80H240Zm220-640h159q1-33-22.5-56.5T540-800q-35 0-55.5 21.5T460-720Z" />
+      </svg>
 
-    <FooterComponentVue v-if="!isMobile" class="footer" />
+      <svg class="icon arrow" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+        fill="white">
+        <path d="m560-240-56-58 142-142H160v-80h486L504-662l56-58 240 240-240 240Z" />
+      </svg>
+      <span class="badge">{{ getCheckoutInfo.cart_items }}</span>
+    </div>
+
+    <div class="chat-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" height="26px" viewBox="0 -960 960 960" width="26px" fill="white">
+        <path
+          d="M80-80v-720q0-33 23.5-56.5T160-880h640q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H240L80-80Zm126-240h594v-480H160v525l46-45Zm-46 0v-480 480Z" />
+      </svg>
+    </div>
+
+
+    <FooterComponentVue class="footer" />
   </div>
 </template>
 
@@ -21,6 +43,7 @@ import HomeSideBarVue from '@/components/HomeSideBar.vue';
 import FooterComponentVue from '@/components/FooterComponent.vue';
 import SwiperContent from '@/components/SwiperContent.vue';
 import { getPlatform } from '@/mixin/reuse';
+import { mapGetters } from 'vuex'
 export default {
   name: 'MainLayout',
   mixins: [getPlatform],
@@ -36,14 +59,25 @@ export default {
       platform: this.currentPlatform
     };
   },
+  computed: {
+    ...mapGetters('auth', ['getCheckoutInfo']),
+    checkout() {
+      return this.$route.path.startsWith('/checkout');
+    }
+
+  },
   mounted() {
     this.checkPlatform();
     window.addEventListener('resize', this.checkScreenSize);
+    this.$store.dispatch('auth/checkoutInfo', null, { root: true });
   },
   beforeUnmount() {
     window.removeEventListener('resize', this.checkScreenSize);
   },
   methods: {
+    redirect() {
+      this.$router.push({ name: 'checkout' });
+    },
     checkPlatform() {
       const isIos = this.platform === "ios";
 
@@ -65,6 +99,78 @@ export default {
 </script>
 
 <style scoped>
+.chat-icon {
+  position: fixed;
+  display: flex;
+  align-items: center;
+  z-index: 1000;
+  bottom: 20px;
+  background-color: #7c317c;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 100px;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.checkout {
+  position: fixed;
+  display: flex;
+  align-items: center;
+  z-index: 1000;
+  bottom: 90px;
+  background-color: #7c317c;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 100px;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.checkout .icon {
+  position: absolute;
+  transition: all 0.35s ease;
+}
+
+.checkout .icon.basket {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.checkout .icon.arrow {
+  opacity: 0;
+  transform: translateY(10px) scale(0.9);
+}
+
+.checkout:hover .icon.basket {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.9);
+}
+
+.checkout:hover .icon.arrow {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.checkout .badge {
+  position: absolute;
+  top: -2px;
+  right: 0;
+  width: 22px;
+  height: 22px;
+  background-color: red;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+}
+
 .banner {
   position: fixed;
   top: 0;
@@ -152,9 +258,6 @@ export default {
     padding-bottom: 20px;
   }
 
-  .footer {
-    width: 100% !important;
-    margin-left: 0 !important;
-  }
+
 }
 </style>

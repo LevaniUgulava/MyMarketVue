@@ -48,7 +48,7 @@
           <div class="dotted-line">
             <span></span>
           </div>
-          <div class="Error" v-if="ErrorName && ErrorText">
+          <div :class="['Error', success ? 'success' : 'error']" v-if="ErrorName && ErrorText">
             <strong>{{ ErrorName }}</strong>
             <hr />
             <p>{{ ErrorText }}</p>
@@ -62,6 +62,7 @@
 <script>
 import api from '@/api';
 import { validateInputFields } from '@/components/utils/validate';
+import store from '@/store';
 import { Capacitor } from '@capacitor/core';
 
 export default {
@@ -76,7 +77,8 @@ export default {
       ErrorText: "",
       isNewPassword: true,
       isRepeatPassword: true,
-      platform: Capacitor.getPlatform()
+      platform: Capacitor.getPlatform(),
+      success: false,
 
 
     };
@@ -99,6 +101,8 @@ export default {
         if (response.status === 200) {
           this.ErrorName = "პაროლის აღდგენა"
           this.ErrorText = "პაროლი წარმატებით შეიცვალა"
+          this.success = true;
+          store.commit('modals/closemodal', 'passwordmmodal', { root: true });
         }
       } catch (error) {
         if (error.response.status === 404 || error.response.status === 500) {
@@ -120,9 +124,6 @@ export default {
 
 <style scoped>
 .Error {
-  background-color: #ffe5e5;
-  border: 1px solid #ffaea8;
-  color: #b71c1c;
   padding: 16px 24px;
   margin: 20px auto;
   border-radius: 10px;
@@ -130,6 +131,20 @@ export default {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   line-height: 1.5;
+}
+
+.success {
+  background-color: #e6f4ea;
+  color: #1b5e20;
+  border: 1px solid #81c784;
+}
+
+
+.error {
+  background-color: #ffe5e5;
+  color: #b71c1c;
+  border: 1px solid #ffaea8;
+
 }
 
 .Error strong {
@@ -357,7 +372,7 @@ h2 {
     position: fixed;
     top: 0px;
     right: 0px;
-    width: 100vh;
+    width: 100vw;
     border-radius: none;
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 1000;
@@ -371,8 +386,14 @@ h2 {
     justify-content: center;
     align-items: center;
     border-right: 2px solid #ccc;
+    max-width: 100vw;
+    width: 100%;
     height: 100%;
     box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+  }
+
+  .title {
+    padding-top: 35px;
   }
 }
 </style>

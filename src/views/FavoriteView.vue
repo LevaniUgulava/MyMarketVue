@@ -99,8 +99,10 @@ export default {
 }
 
 .primary-btn {
+  display: flex;
   text-decoration: none;
-  background-color: #9b51e0;
+  background-color: #7c317c;;
+  align-items: center;
   color: white;
   padding: 10px 15px;
   border-radius: 8px;

@@ -1,28 +1,29 @@
 <template>
     <div class="last-container">
-        <div class="last">
-            <i class="fa fa-gift"></i> <!-- Icon for "Gifting" -->
-            <span class="title">სასაჩუქრე ბარათი</span>
-            <span class="description">ახარებს საჩუქრად ელეხტრო შესაფერისი სასაჩუქრე ბარათი – პატარის ჩადეფის
-                ვაჩუქერო!</span>
-        </div>
-        <div class="last">
-            <i class="fa fa-shoe-prints"></i> <!-- Icon for "Shoes" -->
-            <span class="title">გაცვეთილი ორბის ტექსტის</span>
-            <span class="description">ვიცკი მწალობით New Balance, Peak, Emporio Armani EA7 </span>
-        </div>
-        <div class="last">
-            <i class="fa fa-truck"></i> <!-- Icon for "Delivery" -->
-            <span class="title">ვეტრი მიწოდება</span>
-            <span class="description">ზღავმართორად 200 ₾-ში გად აწ დასღვებასი მწეკვეტად მარტფორმ ვერებიც პირაქ
-                ათქარჩტვ!</span>
+        <div v-for="(item, index) in data" :key="index" class="last">
+            <div class="last-title">
+                <i :class="item.icon"></i>
+                <span class="title">{{ item.title }}</span>
+            </div>
+
+            <span class="description">{{ item.description }}</span>
         </div>
     </div>
 </template>
 
 <script>
 export default {
-    // Any necessary JS can be added here
+    data() {
+        return {
+            data: [
+                {
+                    "id": 1, "icon": "fa fa-gift", "title": "სასაჩუქრე ბარათი", "description": "ახარებს საჩუქრად ელეხტრო შესაფერისი სასაჩუქრე ბარათი  პატარის ჩადეფის ვაჩუქერო!"
+                },
+                { "id": 2, "icon": "fa fa-shoe-prints", "title": "გაცვეთილი ორბის ტექსტის", "description": "ვიცკი მწალობით New Balance, Peak, Emporio Armani EA7" },
+                { "id": 3, "icon": "fa fa-truck", "title": "ვეტრი მიწოდება", "description": "ზღავმართორად 200 ₾-ში გად აწ დასღვებასი მწეკვეტად მარტფორმ ვერებიც პირაქ ათქარჩტვ!" }
+            ]
+        }
+    },
 }
 </script>
 
@@ -71,5 +72,34 @@ export default {
     line-height: 1.6;
     width: 60%;
 
+}
+
+.last-title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+@media(max-width:767px) {
+    .last-container {
+        flex-direction: column;
+    }
+
+    .last {
+        width: 100%;
+    }
+
+    .last-title {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        align-items: center;
+        width: 100%;
+    }
+
+    .description {
+        width: 100%;
+        text-align: start;
+    }
 }
 </style>

@@ -25,7 +25,7 @@
                 <div class="data">
                     <div class="product-name">
                         <span>დასახელება</span>
-                        {{ item.name }}
+                        <div>{{ item.name.length > 15 ? item.name.substring(0, 15) + '...' : item.name }}</div>
                     </div>
 
                     <div class="quantity-control">
@@ -50,9 +50,15 @@
 
                     <div class="price">
                         <span>ფასი</span>
-                        <div>
-                            {{ item.price }} <i class="fa-solid fa-lari-sign"></i>
+                        <div class="one">
+                            {{ item.pivot.retail_price }} <i class="fa-solid fa-lari-sign"></i>
+                            <svg v-if="!item.pivot.isOriginal" xmlns="http://www.w3.org/2000/svg" height="20px"
+                                viewBox="0 -960 960 960" width="20px" fill="gold">
+                                <path
+                                    d="M240-144v-624h366q8 0 16 3.5t13 10.5l133 178-133 178q-5 8-13 11t-16 3H312v240h-72Z" />
+                            </svg>
                         </div>
+
                     </div>
 
                     <div class="size-select"
@@ -243,6 +249,7 @@ export default {
         async checkout() {
             try {
                 const mappedcart = this.getMappedCart();
+                console.log(mappedcart);
                 await api.post("/temporder", { products: mappedcart }, { tokenRequired: true });
                 this.$router.push({ name: "checkout" });
             } catch (error) {
@@ -266,6 +273,7 @@ export default {
                 name: item.name,
                 product_id: item.id,
                 type: "cart",
+                seeOriginal: item.pivot.isOriginal,
                 color,
                 size,
                 retail_price: item.pivot.retail_price,
@@ -367,7 +375,7 @@ export default {
 
 .primary-btn {
     text-decoration: none;
-    background-color: #9b51e0;
+    background-color: #7c317c;
     color: white;
     padding: 10px 15px;
     border-radius: 8px;
@@ -377,22 +385,24 @@ export default {
 }
 
 .primary-btn:hover {
-    background-color: #7e3ae3;
+    background-color: #944894;
+
 }
 
 .secondary-btn {
     text-decoration: none;
-    color: #9b51e0;
+    color: #7c317c;
+    ;
     font-size: 13px;
     padding: 10px 15px;
     font-weight: 600;
     border-radius: 8px;
-    border: 2px solid #9b51e0;
+    border: 2px solid #7c317c;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .secondary-btn:hover {
-    background-color: #9b51e0;
+    background-color: #7c317c;
     color: white;
 }
 
@@ -507,6 +517,11 @@ export default {
 
 .price span {
     font-size: 13px;
+}
+
+.price .one {
+    display: flex;
+    align-items: center;
 }
 
 .price {

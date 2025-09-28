@@ -118,6 +118,7 @@ export default {
     overflow-x: auto;
     white-space: nowrap;
     max-width: 90%;
+    height: 120px;
     margin: auto;
     align-items: center;
     scroll-behavior: smooth;

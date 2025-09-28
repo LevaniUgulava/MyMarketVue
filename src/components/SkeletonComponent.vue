@@ -1,6 +1,6 @@
 <template>
     <div :class="['skeletondiv', isMain ? 'isMain' : 'isProduct']">
-        <div class="skeleton" v-for="index in (isMain ? 6 : 8)" :key="index">
+        <div class="skeleton" v-for="index in (isMain ? 5 : 8)" :key="index">
             <div class="skeleton-item">
                 <div class="skeleton-image"></div>
                 <div class="skeleton-name"></div>
@@ -29,7 +29,7 @@ export default {
 }
 
 .isMain {
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(5, 1fr);
 }
 
 .isProduct {

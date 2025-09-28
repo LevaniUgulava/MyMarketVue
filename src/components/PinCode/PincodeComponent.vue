@@ -1,7 +1,20 @@
 <template>
     <div class="overlay">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-
+        <div class="message-container">
+            <div class="message">
+                <div>
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                        fill="#FFFFFF">
+                        <path
+                            d="M480-120 0-600q95-97 219.5-148.5T480-800q136 0 260.5 51.5T960-600l-40 40q-28-36-69.5-58T760-640q-83 0-141.5 58.5T560-440q0 49 22 90.5t58 69.5L480-120Zm280-40q-17 0-29.5-12.5T718-202q0-17 12.5-29.5T760-244q17 0 29.5 12.5T802-202q0 17-12.5 29.5T760-160Zm-30-128q0-38 10-59t43-54q21-21 27-31.5t6-26.5q0-18-14-31.5T765-504q-21 0-39 13.5T700-454l-54-22q12-38 44-61t75-23q49 0 80 29t31 74q0 23-10 41t-38 46q-24 24-30 38.5t-6 43.5h-62Z" />
+                    </svg>
+                </div>
+                <div>
+                    ინტერნეტთან კავშირი შეწყდა
+                </div>
+            </div>
+        </div>
         <div v-show="visible" class="sheet">
             <div class="user-section">
                 <div class="avatar"><i class="fa-solid fa-user"></i></div>
@@ -39,14 +52,18 @@
                         <img src="../../assets/svg/delete.svg">
                     </button>
                 </div>
-
+                <div class="forget-container">
+                    <div class="forget">
+                        დაგავიწყდა პასკოდი?
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </template>
 
 <script>
-import { SecureStoragePlugin } from 'capacitor-secure-storage-plugin';
+import { checkPincode } from '@/mixin/Capacitor';
 
 
 
@@ -78,14 +95,9 @@ export default {
     },
     methods: {
         async verify() {
-            try {
-                const res = await SecureStoragePlugin.get({ key: 'pincode' }).catch(() => null)
-                const savedPin = res?.value ?? res
-                if (String(this.pin) === String(savedPin)) {
-                    this.$emit('unlocked')
-                }
-            } catch (error) {
-                error.message = 'Verification error'
+            const response = await checkPincode(this.pin);
+            if (response) {
+                this.$emit('unlock');
             }
         },
         open() {
@@ -132,6 +144,56 @@ export default {
     background-position: center;
     background-repeat: no-repeat;
 }
+
+.forget-container {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+
+}
+
+.forget {
+    display: flex;
+    width: 80%;
+    border-radius: 10px;
+    border: 1px solid #dbd9d9;
+    background-color: #eaeaea;
+    padding: 10px;
+    justify-content: center;
+}
+
+.message-container {
+    position: fixed;
+    bottom: 70%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.message {
+    width: 80%;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 18px;
+    align-items: center;
+    background: linear-gradient(135deg, #ff0003, #ff0600);
+    color: #fff;
+    border: 1px solid #ffa39e;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    letter-spacing: 0.6px;
+    backdrop-filter: blur(4px);
+}
+
+
+
 
 .sheet {
     position: fixed;

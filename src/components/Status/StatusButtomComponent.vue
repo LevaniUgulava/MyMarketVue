@@ -1,24 +1,25 @@
 <template>
     <div @pointerdown.stop.prevent="goToStatusPage">
-        <swiper v-if="isAuth" :modules="[Autoplay, EffectFade]" :slidesPerView="1" :loop="false"
+        <!-- <swiper v-if="isAuth" :modules="[Autoplay, EffectFade]" :slidesPerView="1" :loop="false"
             :autoplay="{ delay: 10000, disableOnInteraction: false }" :pagination="{ clickable: false }"
-            :navigation="false">
+            :navigation="false"> -->
 
-            <swiper-slide>
-                <div class="swiperbtn">
-                    სტატუსის მიხედვით
-                </div>
-            </swiper-slide>
-
-            <swiper-slide>
-                <CountDownComponent v-if="status && status.start_data && status.end_date" class="swiperbtn"
-                    :startTime="new Date(status.start_data)" :endTime="new Date(status.end_date)" />
-            </swiper-slide>
-        </swiper>
-
-        <div v-else class="swiperbtn">
+        <!-- <swiper-slide> -->
+        <div class="swiperbtn">
             სტატუსის მიხედვით
         </div>
+        <!-- </swiper-slide> -->
+
+        <!-- <swiper-slide>
+                <CountDownComponent v-if="status && status.userstatus_time && status.end_time" class="swiperbtn"
+                    :startTime="new Date()" :endTime="new Date(status.end_time)" />
+
+            </swiper-slide> -->
+        <!-- </swiper> -->
+
+        <!-- <div v-else class="swiperbtn">
+            სტატუსის მიხედვით
+        </div> -->
 
     </div>
 
@@ -26,32 +27,32 @@
 
 <script>
 import api from '@/api';
-import CountDownComponent from '../CountDownComponent.vue';
+// import CountDownComponent from '../CountDownComponent.vue';
 
-import { Swiper, SwiperSlide } from "swiper/vue";
-import { Autoplay, EffectFade } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/effect-fade";
+// import { Swiper, SwiperSlide } from "swiper/vue";
+// import { Autoplay, EffectFade } from "swiper/modules";
+// import "swiper/css";
+// import "swiper/css/navigation";
+// import "swiper/css/effect-fade";
 import { authMixin } from '@/mixin/reuse';
 export default {
     mixins: [authMixin],
     components: {
-        CountDownComponent,
-        Swiper,
-        SwiperSlide,
+        // CountDownComponent,
+        // Swiper,
+        // SwiperSlide,
     },
     data() {
         return {
             status: null,
         };
     },
-    setup() {
-        return {
-            Autoplay,
-            EffectFade,
-        };
-    },
+    // setup() {
+    //     return {
+    //         Autoplay,
+    //         EffectFade,
+    //     };
+    // },
     methods: {
         async goToStatusPage() {
             this.$router.push('/exclusive')
@@ -63,6 +64,7 @@ export default {
                 });
 
                 this.status = statusResponse.data.status;
+
 
             } catch (error) {
                 console.error('Error fetching data:', error);

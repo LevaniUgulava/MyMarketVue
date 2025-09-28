@@ -8,7 +8,7 @@
         შესრულებული შეკვეთები
       </button>
     </div>
-  
+
     <div v-if="apiLoaded && showPending" class="order-section">
 
       <div v-if="OrderProducts.length > 0" class="order-box">
@@ -63,68 +63,105 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import api from '@/api';
 import OrderComponent from '@/components/OrderComponent.vue';
+import { useHead } from '@vueuse/head';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
-export default {
-  components: {
-    OrderComponent
-  },
-  data() {
-    return {
-      OrderProducts: [],
-      CompletedProducts: [],
-      apiLoaded: false,
-      loading: true,
-    };
-  },
-  computed: {
-    showPending() {
-      return this.$route.query.section === 'pending';
+
+const OrderProducts = ref([]);
+const CompletedProducts = ref([]);
+const apiLoaded = ref(false);
+// const loading = ref(true);
+const route = useRoute();
+const router = useRouter();
+
+const showPending = computed(() => {
+  return route.query.section === 'pending';
+})
+
+useHead({
+  title: "შეკვეთები - თქვენი მიმდინარე და შესრულებული შეკვეთები",
+  meta: [
+    {
+      name: 'description',
+      content: 'მოუსწრო ჩამორთმეული შეკვეთები, სადაც შეგიძლიათ შეამოწმოთ თქვენი ყველა მიმდინარე და დასრულებული შეკვეთა. მარტივი ინტერფეისით განიხილეთ დეტალები და სტატუსები.',
     },
-    ordersReady() {
-      return this.apiLoaded && (this.OrderProducts.length > 0 || this.CompletedProducts.length > 0);
-    }
-  },
-  methods: {
-    async getOrders() {
-      this.apiLoaded = false;
-      try {
-        const response = await api.get('orders', {
-          tokenRequired: true
-        });
-        this.OrderProducts = response.data.Pending || [];
-        this.CompletedProducts = response.data.Completed || [];
-        this.apiLoaded = true;
-      } catch (error) {
-        console.error(error);
-        this.apiLoaded = true;
-      } finally {
-        this.loading = false;
-      }
+    {
+      name: 'robots',
+      content: 'index, follow',
     },
-    toggleSection(section) {
-      this.$router.push({ query: { section } });
+    {
+      property: 'og:title',
+      content: 'შეკვეთები - თქვენი მიმდინარე და შესრულებული შეკვეთები',
+    },
+    {
+      property: 'og:description',
+      content: 'გადაამოწმეთ თქვენი შეკვეთები და შეიტყვეთ დეტალები, როგორიცაა შეკვეთის ნომერი, მიმღები და მისამართი. გააკეთეთ ნებისმიერი ცვლილება თქვენს შეკვეთაში მარტივად.',
+    },
+    {
+      property: 'og:image',
+      content: 'URL_TO_AN_IMAGE_IF_NEEDED',
+    },
+    {
+      property: 'og:url',
+      content: 'https://yourwebsite.com/orders?section=pending',
+    },
+    {
+      name: 'twitter:card',
+      content: 'summary_large_image',
+    },
+    {
+      name: 'twitter:title',
+      content: 'შეკვეთები - თქვენი მიმდინარე და შესრულებული შეკვეთები',
+    },
+    {
+      name: 'twitter:description',
+      content: 'გადამოწმეთ თქვენი შეკვეთების სტატუსი, სასურველი დეტალები და მეტი ამ გვერდზე.',
+    },
+    {
+      name: 'twitter:image',
+      content: 'URL_TO_AN_IMAGE_IF_NEEDED',
     }
-  },
-  mounted() {
-    this.getOrders();
-  },
-  watch: {
-    '$route.query.section': function (newSection) {
-      if (newSection === 'pending') {
-        this.apiLoaded = true;
-      }
-    }
+  ],
+});
+
+async function getOrders() {
+  apiLoaded.value = false;
+  try {
+    const response = await api.get('orders', {
+      tokenRequired: true
+    });
+    OrderProducts.value = response.data.Pending || [];
+    CompletedProducts.value = response.data.Completed || [];
+    apiLoaded.value = true;
+  } catch (error) {
+    console.error(error);
+    apiLoaded.value = true;
   }
-};
+  //  finally {
+  //   loading.value = false;
+  // }
+}
+function toggleSection(section) {
+  router.push({ query: { section } });
+}
+onMounted(() => {
+  getOrders();
+})
+
+watch(route.query.section, (newSection) => {
+  if (newSection === 'pending') {
+    apiLoaded.value = true;
+  }
+})
+
 </script>
 
 
 <style scoped>
-
-
 .container {
   margin: 20px auto;
   padding: 20px;
@@ -150,7 +187,8 @@ export default {
 }
 
 .toggle-buttons button.active {
-  color: #9b51e0;
+  color: #7c317c;
+  ;
   font-weight: bold;
 }
 
@@ -159,7 +197,7 @@ export default {
   display: block;
   width: 0;
   height: 2px;
-  background: #9b51e0;
+  background: #7c317c;
   transition: width 0.3s ease;
   position: absolute;
   left: 50%;
@@ -267,7 +305,8 @@ export default {
 
 .no-order-message i {
   font-size: 2rem;
-  color: #9b51e0;
+  color: #7c317c;
+
   margin-bottom: 10px;
 }
 
@@ -286,7 +325,7 @@ export default {
 .shop-link {
   display: inline-block;
   padding: 10px 15px;
-  background-color: #9b51e0;
+  background-color: #7c317c;
   font-size: small;
   color: white;
   border-radius: 8px;
@@ -295,7 +334,8 @@ export default {
 }
 
 .shop-link:hover {
-  background-color: #7e3ae3;
+  background-color: #9a469a;
+  ;
 }
 
 

@@ -78,15 +78,14 @@ export default {
 
 .skeleton-image {
     width: 100%;
-    height: 300px;
-    background-color: #ddd;
-    border-radius: 10px;
+    height: 480px;
+    background-color: #ccc;
     animation: pulse 1.5s infinite ease-in-out;
 }
 
 @keyframes pulse {
     0% {
-        background-color: #f0f0f0;
+        background-color: #ccc;
     }
 
     50% {
@@ -94,13 +93,12 @@ export default {
     }
 
     100% {
-        background-color: #f0f0f0;
+        background-color: #ccc;
     }
 }
 
 .carousel-container {
-    width: auto;
-    padding: 10px;
+    width: 100%;
     padding-top: 30px;
     overflow: hidden;
 }
