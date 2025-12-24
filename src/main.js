@@ -1,12 +1,35 @@
 import { createApp } from "vue";
 import App from "./App.vue";
 import router from "./router";
-import axios from "axios";
 import vue3GoogleLogin from "vue3-google-login";
 import store from './store';
 import { createHead } from "@vueuse/head";
+import Pusher from "pusher-js";
+import Echo from "laravel-echo";
 
-axios.defaults.baseURL = "http://192.168.0.101:8001/api/";
+let usertoken =localStorage.getItem('token');
+let guest_token = localStorage.getItem('guest_token')
+window.Pusher = Pusher;
+
+window.Echo = new Echo({
+    broadcaster: 'pusher',
+    key: 'local', 
+    wsHost: window.location.hostname, 
+    wsPort: 6001,
+    forceTLS: false,
+    cluster: 'mt1',
+    disableStats: true,
+    encrypted: false,
+    authEndpoint: 'http://127.0.0.1:8000/broadcasting/auth',
+    auth: {
+        headers: usertoken ?  {
+            Authorization: `Bearer ${usertoken}`,
+        } : {},
+         params: guest_token  && !usertoken ? {
+            guest_uuid: guest_token 
+        } : {}
+    },
+});
 
 const app = createApp(App);
 app.use(createHead());

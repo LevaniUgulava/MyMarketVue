@@ -9,6 +9,7 @@
     <div class="sidebar">
       <ul>
         <li><a href="/admin/dashboard"><i class="fas fa-tachometer-alt"></i> მთავარი</a></li>
+        <li><a href="/admin/chat"><i class="fa-solid fa-headset"></i> კომუნიკაცია</a></li>
         <li><a href="/admin/orders"><i class="fas fa-box"></i> შეკვეთები</a></li>
         <li>
           <button @click="toggleDropproduct" class="dropdown">
@@ -37,37 +38,44 @@
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      isOpencategory: false,
-      isOpenproduct: false,
-      itemsproduct: ["დამატება", "ფასდაკლებები", "მოქმედებები"],
-      isadmin: localStorage.getItem("roles") === "admin"
-    };
-  },
-  methods: {
-    toggleDropproduct() {
-      this.isOpenproduct = !this.isOpenproduct;
-    },
-    selectItemproduct(item) {
-      if (item === "დამატება") {
-        this.$router.push("/admin/create");
-      } else if (item === "მოქმედებები") {
-        this.$router.push("/admin/actions");
-      } else if (item === "ფასდაკლებები") {
-        this.$router.push("/admin/discount");
-      }
-    }
+<script setup>
+import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { OnlineUser } from '@/components/utils/globalVariable'
+const router = useRouter();
+
+
+const isOpenproduct = ref(false);
+const itemsproduct = ref(["დამატება", "ფასდაკლებები", "მოქმედებები"]);
+const isadmin = ref(localStorage.getItem("roles") === "admin");
+
+
+function toggleDropproduct() {
+  isOpenproduct.value = !isOpenproduct.value;
+}
+function selectItemproduct(item) {
+  if (item === "დამატება") {
+    router.push("/admin/create");
+  } else if (item === "მოქმედებები") {
+    router.push("/admin/actions");
+  } else if (item === "ფასდაკლებები") {
+    router.push("/admin/discount");
   }
-};
+}
+
+onMounted(() => {
+  window.Echo.join(`online-users`)
+    .here((users) => {
+      const user = users.filter((user) => user.role !== 'admin')
+      OnlineUser.value.push(...user);
+    })
+})
 </script>
 
 <style scoped>
 .container {
   display: flex;
-  height: 100vh;
+  height: 100%;
   padding: 10px;
 }
 
@@ -149,6 +157,6 @@ export default {
   flex: 1;
   margin-left: 270px;
   padding: 20px;
-  overflow-y: auto;
+  overflow-y: hidden;
 }
 </style>

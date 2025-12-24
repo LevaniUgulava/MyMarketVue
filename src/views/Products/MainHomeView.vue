@@ -10,7 +10,7 @@
       <collectionView />
 
       <div @pointerdown="see('all')" class="section-header">
-        <p>ყველა პროდუქტი</p>
+        <p>იხილეთ პროდუქტები</p>
       </div>
       <div v-if="getApiLoaded" class="product-grid">
         <ProductCardComponent class="product-card" v-for="(item, index) in allproducts" :key="index"
@@ -25,10 +25,9 @@
 
       <BrandComponent />
 
-      <swipeCarousel />
 
       <div @pointerdown="see('discount')" class="section-header">
-        <p>ფასდაკლებული პროდუქტი</p>
+        <p>შეთავაზებები</p>
       </div>
       <div v-if="getApiLoaded" class="product-grid">
         <ProductCardComponent class="product-card" v-for="(item, index) in getDiscountproducts" :key="index"
@@ -41,8 +40,8 @@
 
 
       <section class="collection-section">
-        <div :class="['collection-grid', { 'more-than-two': sections.length > 2 }]">
-          <router-link v-for="(item, index) in sections.slice(2, 4)" :key="index"
+        <div :class="['collection-grid', { 'more-than-two': sections.length > 3 }]">
+          <router-link v-for="(item, index) in sections.slice(3, 4)" :key="index"
             :to="{ name: 'productsinglecollection', params: { id: item.id } }" class="grid-item">
             <div class="grid-item-image" :style="{ backgroundImage: 'url(' + item.media_urls + ')' }">
             </div>
@@ -53,7 +52,7 @@
         </div>
       </section>
       <div @pointerdown="see('new')" class="section-header">
-        <p>ახალი პროდუქტები</p>
+        <p>ახალი კოლექცია</p>
       </div>
       <div v-if="getApiLoaded" class="product-grid">
         <ProductCardComponent class="product-card" v-for="(item, index) in newproducts" :key="index"
@@ -68,8 +67,6 @@
     </div>
 
 
-
-
   </div>
 </template>
 <script>
@@ -79,7 +76,6 @@ import SwipeCarousel from '@/components/SwipeCarousel.vue';
 import BrandComponent from '@/components/BrandComponent.vue';
 import collectionView from './CollectionView.vue'
 import { mapActions, mapGetters } from 'vuex';
-// import PosterView from '../PosterView.vue';
 import HomeCategory from './HomeCategory.vue';
 import LastComponent from '@/components/LastComponent.vue';
 import SkeletonComponent from '@/components/SkeletonComponent.vue';
@@ -93,7 +89,7 @@ export default {
     SkeletonComponent,
     collectionView,
     HomeCategory,
-    LastComponent
+    LastComponent,
   },
   data() {
     return {

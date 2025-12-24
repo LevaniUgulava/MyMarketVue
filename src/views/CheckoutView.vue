@@ -1,7 +1,6 @@
 <template>
     <div class="checkout-container new-ui">
         <Message v-if="addressdeletemessage" :message="addressdeletemessage" @close="addressdeletemessage = ''" />
-
         <!-- LEFT -->
         <div class="left-section panel">
             <!-- მიმღების ინფორმაცია -->
@@ -103,7 +102,6 @@
 
                 <div class="div section-body">
                     <div class="payment-button payment-grid" role="radiogroup" aria-label="გადახდის მეთოდები">
-                        <!-- BOG -->
                         <label class="option pay-card"
                             :class="{ 'disabled': disablePayment('bog'), 'checked': paymentmethod === 'bog' }"
                             for="bog-pay" tabindex="0"
@@ -117,7 +115,6 @@
                             <span class="checkmark" aria-hidden="true"></span>
                         </label>
 
-                        <!-- TBC -->
                         <label class="option pay-card"
                             :class="{ 'disabled': disablePayment('tbc'), 'checked': paymentmethod === 'tbc' }"
                             for="tbc-pay" tabindex="0"
@@ -131,7 +128,6 @@
                             <span class="checkmark" aria-hidden="true"></span>
                         </label>
 
-                        <!-- CASH -->
                         <label class="option pay-card"
                             :class="{ 'disabled': disablePayment('cash'), 'checked': paymentmethod === 'cash' }"
                             for="cash-pay" tabindex="0"
@@ -148,8 +144,8 @@
         </div>
 
         <!-- RIGHT -->
-        <div class="right-section">
-            <div class="checkout card sticky">
+        <div class="right-section" ref="RightSection">
+            <div class="checkout card">
                 <!-- order skeleton სანამ isload არაა -->
                 <div v-if="!isload" class="order-skeleton">
                     <div class="s-line"></div>
@@ -157,10 +153,13 @@
                     <div class="s-line"></div>
                 </div>
 
-                <div class="order-items" v-else-if="cart.orders.length > 0">
-                    <div v-for="(item, index) in cart.orders" :key="index" class="order-item">
+                <div class="order-items" v-else-if="cart.orders.data && cart.orders.data.length > 0">
+                    <div class="statusinfo" v-if="getUserStatus.active && limitcontrol">
+                        სტატუსი: <b>{{ getUserStatus.name }}</b> , დარჩენილი ლიმიტი: <b>{{ getUserStatus.left }} ₾</b>
+                    </div>
+                    <div v-for="(item, index) in cart.orders.data" :key="index" class="order-item">
                         <div class="img">
-                            <img :src="item.product.images">
+                            <img :src="item.product.images[0]">
                         </div>
                         <div class="order-main">
                             <span class="name" :title="item.name">
@@ -175,9 +174,35 @@
                                 <path
                                     d="M240-144v-624h366q8 0 16 3.5t13 10.5l133 178-133 178q-5 8-13 11t-16 3H312v240h-72Z" />
                             </svg>
-
                         </div>
+                        <svg class="delete" @pointerdown="deleteTempbyId(item.id)" xmlns="http://www.w3.org/2000/svg"
+                            height="24px" viewBox="0 -960 960 960" width="24px" fill="currentcolor">
+                            <path
+                                d="m336-280-56-56 144-144-144-143 56-56 144 144 143-144 56 56-144 143 144 144-56 56-143-144-144 144Z" />
+                        </svg>
                     </div>
+                    <div class="pagination" v-if="Pagination.lastPage > 1">
+                        <button :disabled="Pagination.currentPage === 1" @click="goPrev">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                                fill="currentcolor">
+                                <path d="M560-253.85 333.85-480 560-706.15 602.15-664l-184 184 184 184L560-253.85Z" />
+                            </svg>
+                        </button>
+
+                        <div v-for="index in Pagination.lastPage" :key="index"
+                            :class="['pagination-item', { active: Pagination.currentPage === index }]"
+                            @click="goToPage(index)">
+                            {{ index }}
+                        </div>
+
+                        <button :disabled="Pagination.currentPage === Pagination.lastPage" @click="goNext">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                                fill="currentcolor">
+                                <path d="m517.85-480-184-184L376-706.15 602.15-480 376-253.85 333.85-296l184-184Z" />
+                            </svg>
+                        </button>
+                    </div>
+
                 </div>
 
                 <div class="empty" v-else>
@@ -207,7 +232,9 @@
 
                 <p class="grand"><strong>სულ: {{ cart.total_price > 0 ? cart.total_price + " ₾" : "---" }}</strong></p>
 
-                <button class="button btn-primary" @pointerdown.stop.prevent="checkout">განათავსეთ შეკვეთა</button>
+                <button :class="['button btn-primary', { 'is-disabled': limitcontrol }]"
+                    @pointerdown.stop.prevent="checkout">განათავსეთ
+                    შეკვეთა</button>
 
                 <div class="slider">
                     <SliderbuttonComponent @confirm="checkout" />
@@ -222,15 +249,25 @@
                 </span>
                 <span v-if="paymentmethod === null" class="sub-title">აირჩიეთ გადახდის მეთოდი</span>
 
+                <!-- promocodeinput -->
+
                 <div v-if="promocodeinput" class="input-with-button">
-                    <input v-model="promocode" type="text" class="promocode-input" placeholder="შეიყვანეთ კოდი" />
+                    <input v-model="promocode" type="text" @input="promocodeError = null"
+                        :class="['promocode-input', promocodeError ? 'input-error' : '']"
+                        placeholder="შეიყვანეთ კოდი" />
                     <button @click="applypromocode" class="promocode-button">
                         <i class="fa fa-check"></i>
                     </button>
-                    <div class="changepay">
+                </div>
+                <div>
+                    <div v-if="cart.payment !== null" class="changepay">
                         <span @click="changePayment" class="changepayment">გადახდის ტიპის შეცვლა</span>
                     </div>
+                    <div v-if="promocodeError" class="message">
+                        {{ promocodeError }}
+                    </div>
                 </div>
+
             </div>
         </div>
 
@@ -243,6 +280,7 @@ import Address from "@/components/AddressModal.vue"
 import Message from '@/components/Message/MessageComponent.vue';
 import SliderbuttonComponent from '@/components/SliderbuttonComponent.vue';
 import { validateInputFields } from '@/components/utils/validate';
+import { mapGetters } from 'vuex';
 export default {
     data() {
         return {
@@ -256,6 +294,11 @@ export default {
                 payment: null,
                 total_price: 0
             },
+            Pagination: {
+                currentPage: 1,
+                lastPage: null,
+                perPage: 4,
+            },
             shippingCost: 0,
             addressmodal: false,
             addresses: [],
@@ -268,7 +311,8 @@ export default {
             addressdeletemessage: null,
             paymentmethod: null,
             promocode: null,
-            promocodeinput: false
+            promocodeinput: false,
+            promocodeError: null,
 
         };
     },
@@ -278,6 +322,18 @@ export default {
         SliderbuttonComponent
     },
     computed: {
+        ...mapGetters('auth', ['getUserStatus']),
+        // limitcontrol() {
+        //     const statusOrders = this.cart.orders.filter(order => order.isOriginal != true);
+
+        //     const total = statusOrders.reduce((sum, order) => sum + order.total_price, 0);
+
+        //     return this.getUserStatus.left < Number(total);
+
+        // },
+
+
+
         totalWithShipping() {
             return this.totalPrice + (this.shippingCost || 0);
         },
@@ -306,6 +362,7 @@ export default {
                     tokenRequired: true
                 });
                 console.log(response);
+                this.promocodeinput = false;
                 this.refreshTempData();
             } catch (error) {
                 console.log(error.message);
@@ -316,37 +373,80 @@ export default {
         },
         async applypromocode() {
             try {
-                await api.post('/test/promo', {
+                await api.post('/apply/promocode', {
                     promocode: this.promocode,
                     type: this.paymentmethod
                 }, {
                     tokenRequired: true
                 });
                 this.refreshTempData();
-
+                this.$nextTick(() => {
+                    this.checkScroll();
+                });
 
             } catch (error) {
-                if (error.response) {
-                    console.error("Error response data:", error.response.data);
-                    console.error("Error response status:", error.response.status);
-                } else if (error.request) {
-                    console.error("Error request:", error.request);
-                } else {
-                    console.error("Error message:", error.message);
+                const err = error.response.data;
+
+                if (!err.success) {
+                    switch (err.type) {
+                        case 'notexist':
+                            this.promocodeError = "მოცემული ფასდაკლების კოდი არ არსებობს";
+                            break;
+                        case 'expire':
+                            this.promocodeError = "მოცემულ ფასდაკლების კოდს ვადა გაუვიდა";
+                            break;
+                        case 'paymentType':
+                            this.promocodeError = "გადახდის ტიპი არ ემთხევავა";
+                            break;
+                        case 'waste':
+                            this.promocodeError = "კალათაში მყოფი პროდუქტებისთვის ფასდაკლების კოდი არ მუშაობს";
+                            break;
+                        case 'used':
+                            this.promocodeError = "ფასდაკლების კოდის გამოყენების ლიმიტი ამოწურილი გაქვთ";
+                            break;
+                    }
                 }
+                this.$nextTick(() => {
+                    this.checkScroll();
+                });
             }
         },
 
         showpromocode() {
             this.promocodeinput = !this.promocodeinput
+            this.$nextTick(() => {
+                this.checkScroll();
+            });
         },
-        async fetchTempDataFromAPI() {
+        goToPage(page) {
+            this.Pagination.currentPage = page;
+            this.fetchTempDataFromAPI(page);
+        },
+
+        goNext() {
+            if (this.Pagination.currentPage < this.Pagination.lastPage) {
+                this.Pagination.currentPage++;
+                this.fetchTempDataFromAPI(this.Pagination.currentPage);
+            }
+        },
+        goPrev() {
+            if (this.Pagination.currentPage > 1) {
+                this.Pagination.currentPage--;
+                this.fetchTempDataFromAPI(this.Pagination.currentPage);
+            }
+        },
+        async fetchTempDataFromAPI(page = 1) {
             try {
-                const response = await api.get("get/temporder", { tokenRequired: true });
+                const response = await api.get(`get/temporder?page=${page}`, { tokenRequired: true });
                 this.cart = response.data;
+                console.log(this.cart.orders.data);
                 this.paymentmethod = response.data.payment;
                 this.promocode = response.data.promocode;
                 this.isload = true;
+
+                this.Pagination.currentPage = this.cart.orders.current_page;
+                this.Pagination.lastPage = this.cart.orders.last_page;
+
                 console.log("Data fetched from API");
             } catch (error) {
                 console.log("Error fetching temporary order:", error);
@@ -354,17 +454,30 @@ export default {
         },
 
 
-        // async deleteTemp() {
-        //     try {
-        //         await api.delete("delete/temporder", {
-        //             tokenRequired: true
-        //         });
-        //         window.sessionStorage.removeItem('temporder');
+        async deleteTempbyId(id) {
+            try {
+                await api.delete(`delete/temporder/${id}`, {
+                    tokenRequired: true
+                });
+                this.fetchTempDataFromAPI();
+                await this.$store.dispatch('auth/dashboardInfo', null, { root: true });
 
-        //     } catch (error) {
-        //         console.log("Error fetching temporary order:", error);
-        //     }
-        // },
+            } catch (error) {
+                console.log("Error fetching temporary order:", error);
+            }
+        },
+        async deleteTemp() {
+            try {
+                await api.delete(`delete/temporder`, {
+                    tokenRequired: true
+                });
+                this.fetchTempDataFromAPI();
+
+            } catch (error) {
+                console.log("Error fetching temporary order:", error);
+            }
+        },
+
         async checkout() {
             const valid = validateInputFields(this, [
                 { model: 'firstName', errorKey: 'firstNameError', message: 'აუცილებელია ველი' },
@@ -386,9 +499,10 @@ export default {
                 }, {
                     tokenRequired: true
                 });
-                response
-                window.sessionStorage.removeItem('temporder');
-                this.deleteTemp();
+                if (response.status === 200) {
+                    this.deleteTemp();
+                    await this.$store.dispatch('auth/getStatusInfo', null, { root: true });
+                }
             } catch (error) {
                 if (error.response) {
                     console.error('Error Response:', error.response.data);
@@ -440,31 +554,48 @@ export default {
                     tokenRequired: true
                 });
                 this.addresses = this.addresses.filter(option => option.id !== id);
-
                 this.addressdeletemessage = response.data;
             } catch (error) {
 
                 this.addressdeletemessage = error.response.data
             }
-        }
+        },
+        checkScroll() {
 
+            const rightsection = this.$refs.RightSection;
+            const footer = document.querySelector('footer');
+            if (!rightsection || !footer) return;
+
+            const scrollY = window.scrollY || 0;
+            const rightsectionHeight = rightsection.offsetHeight;
+            const footerTop = footer.getBoundingClientRect().top + scrollY;
+
+            let topValue = scrollY > 0 ? 80 : 120;
+
+            const maxTop = footerTop - rightsectionHeight;
+            if (scrollY + topValue > maxTop) {
+                topValue = maxTop - scrollY;
+                rightsection.style.transition = 'none';
+            } else {
+                rightsection.style.transition = 'top 0.3s ease-in-out';
+            }
+
+            this.$refs.RightSection.style.setProperty('--top-checkout', `${topValue}px`);
+        },
     },
     async mounted() {
+        this.checkScroll();
+        window.addEventListener('scroll', this.checkScroll);
+
         await Promise.all([this.fetchTempDataFromAPI(), this.getAddresses()]);
+    },
+    beforeUnmount() {
+        window.removeEventListener('scroll', this.checkScroll);
+
+
     },
 
 
-    // beforeRouteLeave(to, from, next) {
-    //     this.deleteTemp();
-    //     window.sessionStorage.removeItem('temporder');
-    //     next();
-    // },
-
-    // beforeRouteUpdate(to, from, next) {
-    //     this.deleteTemp();
-    //     window.sessionStorage.removeItem('temporder');
-    //     next();
-    // }
 
 
 };
@@ -477,28 +608,30 @@ export default {
     --text: #222;
     --muted: #7a7f8a;
     --border: #e7e7ee;
-    --primary: #7a1dff;
-    --primary-600: #6a0fff;
-    --accent: #916ac7;
+    --primary: #162e63;
+    --primary-600: #2e477c;
+    --accent: #0f2c6a;
     --accent-600: #7b53b3;
     --danger: #e74c3c;
     --success: #16a34a;
     --shadow: 0 8px 28px rgba(16, 24, 40, 0.08);
 }
 
-/* ======= Layout refresh ======= */
+.is-disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
 .checkout-container.new-ui {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 480px;
-    gap: 28px;
-    padding: 28px;
-    background: var(--bg);
+    padding: 0 100px;
 }
 
 .panel {
     background: var(--card);
     border-radius: 14px;
-    box-shadow: var(--shadow);
 }
 
 .section {
@@ -521,26 +654,24 @@ export default {
     padding-top: 14px;
 }
 
-/* RIGHT column */
 .right-section {
-    display: grid;
-    gap: 16px;
+    position: fixed;
+    top: var(--top-checkout);
+    right: 100px;
+    width: 480px;
     height: fit-content;
+    transition: top 0.3s ease-in-out;
+
 }
 
 .card {
-    background: var(--card);
+    background: transparent;
     border-radius: 14px;
-    box-shadow: var(--shadow);
     padding: 18px;
 }
 
-.sticky {
-    position: sticky;
-    top: 20px;
-}
 
-/* ======= Typography ======= */
+
 .title {
     font-size: 16px;
     font-weight: 800;
@@ -575,6 +706,58 @@ export default {
 .ucase {
     text-transform: uppercase;
 }
+
+/* pagination */
+.pagination {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    user-select: none;
+}
+
+.pagination button {
+    border: none;
+    background: #f0f0f0;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease;
+}
+
+.pagination button:hover:not(:disabled) {
+    background: #e0e0e0;
+}
+
+.pagination button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.pagination-item {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.2s ease;
+}
+
+.pagination-item:hover {
+    transform: scale(1.10);
+}
+
+.pagination-item.active {
+    font-weight: 600;
+    text-decoration: underline;
+}
+
 
 /* ======= Inputs ======= */
 label {
@@ -631,7 +814,8 @@ input:focus {
     background: var(--primary);
     color: #fff;
     padding: 12px;
-    border-radius: 10px;
+    border-radius: 5px;
+    font-weight: 600;
     border: none;
     cursor: pointer;
 }
@@ -663,13 +847,12 @@ input:focus {
 .link-danger {
     color: var(--danger);
     background: transparent;
+    font-size: 12px;
     border: none;
     cursor: pointer;
 }
 
-.link-danger:hover {
-    text-decoration: underline;
-}
+
 
 /* ======= Address Cards ======= */
 .address-button {
@@ -685,11 +868,10 @@ input:focus {
     display: grid;
     grid-template-columns: 22px 1fr auto;
     align-items: center;
-    gap: 12px;
     border: 2px solid var(--accent);
     border-radius: 10px;
     padding: 12px;
-    font-size: 13px;
+    font-size: 12px;
     margin-top: 10px;
     background: #fff;
     transition: border-color .2s, background .2s, transform .08s;
@@ -775,8 +957,8 @@ input:focus {
 
 /* ======= Payment grid/cards ======= */
 .payment-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    display: flex;
+    flex-direction: column;
     gap: 12px;
 }
 
@@ -786,10 +968,10 @@ input:focus {
     align-items: center;
     gap: 10px;
     font-size: 13px;
-    border: 2px solid var(--accent);
+    /* border: 2px solid var(--accent); */
     border-radius: 12px;
     padding: 6px;
-    color: var(--accent);
+    /* color: var(--accent); */
     cursor: pointer;
     transition: background .2s, border-color .2s, transform .08s;
 }
@@ -874,13 +1056,34 @@ input:focus {
     margin-bottom: 10px;
 }
 
+.statusinfo {
+    box-shadow: var(--shadow);
+    border-radius: 8px;
+    font-size: 12px;
+    background-color: #fff;
+    padding: 12px;
+}
+
+
 .order-item {
     display: grid;
-    grid-template-columns: 1fr auto auto auto;
+    position: relative;
+    grid-template-columns: auto auto auto auto;
     gap: 8px;
     align-items: center;
     padding: 8px 0;
     border-bottom: 1px dashed var(--border);
+}
+
+.delete {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+}
+
+.delete:hover {
+    color: #7a1dff;
 }
 
 .order-item:last-child {
@@ -910,8 +1113,11 @@ img {
 
 .order-total {
     font-size: 13px;
+    align-items: center;
     display: flex;
 }
+
+
 
 .order-qty,
 .order-total {
@@ -936,10 +1142,13 @@ img {
 
 .sub-info .k {
     color: var(--muted);
+    font-size: 15px;
 }
 
 .sub-info .v {
-    font-weight: 700;
+    font-weight: 500;
+    font-size: 15px;
+
 }
 
 .address-line .v {
@@ -964,6 +1173,7 @@ img {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    font-size: 15px;
 }
 
 .promocode {
@@ -989,6 +1199,13 @@ img {
     max-width: 360px;
 }
 
+.message {
+    font-size: 14px;
+    max-width: 350px;
+    color: var(--danger);
+}
+
+
 .promocode-input {
     font-size: 14px;
     border: 1px solid var(--border);
@@ -1006,7 +1223,7 @@ img {
 .promocode-button {
     position: absolute;
     right: 2px;
-    top: 15%;
+    top: 25%;
     background-color: var(--primary);
     color: white;
     border: none;
@@ -1057,9 +1274,7 @@ img {
         gap: 18px;
     }
 
-    .sticky {
-        position: static;
-    }
+
 }
 
 @media (max-width: 768px) {

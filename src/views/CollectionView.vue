@@ -66,7 +66,6 @@ export default {
 .collection-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    /* Show two items per row */
     gap: 20px;
     position: relative;
     width: 100%;
@@ -91,6 +90,7 @@ export default {
 .grid-item-image {
     flex: 1;
     height: 100%;
+    border-radius: 5px;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;

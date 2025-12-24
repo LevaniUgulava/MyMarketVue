@@ -4,8 +4,7 @@
             <div :class="['collection-grid', { 'more-than-two': sections.length > 2 }]">
                 <router-link v-for="(item, index) in sections.slice(0, 2)" :key="index"
                     :to="{ name: 'productsinglecollection', params: { id: item.id } }" class="grid-item">
-                    <div class="grid-item-image" :style="{ backgroundImage: 'url(' + item.media_urls + ')' }">
-                    </div>
+                    <img :src="item.media_urls">
                     <div class="product-availability">
                         <p>იხილეთ მეტი →</p>
                     </div>
@@ -64,10 +63,17 @@ watch([getApiLoaded, getSections], ([newApiLoaded, newSections]) => {
     overflow: hidden;
     text-decoration: none;
     transition: transform 0.3s;
-    height: 60vh;
+    height: 70vh;
     width: 100%;
     position: relative;
 }
+.grid-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    transition: transform 0.3s ease;
+}
+
 
 .grid-item:hover {
     transform: translateY(-5px);
@@ -98,7 +104,6 @@ watch([getApiLoaded, getSections], ([newApiLoaded, newSections]) => {
     flex: 1;
     height: 100%;
     background-size: cover;
-    background-position: center;
     background-repeat: no-repeat;
     position: relative;
     transition: all 0.3s ease;

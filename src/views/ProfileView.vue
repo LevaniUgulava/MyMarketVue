@@ -57,13 +57,13 @@ export default {
 .web {
     display: flex;
     flex-direction: row;
+    height: 100%;
 }
 
 .main-content {
-    width: 70%;
-    margin: 0 auto;
-    padding-right: 50px;
-    padding-top: 50px;
+    margin-left: 350px;
+    width: calc(100% - 350px);
+    padding: 20px;
 }
 
 @media (max-width: 768px) {

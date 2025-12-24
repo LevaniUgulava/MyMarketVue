@@ -67,8 +67,10 @@ export default {
                     'admin/collection/create',
                     formData,
                     {
-                        tokenRequired: true
-                    }
+                        tokenRequired: true,
+
+                    },
+
                 );
 
                 console.log(response.data);

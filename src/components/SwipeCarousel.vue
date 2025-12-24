@@ -1,16 +1,23 @@
 <template>
     <div v-if="getApiLoaded" class="carousel-container">
-        <swiper :modules="[Autoplay, Navigation, EffectFade]" :slides-per-view="1" :loop="true"
-            :autoplay="{ delay: 5000, disableOnInteraction: false }" :pagination="{ clickable: true }"
-            :navigation="true" :effect="'fade'" class="carousel">
-            <swiper-slide v-for="(image, index) in getBanners" :key="index">
-                <a :href="image.url" target="_blank" rel="noopener noreferrer">
-                    <img :src="[isMobile ? image.media_mobile : image.media_desktop]" class="carousel-image"
-                        alt="carousel slide" />
-                </a>
-            </swiper-slide>
-        </swiper>
+        <div v-for="(item, index) in getBanners" :key="index">
+            <img v-if="index === activeIndex" :src="item.media_desktop" class="carousel-image">
+
+
+            <div v-if="index === activeIndex" class="overlay">
+                <div class="container">
+                    <button class="overlay-button">გაგაგრძელე</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="custom-pagination">
+            <span v-for="(image, index) in getBanners" :key="index" :class="{ 'active': activeIndex === index }"
+                @click="goToSlide(index)" class="bullet"></span>
+        </div>
+
     </div>
+
     <div v-else class="carousel-container">
 
         <div class="carousel-skeleton">
@@ -20,55 +27,91 @@
     </div>
 </template>
 
-<script>
-import { Swiper, SwiperSlide } from "swiper/vue";
-import { Autoplay, Navigation, EffectFade } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/pagination";
-import "swiper/css/navigation";
-import "swiper/css/effect-fade";
-import { mapGetters } from 'vuex';
+<script setup>
 
-export default {
-    components: {
-        Swiper,
-        SwiperSlide,
-    },
-    setup() {
-        return {
-            Autoplay,
-            Navigation,
-            EffectFade,
-        };
-    },
-    data() {
-        return {
-            isMobile: window.innerWidth <= 768,
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { useStore } from 'vuex'
+const store = useStore()
+const activeIndex = ref(0);
+const timer = 10000;
+const isMobile = ref(window.innerWidth <= 768);
 
-        };
-    },
-    methods: {
-        handleResize() {
-            this.isMobile = window.innerWidth <= 768;
-        }
-    },
-    computed: {
-        ...mapGetters('product', ["getBanners", "getApiLoaded"]),
+function handleResize() {
+    isMobile.value = window.innerWidth <= 768;
+}
+function startAutoplay() {
+    autoplayInterval = setInterval(goToNextSlide, timer);
+}
 
-    },
+function stopAutoplay() {
+    clearInterval(autoplayInterval);
+    autoplayInterval = null;
+}
+function goToSlide(index) {
+    activeIndex.value = index;
+    stopAutoplay();
+    startAutoplay();
+}
 
-    mounted() {
-        window.addEventListener('resize', this.handleResize);
+const getBanners = computed(() => {
+    return store.getters['product/getBanners']
+})
+const getApiLoaded = computed(() => {
+    return store.getters['product/getApiLoaded']
+})
+function goToNextSlide() {
+    activeIndex.value = (activeIndex.value + 1) % getBanners.value.length;
 
-    },
-    beforeUnmount() {
-        window.removeEventListener('resize', this.checkScreenSize);
-    },
-};
+}
+
+let autoplayInterval = null;
+
+
+onMounted(() => {
+    window.addEventListener('resize', handleResize);
+    autoplayInterval = setInterval(goToNextSlide, timer);
+})
+onBeforeUnmount(() => {
+    window.removeEventListener('resize', handleResize);
+    clearInterval(autoplayInterval);
+});
+
+
 </script>
 
 
 <style scoped>
+:global(body) {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+.custom-pagination {
+    display: flex;
+    margin-top: 15px;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    gap: 5px;
+}
+
+.bullet {
+    height: 10px;
+    width: 10px;
+    background-color: #ccc;
+    border-radius: 100%;
+}
+
+.custom-pagination .active {
+    width: 25px;
+    height: 8px;
+    border-radius: 10px;
+    background-color: blue;
+}
+
 .carousel-skeleton {
     display: flex;
     justify-content: space-between;
@@ -78,7 +121,7 @@ export default {
 
 .skeleton-image {
     width: 100%;
-    height: 480px;
+    height: 400px;
     background-color: #ccc;
     animation: pulse 1.5s infinite ease-in-out;
 }
@@ -99,79 +142,68 @@ export default {
 
 .carousel-container {
     width: 100%;
-    padding-top: 30px;
+    padding-top: 10px;
+    border-radius: 10px;
     overflow: hidden;
 }
 
-.carousel {
-    width: auto;
-    height: 100%;
-}
-
 .carousel-image {
-    display: block;
-    width: 100%;
-    height: 100%;
-    margin: auto;
-    object-fit: contain;
+    position: relative;
 }
 
-
-
-.swiper-button-prev,
-.swiper-button-next {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
+.overlay {
+    position: absolute;
+    top: 120px;
+    left: 50px;
+    right: 0;
+    bottom: 0;
     display: flex;
     align-items: center;
-    justify-content: center;
-    transition: background-color 0.3s ease;
 }
 
-.swiper-button-prev::after,
-.swiper-button-next::after {
-    padding: 15px 20px;
-    font-size: 20px;
-    border-radius: 25px;
-    color: black;
-    transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-
-
-.swiper-button-prev::after {
-    margin-left: 20px;
-}
-
-.swiper-button-next::after {
-    margin-right: 20px;
-}
-
-.swiper-button-prev:hover::after,
-.swiper-button-next:hover::after {
-    display: block;
-    background-color: black;
+.container {
+    text-align: center;
     color: white;
 }
 
+.overlay-text {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.overlay-button {
+    background-color: #162e63;
+    border: none;
+    color: white;
+    font-size: 14px;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.overlay-button:hover {
+    background-color: #d04b1f;
+}
+
+
+.carousel-container img {
+    display: block;
+    width: 100%;
+    object-position: top;
+
+    margin: auto;
+    transition: opacity 1s ease-in-out;
+    object-fit: cover;
+}
+
+
+
 @media (max-width: 768px) {
-
-    .swiper-button-prev::after,
-    .swiper-button-next::after {
-        padding: 8px 10px;
-        font-size: 13px;
-    }
-
     .carousel-container {
         padding-top: 0px;
 
-    }
-
-
-    .swiper-button-prev,
-    .swiper-button-next {
-        width: 5px;
     }
 }
 </style>

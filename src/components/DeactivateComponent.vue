@@ -205,7 +205,7 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 9999;
 }
 
 
@@ -216,6 +216,7 @@ export default {
     max-width: 600px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
     position: relative;
+    z-index: 10000;
 }
 
 
@@ -351,7 +352,7 @@ export default {
     font-size: 16px;
     color: #888;
     padding: 4px;
-    z-index: 2;
+    z-index: 9999;
 }
 
 .resend {

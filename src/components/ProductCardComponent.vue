@@ -25,13 +25,28 @@
             <button v-if="isHovered" class="likebtn" :aria-pressed="isLiked.toString()"
               @pointerdown.stop.prevent="toggleLike(initialproduct.id)"
               :title="isLiked ? 'მოწონების გაუქმება' : 'მოწონება'">
-              <i :class="isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
+              <svg v-show="isLiked" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960"
+                width="24px" fill="#FFFFFF">
+                <path
+                  d="m480-173.85-30.31-27.38q-97.92-89.46-162-153.15-64.07-63.7-101.15-112.35-37.08-48.65-51.81-88.04Q120-594.15 120-634q0-76.31 51.85-128.15Q223.69-814 300-814q52.77 0 99 27t81 78.54Q514.77-760 561-787q46.23-27 99-27 76.31 0 128.15 51.85Q840-710.31 840-634q0 39.85-14.73 79.23-14.73 39.39-51.81 88.04-37.08 48.65-100.77 112.35Q609-290.69 510.31-201.23L480-173.85Z" />
+              </svg>
+
+              <svg v-show="!isLiked" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960"
+                width="24px" fill="currentcolor">
+                <path
+                  d="m480-173.85-30.31-27.38q-97.92-89.46-162-153.15-64.07-63.7-101.15-112.35-37.08-48.65-51.81-88.04Q120-594.15 120-634q0-76.31 51.85-128.15Q223.69-814 300-814q52.77 0 99 27t81 78.54Q514.77-760 561-787q46.23-27 99-27 76.31 0 128.15 51.85Q840-710.31 840-634q0 39.85-14.73 79.23-14.73 39.39-51.81 88.04-37.08 48.65-100.77 112.35Q609-290.69 510.31-201.23L480-173.85Zm0-54.15q96-86.77 158-148.65 62-61.89 98-107.39t50-80.61q14-35.12 14-69.35 0-60-40-100t-100-40q-47.77 0-88.15 27.27-40.39 27.27-72.31 82.11h-39.08q-32.69-55.61-72.69-82.5Q347.77-774 300-774q-59.23 0-99.62 40Q160-694 160-634q0 34.23 14 69.35 14 35.11 50 80.61t98 107q62 61.5 158 149.04Zm0-273Z" />
+              </svg>
             </button>
 
             <button
               @pointerdown.stop.prevent="addToCart(initialproduct.id, initialproduct.size[0].size, initialproduct.size[0].details[0].color)"
               v-if="isHovered && !isOpen" class="addbtn">
-              <i class="fa-solid fa-cart-shopping outline-icon"></i>
+              <svg class="icon" aria-hidden="true" focusable="false" width="24" height="24" viewBox="0 0 24 24"
+                fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M13.9984 5C13.9984 4.46957 13.7877 3.96086 13.4126 3.58579C13.0375 3.21071 12.5288 3 11.9984 3C11.4679 3 10.9592 3.21071 10.5842 3.58579C10.2091 3.96086 9.99836 4.46957 9.99836 5M19.2584 9.696L20.6434 18.696C20.6872 18.9808 20.6689 19.2718 20.5898 19.5489C20.5107 19.8261 20.3726 20.0828 20.1851 20.3016C19.9975 20.5204 19.7649 20.6961 19.5031 20.8167C19.2413 20.9372 18.9566 20.9997 18.6684 21H5.32836C5.04 21 4.75503 20.9377 4.49301 20.8173C4.23098 20.6969 3.99809 20.5212 3.81031 20.3024C3.62253 20.0836 3.48429 19.8267 3.40507 19.5494C3.32585 19.2721 3.30753 18.981 3.35136 18.696L4.73636 9.696C4.80901 9.22359 5.04844 8.79282 5.41129 8.4817C5.77413 8.17059 6.2364 7.9997 6.71436 8H17.2824C17.7602 7.99994 18.2222 8.17094 18.5848 8.48203C18.9475 8.79312 19.1857 9.22376 19.2584 9.696Z"
+                  stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
             </button>
 
             <transition name="grow">
@@ -90,15 +105,23 @@
 
 
         <h3>{{ initialproduct.name }}</h3>
-        <span class="brand">ზომა: {{ initialproduct.size[0].size }}, ფერი: {{ initialproduct.size[0].details[0].color
-          }}</span>
+
 
         <div class="price">
-          {{ initialproduct.discountprice }} <i class="fa-solid fa-lari-sign"></i>
-          <div class="realprice" v-if="initialproduct.discountstatus && initialproduct.discountstatus.discount > 0">
-            <s>{{
-              initialproduct.price }}</s>
+          <div style="display: flex; gap: 2px;">{{ initialproduct.discountprice }} <i class="fa-solid fa-lari-sign"></i>
+            <div class="realprice" v-if="initialproduct.discountstatus && initialproduct.discountstatus.discount > 0">
+              <s>{{
+                initialproduct.price }}</s>
+            </div>
           </div>
+
+          <transition name="slide">
+            <div v-if="isHovered">
+              <span class="brand">
+                ზომა: {{ initialproduct.size[0].size }}, ფერი: {{ initialproduct.size[0].details[0].color }}
+              </span>
+            </div>
+          </transition>
         </div>
       </div>
 
@@ -205,7 +228,7 @@ export default {
     },
     async addToCart(id, size, color) {
       try {
-        const isOriginal = this.initialproduct.discountstatus && this.initialproduct.discountstatus.discount > 0 || false
+        const isOriginal = this.initialproduct.discountstatus && this.initialproduct.discountstatus.discount > 0 ? false : true
         const response = await api.post(
           `addcart/${id}`,
           { type: this.initialproduct.size_type, size: size, color: color, isOriginal: isOriginal },
@@ -421,6 +444,7 @@ export default {
 .image-wrapper {
   position: relative;
   width: 250px;
+  border-radius: 5px;
   height: 250px;
   overflow: hidden;
 }
@@ -433,7 +457,7 @@ export default {
   position: absolute;
   top: 0;
   left: 0;
-  transition: opacity 0.8s ease;
+  transition: opacity 0.1s ease;
 }
 
 .main-img {
@@ -491,6 +515,7 @@ export default {
   position: absolute;
   top: 10px;
   right: 20px;
+  display: flex;
   background: transparent;
   z-index: 3;
   border: none;
@@ -498,8 +523,8 @@ export default {
   background-color: aliceblue;
   justify-content: center;
   align-items: center;
-  border-radius: 20px;
-  padding: 10px;
+  border-radius: 15px;
+  padding: 5px;
   color: black;
 }
 
@@ -511,12 +536,13 @@ export default {
   background: transparent;
   z-index: 3;
   border: none;
+  display: flex;
   cursor: pointer;
   background-color: aliceblue;
   justify-content: center;
   align-items: center;
-  padding: 10px;
-  border-radius: 20px;
+  padding: 5px;
+  border-radius: 15px;
   color: black;
 }
 
@@ -529,8 +555,11 @@ export default {
 
 .product-info .brand {
   font-size: 12px;
+  font-weight: normal;
   color: #6f6c6c;
+  margin-right: 10px;
 }
+
 
 
 h3 {
@@ -549,6 +578,7 @@ h3 {
   font-size: 13px;
   margin-top: 5px;
   display: flex;
+  justify-content: space-between;
   margin-bottom: 5px;
   font-weight: bold;
 }
@@ -567,7 +597,6 @@ h3 {
   justify-content: center;
   border-radius: 8px;
   background-color: #7e23fc1a;
-  width: 200px;
   height: 40px;
   margin: 0 auto;
   overflow: hidden;

@@ -1,17 +1,19 @@
 <template>
   <div class="layout-container">
     <SwiperContent class="banner" />
-    <HeaderComponentVue :isMobile="isMobile" @search="handleSearch" />
+    <HeaderComponentVue :isMobile="isMobile" />
 
     <HomeSideBarVue class="sidebar" v-if="isMobile" />
 
 
-    <div class="main-content">
+    <div :class="['main-content', isStart ? 'top-start' : 'top']">
       <router-view v-slot="{ Component }">
         <component :is="Component" />
       </router-view>
     </div>
-    <div class="checkout" @pointerdown.stop.prevent="redirect" v-if="getCheckoutInfo.checkout_in_progress && !checkout">
+
+    <div class="checkout" @pointerdown.stop.prevent="redirect"
+      v-if="getDashboardInfo.checkout_in_progress && !checkout">
       <svg class="icon basket" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
         fill="white">
         <path
@@ -22,14 +24,33 @@
         fill="white">
         <path d="m560-240-56-58 142-142H160v-80h486L504-662l56-58 240 240-240 240Z" />
       </svg>
-      <span class="badge">{{ getCheckoutInfo.cart_items }}</span>
+      <span class="badge">{{ getDashboardInfo.cart_items }}</span>
     </div>
 
-    <div class="chat-icon">
-      <svg xmlns="http://www.w3.org/2000/svg" height="26px" viewBox="0 -960 960 960" width="26px" fill="white">
-        <path
-          d="M80-80v-720q0-33 23.5-56.5T160-880h640q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H240L80-80Zm126-240h594v-480H160v525l46-45Zm-46 0v-480 480Z" />
-      </svg>
+    <CookieComponent v-if="!cookieAllowed" />
+
+    <CameraAccessComponent v-if="openCamera" :open="openCamera" @closeCamera="openCamera = false"
+      @photoCaptured="handleAttachment" @videoCaptured="handleAttachment" />
+
+    <ChatModal v-if="openChat" :isMobile="isMobile" :open="openChat" @openCamera="openCamerafunction"
+      :Rawattachment="RawAttachment" />
+
+    <div class="chat-icon" :style="{ bottom: isMobile ? '90px' : '20px' }" @pointerdown.stop.prevent="openChatfunction">
+
+      <div class="chat" v-if="!openChat">
+        <svg xmlns="http://www.w3.org/2000/svg" height="26px" viewBox="0 -960 960 960" width="26px" fill="white">
+          <path
+            d="M80-80v-720q0-33 23.5-56.5T160-880h640q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H240L80-80Zm126-240h594v-480H160v525l46-45Zm-46 0v-480 480Z" />
+        </svg>
+        <span v-if="getDashboardInfo.unseenMessage" class="badge"> {{ getDashboardInfo.unseenMessage }}</span>
+
+      </div>
+      <div class="chat" v-else>
+        <svg xmlns="http://www.w3.org/2000/svg" height="26px" viewBox="0 -960 960 960" width="26px" fill="white">
+          <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
+        </svg>
+      </div>
+
     </div>
 
 
@@ -44,6 +65,10 @@ import FooterComponentVue from '@/components/FooterComponent.vue';
 import SwiperContent from '@/components/SwiperContent.vue';
 import { getPlatform } from '@/mixin/reuse';
 import { mapGetters } from 'vuex'
+import ChatModal from '@/components/ChatModal.vue';
+import CameraAccessComponent from '@/components/CameraAccessComponent.vue';
+import CookieComponent from '@/components/CookieComponent.vue';
+import api from '@/api';
 export default {
   name: 'MainLayout',
   mixins: [getPlatform],
@@ -51,30 +76,69 @@ export default {
     HeaderComponentVue,
     HomeSideBarVue,
     FooterComponentVue,
-    SwiperContent
+    SwiperContent,
+    ChatModal,
+    CameraAccessComponent,
+    CookieComponent
   },
   data() {
     return {
+      openChat: localStorage.getItem('openChat') === 'true',
       isMobile: window.innerWidth <= 768,
-      platform: this.currentPlatform
+      platform: this.currentPlatform,
+      openCamera: false,
+      RawAttachment: null,
+      cookieAllowed: true,
     };
   },
   computed: {
-    ...mapGetters('auth', ['getCheckoutInfo']),
+    ...mapGetters('auth', ['isAuthenticated']),
+    ...mapGetters('auth', ['getDashboardInfo']),
     checkout() {
       return this.$route.path.startsWith('/checkout');
+    },
+    isStart() {
+      return this.$route.path !== "/";
     }
 
   },
+
   mounted() {
+    this.checkCookie();
     this.checkPlatform();
     window.addEventListener('resize', this.checkScreenSize);
-    this.$store.dispatch('auth/checkoutInfo', null, { root: true });
+    if (this.isAuthenticated) {
+      this.$store.dispatch('auth/dashboardInfo', null, { root: true });
+
+    }
   },
   beforeUnmount() {
     window.removeEventListener('resize', this.checkScreenSize);
   },
   methods: {
+    async checkCookie() {
+      try {
+        const response = await api.get('/checkCookie');
+        this.cookieAllowed = response.data.status;
+
+      } catch (error) {
+        console.log(error);
+      }
+
+    },
+
+
+    handleAttachment(emit) {
+      this.RawAttachment = emit;
+      this.openCamera = false
+    },
+    openChatfunction() {
+      this.openChat = !this.openChat;
+      localStorage.setItem('openChat', this.openChat)
+    },
+    openCamerafunction() {
+      this.openCamera = !this.openCamera;
+    },
     redirect() {
       this.$router.push({ name: 'checkout' });
     },
@@ -99,11 +163,16 @@ export default {
 </script>
 
 <style scoped>
+.chat {
+  width: 26px;
+  height: 26px;
+}
+
 .chat-icon {
   position: fixed;
   display: flex;
   align-items: center;
-  z-index: 1000;
+  z-index: 100;
   bottom: 20px;
   background-color: #7c317c;
   right: 20px;
@@ -120,7 +189,7 @@ export default {
   align-items: center;
   z-index: 1000;
   bottom: 90px;
-  background-color: #7c317c;
+  background-color: #162e63;
   right: 20px;
   width: 60px;
   height: 60px;
@@ -154,7 +223,7 @@ export default {
   transform: translateY(0) scale(1);
 }
 
-.checkout .badge {
+.badge {
   position: absolute;
   top: -2px;
   right: 0;
@@ -212,7 +281,16 @@ export default {
   box-sizing: border-box;
   min-height: calc(100vh - 60px);
   overflow: hidden;
-  margin-top: 160px;
+}
+
+.top-start {
+  margin-top: 120px;
+
+}
+
+.top {
+  margin-top: 30px;
+
 }
 
 .footer {

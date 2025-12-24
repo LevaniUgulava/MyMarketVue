@@ -8,9 +8,22 @@
         class="category-modal" ref="productviewcategory" />
     </div>
     <div class="products-container">
+
       <div>
-        <BreadcrumbComponent :maincategory="emitselectedmainCategory" :category="emitselectedCategory"
-          :subcategory="emitselectedsubCategory" class="bread" @item-removed="handleremoved" />
+        <div class="head">
+          <BreadcrumbComponent :maincategory="emitselectedmainCategory" :category="emitselectedCategory"
+            :subcategory="emitselectedsubCategory" class="bread" @item-removed="handleremoved" />
+          <div class="search-input" v-if="searchname">
+            <input v-model="searchname" @input="performLocalSearch" type="text" placeholder="რას ეძებ?">
+            <button @pointerdown="performSearch" class="search-btn"><svg data-v-5c833af0=""
+                xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"
+                fill="currentcolor">
+                <path data-v-5c833af0=""
+                  d="M779.38-153.85 528.92-404.31q-30 25.54-69 39.54t-78.38 14q-96.1 0-162.67-66.53-66.56-66.53-66.56-162.57 0-96.05 66.53-162.71 66.53-66.65 162.57-66.65 96.05 0 162.71 66.56Q610.77-676.1 610.77-580q0 41.69-14.77 80.69t-38.77 66.69l250.46 250.47-28.31 28.3ZM381.54-390.77q79.61 0 134.42-54.81 54.81-54.8 54.81-134.42 0-79.62-54.81-134.42-54.81-54.81-134.42-54.81-79.62 0-134.42 54.81-54.81 54.8-54.81 134.42 0 79.62 54.81 134.42 54.8 54.81 134.42 54.81Z">
+                </path>
+              </svg> ძიება</button>
+          </div>
+        </div>
 
         <div class="main-content">
 
@@ -269,6 +282,46 @@ function handleunauthorizedcart(cartmessage) {
 // }
 </script>
 <style scoped>
+.search-input {
+  display: flex;
+  gap: 10px;
+}
+
+.search-input input {
+  width: 100%;
+  padding: 10px 24px;
+  font-size: 15px;
+  border-radius: 10px;
+  background-color: transparent;
+  border: 1px solid #dcdcdc;
+}
+
+.search-btn {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  border-radius: 10px;
+  border: none;
+  background-color: #102556;
+  color: white;
+  gap: 5px;
+  width: auto;
+  justify-content: center;
+  min-width: 100px;
+  cursor: pointer;
+  padding: 5px 15px;
+}
+
+.search-btn:hover {
+  background-color: #162E63;
+
+}
+
+.search-input input:focus {
+  columns: black;
+}
+
+
 .empty {
   display: flex;
   justify-content: center;
@@ -292,13 +345,12 @@ function handleunauthorizedcart(cartmessage) {
 .container {
   display: flex;
   flex-wrap: wrap;
-  padding-top: 15px;
   gap: 20px;
 }
 
 .category-container {
   flex: 1;
-  max-width: 250px;
+  max-width: 230px;
   margin-top: 15px;
   padding: 10px;
   overflow-y: auto;
@@ -311,6 +363,11 @@ function handleunauthorizedcart(cartmessage) {
 
 .main-content {
   overflow: hidden;
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
 }
 
 .page-container {
@@ -330,9 +387,9 @@ function handleunauthorizedcart(cartmessage) {
   width: 100%;
 }
 
-.bread {
+/* .bread {
   margin-top: 15px;
-}
+} */
 
 .pagination-container {
   display: flex;

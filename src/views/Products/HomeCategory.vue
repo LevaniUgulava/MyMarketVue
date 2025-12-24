@@ -1,10 +1,6 @@
 <template>
     <section v-if="getApiLoaded" class="cat-wrap" aria-labelledby="cat-head">
         <header class="cat-head">
-            <div class="filters-left">
-                <input v-model="q" class="search" type="search" placeholder="ძიება კატეგორიებში..."
-                    aria-label="ძიება კატეგორიებში" />
-            </div>
 
             <div class="filters-right">
                 <button class="chip" :class="{ active: activeView === 'grid' }" @click="toggleView"
@@ -30,11 +26,11 @@
                 <div class="hero">
                     <img :src="cat.image_url" :alt="cat.ka_name" loading="lazy" decoding="async" />
                     <div class="ring"></div>
-                    <div class="badge">{{ cat.count }}+</div>
+                    <!-- <div class="badge">{{ cat.count }}+</div> -->
                 </div>
                 <div class="meta">
                     <h3 class="title">{{ cat.ka_name }}</h3>
-                    <p class="subtitle">{{ cat.subtitle }}</p>
+                    <!-- <p class="subtitle">{{ cat.subtitle }}</p> -->
                 </div>
             </div>
         </div>
@@ -335,7 +331,7 @@ function onClick(cat) {
 .hero,
 .thumb {
     position: relative;
-    border-radius: 16px;
+    border-radius: 10px;
     overflow: hidden;
     aspect-ratio: 16/10;
     background: #0c0c0f;
@@ -360,7 +356,6 @@ function onClick(cat) {
     inset: -1px;
     border-radius: 18px;
     pointer-events: none;
-    background: conic-gradient(from 180deg, rgba(124, 49, 201, 0.6), rgba(254, 124, 163, 0.6), rgba(124, 49, 201, 0.6));
     filter: blur(16px) saturate(1.1);
     opacity: .25;
     transition: opacity .25s ease;
@@ -387,8 +382,10 @@ function onClick(cat) {
 }
 
 .title {
-    font-size: 16px;
-    font-weight: 800;
+    display: flex;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 500;
     letter-spacing: -.01em;
     margin: 0 0 2px 0;
 }

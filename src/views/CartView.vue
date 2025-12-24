@@ -96,17 +96,21 @@
         </div>
 
         <div class="payment-section">
-            <!-- <div class="details">
-                <span>თანხა:</span>
+            <h3>შეკვეთა</h3>
+            <div class="details add">
+                <span>პროდუქტების რაოდენობა</span>
+                <span>{{ mycarts.length }}</span>
+            </div>
+            <div class="details">
+                <span>სულ თანხა:</span>
                 <span>{{ allprice }} <i class="fa-solid fa-lari-sign"></i></span>
-            </div> -->
-            <button class="checkbtn" @pointerup.stop.prevent="checkout">გადასახდელი თანხა {{
-                allprice }} <i class="fa-solid fa-lari-sign"></i></button>
+            </div>
+            <button class="checkbtn" @pointerup.stop.prevent="checkout">ყიდვის გაგრძელება</button>
         </div>
     </div>
 
     <div v-if="apiLoaded && mycarts.length === 0" class="empty-cart">
-        <i class="fa-solid fa-cart-shopping"></i>
+        <img src="../assets/image copy 2.png">
         <p class="empty-text">თქვენ ჯერ არ დაგიმატებიან პროდუქტი</p>
         <p class="empty-subtext">დამატეთ ყველა პროდუქტი, რაც თქვენ გაინტერესებთ</p>
         <div class="empty-actions">
@@ -252,6 +256,7 @@ export default {
                 console.log(mappedcart);
                 await api.post("/temporder", { products: mappedcart }, { tokenRequired: true });
                 this.$router.push({ name: "checkout" });
+                await this.$store.dispatch('auth/dashboardInfo', null, { root: true });
             } catch (error) {
                 this.handleCheckoutError(error);
             }
@@ -294,10 +299,25 @@ export default {
                 this.maxquantity = selectedColorObj ? selectedColorObj.quantity : 0;
             }
         },
+        checkscroll() {
+            const maxTop = 150;
+            const scrollY = window.scrollY || 0;
+            const topValue = Math.max(80, maxTop - scrollY)
+            document.documentElement.style.setProperty('--payment-top', `${topValue}px`);
+
+
+        }
     },
     mounted() {
+        this.checkscroll();
+        window.addEventListener('scroll', this.checkscroll);
+
         this.getCart();
     },
+    beforeUnmount() {
+        window.removeEventListener('scroll', this.checkscroll);
+
+    }
 };
 </script>
 
@@ -311,6 +331,10 @@ export default {
     text-align: center;
     padding: 80px 20px;
     color: #333;
+}
+
+.empty-cart img {
+    width: 200px;
 }
 
 .increment-wrapper {
@@ -431,8 +455,7 @@ export default {
     padding: 20px;
     width: 95%;
     margin: auto;
-    gap: 30px;
-    margin-top: 40px;
+    gap: 50px;
 }
 
 .product-section {
@@ -445,6 +468,7 @@ export default {
 .card {
     display: flex;
     padding: 5px;
+    width: 1000px;
     border-bottom: 1px solid #ccc;
     position: relative;
 }
@@ -468,7 +492,7 @@ export default {
 }
 
 .custom-carousel .img {
-    width: 100%;
+    width: 60%;
     height: auto;
     border-radius: 8px;
     object-fit: cover;
@@ -568,11 +592,12 @@ export default {
 
 
 .payment-section {
-    flex: 1;
     display: flex;
     flex-direction: column;
-    position: sticky;
-    top: 20px;
+    position: fixed;
+    width: 300px;
+    top: var(--payment-top);
+    right: 30px;
     height: fit-content;
 }
 
@@ -580,6 +605,13 @@ export default {
     display: flex;
     justify-content: space-between;
     margin-bottom: 10px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.add {
+    font-weight: 400 !important;
+
 }
 
 .checkbtn {
@@ -589,7 +621,8 @@ export default {
     padding: 10px 15px;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 12px;
+    font-weight: 500;
 }
 
 @media (max-width:767px) {

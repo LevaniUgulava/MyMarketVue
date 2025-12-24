@@ -12,7 +12,14 @@ const routes = [
     path: "/",
     component: () => import("@/views/MainlayoutView.vue"),
     children: [
-  
+      {
+        path:"docs/service-terms",
+        component:()=>import("@/components/Footer/ServiceTermsComponent.vue")
+      },
+      {
+        path:"docs/privacy-policy",
+        component:()=>import("@/components/Footer/ServiceTermsComponent.vue")
+      },
       {
         path: "",
         name: "Home",
@@ -31,10 +38,7 @@ const routes = [
         component: () => import("@/views/Products/ProductsView.vue"),
 
       },
-      {
-        path: "/docs",
-        component: () => import("@/components/Footer/DocumentComponent.vue"), 
-      },
+    
       {
         path: "cart",
         name: "Cart",
@@ -57,6 +61,11 @@ const routes = [
           name:"profile-info",
           component: () => import("@/components/profile/Components/PersonalInfo.vue")
           },
+          {
+        path: "orders",
+        name: "ordersuser",
+        component: () => import("@/views/OrderView.vue"),
+         },
           {
           path: "address",
           name:"address-info",
@@ -113,11 +122,6 @@ const routes = [
             title:"სურვილების სია - name"
 
           }
-      },
-      {
-        path: "orders",
-        name: "ordersuser",
-        component: () => import("@/views/OrderView.vue"),
       },
       {
         path: "collection/:id",
@@ -190,6 +194,11 @@ const routes = [
         component: () => import("@/components/Admin/Mail/SingleMailComponent.vue"),
         props:true
       },  
+      {
+        path: "chat",
+        name: "Adminchat",
+        component: () => import("@/components/Admin/AdminchatComponent.vue"),
+      },    
       {
         path: "dashboard",
         name: "Admindashboard",
@@ -327,16 +336,13 @@ const routes = [
     component: () => import("@/views/Admin/AdminLoginView.vue"),
   },
     {
-    path: "/fastlogin",
-    component: () => import("@/components/PinCode/PincodeComponent.vue")
+    path: "/camera",
+    component: () => import("@/components/AudioSim.vue")
   },
-     {
-    path: "/setpin",
-    component: () => import("@/components/PinCode/SetPincodeComponent.vue")
-  },
+
   {
-    path: "/pincode-biometric",
-    component: () => import("@/components/PinCode/PincodeBiometricComponent.vue")
+    path: "/chat",
+    component: () => import("@/components/ChatModal.vue")
   },
 ];
 

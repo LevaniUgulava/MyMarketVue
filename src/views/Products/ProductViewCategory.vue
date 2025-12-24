@@ -2,7 +2,7 @@
     <div class="category-modal">
         <button @pointerdown="resetFilters" class="reset-button">ფილტრის გასუფთავება</button>
         <div class="filter-section">
-            <h3 @pointerdown="toggleSection('mainCategory')">
+            <div class="sect" @pointerdown="toggleSection('mainCategory')">
                 მთავრი კატეგორია
                 <svg v-if="collapsed.mainCategory" class="icon icon-chevron-up icon-md" viewBox="0 0 24 24"
                     stroke="currentColor" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -12,7 +12,7 @@
                     xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M18 9L12 15L6 9"></path>
                 </svg>
-            </h3>
+            </div>
             <div v-if="!collapsed.mainCategory">
                 <div v-for="(mainCategory, index) in mainCategories" :key="index" class="checkbox-container">
                     <input type="checkbox" :id="'main-' + mainCategory.id" v-model="selectedMainCategories"
@@ -23,7 +23,7 @@
         </div>
 
         <div class="filter-section">
-            <h3 @pointerdown="toggleSection('category')">
+            <div class="sect" @pointerdown="toggleSection('category')">
                 კატეგორია
                 <svg v-if="collapsed.category" class="icon icon-chevron-up icon-md" viewBox="0 0 24 24"
                     stroke="currentColor" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -33,7 +33,7 @@
                     xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M18 9L12 15L6 9"></path>
                 </svg>
-            </h3>
+            </div>
             <div v-if="!collapsed.category">
                 <div class="checkbox-container" v-for="(category, catIndex) in filteredCategory || []" :key="catIndex">
                     <input type="checkbox" :id="'category-' + category.id" v-model="selectedCategories"
@@ -45,7 +45,7 @@
 
         <!-- Subcategory Section -->
         <div class="filter-section">
-            <h3 @pointerdown="toggleSection('subcategory')">
+            <div class="sect" @pointerdown="toggleSection('subcategory')">
                 ქვეკატეგორია
                 <svg v-if="collapsed.subcategory" class="icon icon-chevron-up icon-md" viewBox="0 0 24 24"
                     stroke="currentColor" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -55,7 +55,7 @@
                     xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M18 9L12 15L6 9"></path>
                 </svg>
-            </h3>
+            </div>
             <div v-if="!collapsed.subcategory">
                 <div class="checkbox-container" v-for="(subcategory, subIndex) in filteredsubCategory || []"
                     :key="subIndex">
@@ -67,7 +67,7 @@
         </div>
         <!-- Brand Section -->
         <div class="filter-section">
-            <h3 @pointerdown="toggleSection('brand')">
+            <div class="sect" @pointerdown="toggleSection('brand')">
                 მწარმოებელი
                 <svg v-if="collapsed.brand" class="icon icon-chevron-up icon-md" viewBox="0 0 24 24"
                     stroke="currentColor" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -77,7 +77,7 @@
                     xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M18 9L12 15L6 9"></path>
                 </svg>
-            </h3>
+            </div>
             <div v-if="!collapsed.brand">
                 <div class="checkbox-container" v-for="(brand, Index) in brands || []" :key="Index">
                     <input type="checkbox" :id="'brand-' + brand.id" v-model="selectedBrands" :value="brand.id"
@@ -89,7 +89,7 @@
 
         <!-- Price Range Section -->
         <div class="filter-section">
-            <h3 @pointerdown="toggleSection('price')">
+            <div class="sect" @pointerdown="toggleSection('price')">
                 ფასი
                 <svg v-if="collapsed.price" class="icon icon-chevron-up icon-md" viewBox="0 0 24 24"
                     stroke="currentColor" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -99,8 +99,9 @@
                     xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M18 9L12 15L6 9"></path>
                 </svg>
-            </h3>
+            </div>
             <div v-if="!collapsed.price">
+                <SliderComponent @min="onMinChange" @max="onMaxChange" />
                 <div class="inputs">
                     <input class="input" type="number" placeholder="დან" v-model="priceRange.min"
                         @input="performSearch">
@@ -111,7 +112,7 @@
         </div>
 
         <div class="filter-section">
-            <h3 @pointerdown="toggleSection('size')">
+            <div class="sect" @pointerdown="toggleSection('size')">
                 ზომა
                 <svg v-if="collapsed.size" class="icon icon-chevron-up icon-md" viewBox="0 0 24 24"
                     stroke="currentColor" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -121,7 +122,7 @@
                     xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M18 9L12 15L6 9"></path>
                 </svg>
-            </h3>
+            </div>
             <div v-if="!collapsed.size" class="size">
                 <div class="size-grid">
                     <div class="size-section">
@@ -145,7 +146,7 @@
 
 
         <div class="filter-section">
-            <h3 @pointerdown="toggleSection('color')">
+            <div class="sect" @pointerdown="toggleSection('color')">
                 ფერი
                 <svg v-if="collapsed.color" class="icon icon-chevron-up icon-md" viewBox="0 0 24 24"
                     stroke="currentColor" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -155,7 +156,7 @@
                     xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M18 9L12 15L6 9"></path>
                 </svg>
-            </h3>
+            </div>
             <div v-if="!collapsed.color">
                 <div class="checkbox-container" v-for="(color, colorIndex) in colors" :key="colorIndex">
                     <input type="checkbox" :id="'color-' + color.id" v-model="selectedColors" :value="color.color"
@@ -169,8 +170,12 @@
 
 <script>
 import api from '@/api';
+import SliderComponent from '@/components/SliderComponent.vue';
 import { mapMutations, mapGetters } from 'vuex';
 export default {
+    components: {
+        SliderComponent
+    },
     data() {
         return {
             collapsed: {
@@ -205,6 +210,12 @@ export default {
         };
     },
     methods: {
+        onMinChange(data) {
+            this.priceRange.min = data
+        },
+        onMaxChange(data) {
+            this.priceRange.max = data
+        },
         loadsavefilter() {
             this.selectedMainCategories = this.getMainCategory;
             this.selectedCategories = this.getCategory;
@@ -257,17 +268,17 @@ export default {
         },
         async fetchCategories() {
             try {
-                const storedCategories = sessionStorage.getItem('categories');
+                // const storedCategories = sessionStorage.getItem('categories');
 
-                if (storedCategories) {
-                    const parsedCategories = JSON.parse(storedCategories);
-                    this.mainCategories = parsedCategories.mainCategories;
-                    this.Categories = parsedCategories.Categories;
-                    this.subCategories = parsedCategories.subCategories;
-                    this.colors = parsedCategories.colors;
-                    this.sizes = parsedCategories.sizes;
-                    this.brands = parsedCategories.brands;
-                } else {
+                // if (storedCategories) {
+                //     const parsedCategories = JSON.parse(storedCategories);
+                //     this.mainCategories = parsedCategories.mainCategories;
+                //     this.Categories = parsedCategories.Categories;
+                //     this.subCategories = parsedCategories.subCategories;
+                //     this.colors = parsedCategories.colors;
+                //     this.sizes = parsedCategories.sizes;
+                //     this.brands = parsedCategories.brands;
+                // } else {
                     const [response, responsee, responseee, responsecolor, responsesize, responsebrand] = await Promise.all([
                         api.get('maincategory', { tokenRequired: false }),
                         api.get('category', { tokenRequired: false }),
@@ -294,9 +305,9 @@ export default {
                     this.colors = responsecolor.data;
                     this.sizes = responsesize.data;
                     this.brands = responsebrand.data;
-                }
+                // }
 
-                this.setCategoryFromQuery();
+                // this.setCategoryFromQuery();
 
             } catch (error) {
                 console.error('Failed to fetch categories:', error);
@@ -450,18 +461,18 @@ export default {
 }
 
 .icon {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
 }
 
 .inputs {
     display: flex;
-    gap: 10px;
+    justify-content: space-between;
 }
 
 .category-modal {
     width: 100%;
-    height: 80vh;
+    height: 100vh;
     overflow-y: auto;
     border-radius: 8px;
 }
@@ -475,7 +486,7 @@ export default {
 }
 
 .filter-section {
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     padding: 10px;
     border-radius: 8px;
     transition: background-color 0.3s ease;
@@ -483,8 +494,8 @@ export default {
 }
 
 
-.filter-section h3 {
-    font-size: 16px;
+.filter-section .sect {
+    font-size: 14px;
     cursor: pointer;
     display: flex;
     font-weight: 400;
@@ -494,7 +505,7 @@ export default {
     padding-bottom: 10px;
 }
 
-.filter-section h3 span {
+.filter-section .sect span {
     font-size: 18px;
 }
 
@@ -506,7 +517,7 @@ export default {
 /* Custom checkbox */
 .checkbox-container label {
     position: relative;
-    padding-left: 35px;
+    padding-left: 25px;
     cursor: pointer;
     font-size: 13px;
 }
@@ -516,8 +527,8 @@ export default {
     position: absolute;
     left: 0;
     top: 0;
-    width: 15px;
-    height: 15px;
+    width: 13px;
+    height: 13px;
     border: 1px solid #333;
     border-radius: 5px;
     background-color: #fff;
@@ -543,8 +554,8 @@ export default {
 }
 
 .input {
-    width: 100px;
-    height: 30px;
+    width: 50px;
+    height: 20px;
     border: 0.5px solid #171717;
     border-radius: 5px;
     padding: 5px;

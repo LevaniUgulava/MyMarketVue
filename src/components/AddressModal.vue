@@ -4,37 +4,38 @@
             <div class="modal-content">
                 <button class="close-button" @click="$emit('close')">&times;</button>
                 <div class="modal-body">
-                    <p class="modal-title">მისამართის დამატება</p>
-                    <div class="line">
-                    </div>
+                    <h2 class="modal-title">მისამართის დამატება</h2>
+                    <div class="line"></div>
 
-                    <div class="form-group" style="position: relative;">
-                        <label for="city">ქალაქი</label>
-                        <input id="city" type="text" class="form-control" v-model="citySearch"
-                            placeholder="ჩაწერე ქალაქის სახელი" @focus="showDropdown = true"
-                            @input="showDropdown = true" @blur="hideDropdownWithDelay" />
-                        <ul v-if="showDropdown && filteredZones.length" class="autocomplete-list">
-                            <li v-for="zone in filteredZones" :key="zone.id" @mousedown.prevent="selectZone(zone)">
-                                {{ zone.name }}
-                            </li>
-                        </ul>
-                    </div>
+                    <form @submit.prevent="saveAddress">
+                        <div class="form-group">
+                            <label for="city">ქალაქი</label>
+                            <input id="city" type="text" class="form-control" v-model="citySearch"
+                                placeholder="ჩაწერე ქალაქის სახელი" @focus="showDropdown = true"
+                                @input="showDropdown = true" @blur="hideDropdownWithDelay" />
+                            <ul v-if="showDropdown && filteredZones.length" class="autocomplete-list">
+                                <li v-for="zone in filteredZones" :key="zone.id" @mousedown.prevent="selectZone(zone)">
+                                    {{ zone.name }}
+                                </li>
+                            </ul>
+                        </div>
 
-                    <div class="form-group">
-                        <label for="address">მისამართი</label>
-                        <input id="address" type="text" class="form-control" v-model="address"
-                            placeholder="შეიყვანე მისამართი" ref="addressInput" />
-                    </div>
+                        <div class="form-group">
+                            <label for="address">მისამართი</label>
+                            <input id="address" type="text" class="form-control" v-model="address"
+                                placeholder="შეიყვანე მისამართი" ref="addressInput" />
+                        </div>
 
-                    <div class="form-group">
-                        <label for="additional">დამატებითი ინფორმაცია</label>
-                        <input id="additional" type="text" class="form-control" v-model="additionalInfo"
-                            placeholder="სართულზე, სადარბაზო და ა.შ." />
-                    </div>
+                        <div class="form-group">
+                            <label for="additional">დამატებითი ინფორმაცია</label>
+                            <input id="additional" type="text" class="form-control" v-model="additionalInfo"
+                                placeholder="სართულზე, სადარბაზო და ა.შ." />
+                        </div>
 
-                    <div class="actions">
-                        <button class="save-button" @click.prevent="saveAddress">მისამართის დამატება</button>
-                    </div>
+                        <div class="actions">
+                            <button class="save-button" type="submit">მისამართის დამატება</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -42,8 +43,6 @@
 </template>
 
 <script>
-/* global google */
-
 import api from '@/api';
 import { nextTick } from 'vue';
 
@@ -91,9 +90,7 @@ export default {
             }, 150);
         },
         async saveAddress() {
-
             try {
-
                 const response = await api.post('/addAddress', {
                     town: this.citySearch,
                     address: this.address,
@@ -102,45 +99,41 @@ export default {
                     tokenRequired: true
                 });
                 console.log(response);
-
             } catch (error) {
                 console.log(error);
             }
 
-
             this.$emit('save');
             this.$emit('close');
         },
-        autoCompleteAddress() {
-            const input = this.$refs.addressInput;
-            const autocomplete = new google.maps.places.Autocomplete(input, {
-                types: ['geocode'],
-                componentRestrictions: { country: 'ge' }
-            });
-            console.log(autocomplete)
-            autocomplete.addListener('place_changed', () => {
-                const place = autocomplete.getPlace();
-                this.address = place.formatted_address || '';
-            });
-        },
+        // autoCompleteAddress() {
+        //     const input = this.$refs.addressInput;
+        //     const autocomplete = new google.maps.places.Autocomplete(input, {
+        //         types: ['geocode'],
+        //         componentRestrictions: { country: 'ge' }
+        //     });
+
+        //     autocomplete.addListener('place_changed', () => {
+        //         const place = autocomplete.getPlace();
+        //         this.address = place.formatted_address || '';
+        //     });
+        // },
     },
     mounted() {
         this.getAddressZones();
-
     },
     watch: {
         open(newVal) {
             if (newVal) {
                 nextTick(() => {
-                    this.autoCompleteAddress();
+                    // this.autoCompleteAddress();
                     document.body.style.overflow = 'hidden';
                 });
             } else {
                 document.body.style.overflow = '';
             }
-        }
+        },
     },
-
 };
 </script>
 
@@ -151,70 +144,77 @@ export default {
 }
 
 .line {
-    background-color: #cfcdd3b3;
+    background-color: #e0e0e0;
     height: 1px;
-    width: 100%;
-    margin-bottom: 30px;
-
+    margin: 30px 0;
 }
 
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background-color: rgb(102 97 97 / 35%);
+    background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    padding: 20px;
 }
 
 .modal-content {
-    background-color: #ffffff;
-    padding: 25px 30px;
-    border-radius: 12px;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    max-width: 600px;
     width: 100%;
-    max-width: 50%;
-    position: relative;
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .modal-title {
-    display: flex;
-    justify-content: center;
+    text-align: center;
     font-size: 18px;
     font-weight: 600;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 .form-group {
     display: flex;
     flex-direction: column;
-    margin-bottom: 15px;
-    position: relative;
+    margin-bottom: 20px;
 }
 
 label {
-    margin-bottom: 6px;
+    margin-bottom: 8px;
     font-size: 14px;
-    color: #000000b3;
+    color: #333;
 }
 
 .form-control {
-    padding: 10px 12px;
+    padding: 12px;
     font-size: 14px;
     border-radius: 6px;
-    border: 1px solid #cfcdd3b3;
-    background-color: #ffffff;
+    border: 1px solid #ddd;
+    background-color: #f9f9f9;
     width: 100%;
 }
 
 .form-control::placeholder {
-    color: #898690b3;
+    color: #bbb;
 }
 
 .form-control:focus {
     outline: none;
-    border-color: #7a1dff;
+    border-color: #162e63;
     background-color: #fff;
 }
 
@@ -225,7 +225,6 @@ label {
     background: white;
     border: 1px solid #ccc;
     max-height: 200px;
-    font-size: 12px;
     overflow-y: auto;
     z-index: 999;
     list-style: none;
@@ -235,7 +234,7 @@ label {
 }
 
 .autocomplete-list li {
-    padding: 8px 12px;
+    padding: 8px;
     cursor: pointer;
 }
 
@@ -245,20 +244,19 @@ label {
 
 .actions {
     margin-top: 20px;
-    display: flex;
-    justify-content: flex-end;
+    text-align: right;
 }
 
 .save-button {
-    background-color: #7a1dff;
+    background-color: #162e63;
     color: white;
-    padding: 10px 18px;
+    padding: 12px 18px;
     border: none;
     border-radius: 6px;
     width: 100%;
     cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.2s ease;
+    font-size: 16px;
+    transition: background-color 0.3s;
 }
 
 .save-button:hover {
@@ -267,34 +265,22 @@ label {
 
 .close-button {
     position: absolute;
-    top: 12px;
-    right: 14px;
+    top: 15px;
+    right: 20px;
     background: transparent;
     border: none;
-    font-size: 22px;
+    font-size: 28px;
+    color: #666;
     cursor: pointer;
-    color: #999;
-    transition: color 0.2s ease;
 }
 
 .close-button:hover {
     color: #333;
 }
 
-.modal-body {
-    margin-top: 15px;
-}
-
-
 @media (max-width: 768px) {
     .modal-content {
         max-width: 90%;
-
-
-    }
-
-    .modal-overlay {
-        padding-bottom: 100%;
     }
 }
 </style>

@@ -219,14 +219,11 @@ export default {
   text-indent: 15px;
   height: 50px;
   border: 1px solid #dbdbdb;
-  border-radius: 10px;
   outline: none;
   transition: border-color 0.3s, box-shadow 0.3s;
 }
 
-.input-error {
-  border-color: #e74c3c;
-}
+
 
 .input-container label {
   position: absolute;
@@ -325,11 +322,10 @@ span {
 
 .modal {
   position: fixed;
-  top: 10px;
-  right: 10px;
-  bottom: 10px;
+  top: 0;
+  right: 0;
+  bottom: 0;
   width: 50vh;
-  border-radius: 10px;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 1000;
 }
@@ -389,9 +385,8 @@ input:not(:placeholder-shown)+label {
   padding: 12px;
   font-size: 16px;
   cursor: pointer;
-  border-radius: 8px;
   border: none;
-  background-color: #62389c;
+  background-color: #162e63;
   color: white;
   width: 100%;
   font-weight: 500;
@@ -407,7 +402,7 @@ h2 {
 }
 
 .loginbtn:hover {
-  background-color: #4b6ee6;
+  background-color: #2e477c;
 }
 
 

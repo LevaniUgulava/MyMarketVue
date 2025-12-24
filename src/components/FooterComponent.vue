@@ -1,112 +1,126 @@
 <template>
-  <div class="footer">
-    <div class="contact-container">
-      <div class="contact">
-        <div class="logo">
-          <span>შეიყვანეთ მეილი სიახლეებისთის</span>
-        </div>
-        <div class="input">
+  <footer class="footer">
+    <div class="footer-container">
+      <!-- Left side -->
+      <div class="footer-left">
+        <div class="footer-title">გამოიწერეთ ჩვენი სიახლეები</div>
+        <p class="footer-desc">
+          იყავით პირველი, ვინც შეიტყობს ახალ კოლექციებს და ექსკლუზიურ შეთავაზებებს.
+        </p>
 
-          <input type="email" v-model="email" placeholder="შეიყვანეთ ელ.ფოსტა">
-          <span class="mail-icon">
-            <img src="../assets/svg/mail.svg">
-          </span>
-          <div class="btn">
-            <span v-if="loading" class="spinner" aria-hidden="true"></span>
+        <form class="footer-subscribe">
+          <input type="email" v-model="email" placeholder="ელფოსტა" required />
+          <button @click.prevent="subscription" v-if="isShown">
 
-            <div class="div" v-else-if="status === 'success' && !loading">
-              <div v-if="showTooltip" class="popup-message">
+            <svg v-if="!loading && status === null" xmlns="http://www.w3.org/2000/svg" height="24px"
+              viewBox="0 -960 960 960" width="24px" fill="currentcolor">
+              <path d="m556-258-38-39 158-158H180v-54h496L518-667l38-39 224 224-224 224Z" />
+            </svg>
+            <div v-else-if="loading" class="spinner"></div>
+
+            <div v-else-if="!loading && status === 'exist'" class="message">
+              <div class="popup-message">
                 {{ Message }}
                 <div class="arrow-down"></div>
               </div>
-              <svg @pointerdown="clear" @mouseenter="showTooltip = true" @mouseleave="showTooltip = false"
-                xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#48752C">
-                <path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z" />
-              </svg>
-
-            </div>
-
-            <div class="div" v-else-if="status === 'error' && !loading">
-              <div v-if="showTooltip" class="popup-message">
-                {{ Message }}
-                <div class="arrow-down"></div>
-              </div>
-              <svg @pointerdown="clear" @mouseenter="showTooltip = true" @mouseleave="showTooltip = false"
-                xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#EA3323">
-                <path
-                  d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
-              </svg>
-            </div>
-            <div class="div" v-else-if="status === 'exist' && !loading">
-              <div v-if="showTooltip" class="popup-message">
-                {{ Message }}
-                <div class="arrow-down"></div>
-              </div>
-              <svg @pointerdown="clear" @mouseenter="showTooltip = true" @mouseleave="showTooltip = false"
-                xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#F19E39">
+              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                fill="#F19E39">
                 <path
                   d="M440-280h80v-240h-80v240Zm40-320q17 0 28.5-11.5T520-640q0-17-11.5-28.5T480-680q-17 0-28.5 11.5T440-640q0 17 11.5 28.5T480-600Zm0 520q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" />
               </svg>
             </div>
+            <div v-else-if="!loading && status === 'success'" class="message">
+              <div class="popup-message">
+                {{ Message }}
+                <div class="arrow-down"></div>
+              </div>
+              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                fill="#9DC384">
+                <path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z" />
+              </svg>
+            </div>
+            <div v-else-if="!loading && status === 'error'" class="message">
+              <div class="popup-message">
+                {{ Message }}
+                <div class="arrow-down"></div>
+              </div>
+              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                fill="#EA3323">
+                <path
+                  d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
+              </svg>
+            </div>
 
+          </button>
+        </form>
+        <div class="pay-term">
+          <div class="footer-terms">
+            გამოწერით თქვენ ეთანხმებით ჩვენი
+            <a href="/docs/service-terms">გამოყენების პირობებს</a> და
+            <a href="/docs/privacy-policy">კონფიდენციალურობის პოლიტიკას</a>.
+          </div>
 
+          <div class="footer-payments">
 
+            <svg class="icon icon--full-color" viewBox="0 0 38 24" xmlns="http://www.w3.org/2000/svg" role="img"
+              width="38" height="24" aria-labelledby="pi-visa">
+              <title id="pi-visa">Visa</title>
+              <path opacity=".07" d="M35 0H3C1.3 0 0 1.3 0 3v18c0 1.7 1.4 3 3 3h32c1.7 0 3-1.3 3-3V3c0-1.7-1.4-3-3-3z">
+              </path>
+              <path fill="#fff" d="M35 1c1.1 0 2 .9 2 2v18c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V3c0-1.1.9-2 2-2h32"></path>
+              <path
+                d="M28.3 10.1H28c-.4 1-.7 1.5-1 3h1.9c-.3-1.5-.3-2.2-.6-3zm2.9 5.9h-1.7c-.1 0-.1 0-.2-.1l-.2-.9-.1-.2h-2.4c-.1 0-.2 0-.2.2l-.3.9c0 .1-.1.1-.1.1h-2.1l.2-.5L27 8.7c0-.5.3-.7.8-.7h1.5c.1 0 .2 0 .2.2l1.4 6.5c.1.4.2.7.2 1.1.1.1.1.1.1.2zm-13.4-.3l.4-1.8c.1 0 .2.1.2.1.7.3 1.4.5 2.1.4.2 0 .5-.1.7-.2.5-.2.5-.7.1-1.1-.2-.2-.5-.3-.8-.5-.4-.2-.8-.4-1.1-.7-1.2-1-.8-2.4-.1-3.1.6-.4.9-.8 1.7-.8 1.2 0 2.5 0 3.1.2h.1c-.1.6-.2 1.1-.4 1.7-.5-.2-1-.4-1.5-.4-.3 0-.6 0-.9.1-.2 0-.3.1-.4.2-.2.2-.2.5 0 .7l.5.4c.4.2.8.4 1.1.6.5.3 1 .8 1.1 1.4.2.9-.1 1.7-.9 2.3-.5.4-.7.6-1.4.6-1.4 0-2.5.1-3.4-.2-.1.2-.1.2-.2.1zm-3.5.3c.1-.7.1-.7.2-1 .5-2.2 1-4.5 1.4-6.7.1-.2.1-.3.3-.3H18c-.2 1.2-.4 2.1-.7 3.2-.3 1.5-.6 3-1 4.5 0 .2-.1.2-.3.2M5 8.2c0-.1.2-.2.3-.2h3.4c.5 0 .9.3 1 .8l.9 4.4c0 .1 0 .1.1.2 0-.1.1-.1.1-.1l2.1-5.1c-.1-.1 0-.2.1-.2h2.1c0 .1 0 .1-.1.2l-3.1 7.3c-.1.2-.1.3-.2.4-.1.1-.3 0-.5 0H9.7c-.1 0-.2 0-.2-.2L7.9 9.5c-.2-.2-.5-.5-.9-.6-.6-.3-1.7-.5-1.9-.5L5 8.2z"
+                fill="#142688"></path>
+            </svg>
 
+            <svg class="icon icon--full-color" viewBox="0 0 38 24" xmlns="http://www.w3.org/2000/svg" role="img"
+              width="38" height="24" aria-labelledby="pi-master">
+              <title id="pi-master">Mastercard</title>
+              <path opacity=".07" d="M35 0H3C1.3 0 0 1.3 0 3v18c0 1.7 1.4 3 3 3h32c1.7 0 3-1.3 3-3V3c0-1.7-1.4-3-3-3z">
+              </path>
+              <path fill="#fff" d="M35 1c1.1 0 2 .9 2 2v18c0 1.1-.9 2-2 2H3c-1.1 0-2-.9-2-2V3c0-1.1.9-2 2-2h32"></path>
+              <circle fill="#EB001B" cx="15" cy="12" r="7"></circle>
+              <circle fill="#F79E1B" cx="23" cy="12" r="7"></circle>
+              <path fill="#FF5F00"
+                d="M22 12c0-2.4-1.2-4.5-3-5.7-1.8 1.3-3 3.4-3 5.7s1.2 4.5 3 5.7c1.8-1.2 3-3.3 3-5.7z"></path>
+            </svg>
 
-            <button class="button" v-else-if="isShown" @pointerdown="subscription"><img
-                src="../assets/svg/keyboard-arrow-right.svg"></button>
+            <svg width="38" height="24" viewBox="0 0 38 24" xmlns="http://www.w3.org/2000/svg" role="img"
+              aria-label="American Express">
+              <defs>
+                <linearGradient id="amexGradient" x1="0" y1="0" x2="38" y2="24" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stop-color="#2E77BB" />
+                  <stop offset="100%" stop-color="#1A54A5" />
+                </linearGradient>
+              </defs>
+              <rect width="38" height="24" rx="4" fill="url(#amexGradient)" />
+              <rect width="38" height="24" rx="4" stroke="#E5E7EB" stroke-width="0.5" fill="none" />
+
+              <text x="50%" y="56%" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="7" fill="none"
+                stroke="white" stroke-width="0.6" font-weight="900" letter-spacing="0.5">
+                AMEX
+              </text>
+            </svg>
+
 
           </div>
         </div>
       </div>
 
-    </div>
-    <div class="container">
 
-      <div class="footer-columns">
-        <div class="column">
-          <h4>კომპანია</h4>
-          <ul>
-            <li><router-link to="/docs#privacy-policy">ჩვენს შესახებ</router-link></li>
-            <li><router-link to="/terms">წესები და პირობები</router-link></li>
-            <li><router-link to="/privacy-policy">პირადი მონაცემების პოლიტიკა</router-link></li>
-            <li><router-link to="/returns">დაბრუნების პოლიტიკა</router-link></li>
-          </ul>
+
+      <div class="footer-copy">
+        <div class="footer-social">
+          <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
         </div>
-
-        <div class="column">
-          <h4>კონტაქტი:</h4>
-          <ul>
-            <li>ელფოსტა:</li>
-            <li>ნომერი:</li>
-            <div class="column socials">
-              <div class="icons">
-                <a href="#" target="_blank"><i class="fab fa-facebook"></i></a>
-                <a href="#" target="_blank"><i class="fab fa-twitter"></i></a>
-                <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
-                <a href="#" target="_blank"><i class="fab fa-pinterest"></i></a>
-              </div>
-            </div>
-          </ul>
-        </div>
-
-        <div class="column">
-          <h4>ახალი შეთავაზებეი</h4>
-          <ul>
-            <li><router-link to="/returns">დაბრუნების პოლიტიკა</router-link></li>
-          </ul>
+        <div>
+          © 2025 onStore
         </div>
       </div>
     </div>
+  </footer>
 
-    <div class="footer-bottom">
-      <p>&copy; 2024 YourStore. Powered by Webflow</p>
-      <div class="links">
-        <p>tbc</p>
-        <p>bog</p>
-      </div>
-    </div>
-  </div>
 </template>
 
 <script>
@@ -118,21 +132,9 @@ export default {
   data() {
     return {
       email: '',
-      isShown: false,
       loading: false,
-      status: '',
-      showTooltip: false,
+      status: null,
       Message: '',
-      items: [
-        { "id": 1, "url": "bla", "name": "დადდს" },
-        { "id": 2, "url": "bla", "name": "დადდს" },
-        { "id": 3, "url": "bla", "name": "დადდს" },
-        { "id": 4, "url": "bla", "name": "დადდს" },
-        { "id": 5, "url": "bla", "name": "დადდს" },
-        { "id": 6, "url": "bla", "name": "დადდს" },
-        { "id": 7, "url": "bla", "name": "დადდს" },
-        { "id": 8, "url": "bla", "name": "დადდს" }
-      ],
     }
   },
   watch: {
@@ -141,7 +143,8 @@ export default {
     },
     loading() {
       setTimeout(() => {
-        this.status = ''
+        this.status = null
+        this.Message = ''
       }, 8000);
     }
   },
@@ -172,20 +175,17 @@ export default {
 
         if (res.status === 200) {
           this.email = '';
+          this.Message = "გმადლობთ გამოწერისთვის"
           this.status = 'success'
-          this.Message = "ელ.ფოსტა წარმატებით დაემატა"
         }
 
       } catch (error) {
         if (error.response.status === 409) {
+          this.Message = "ელ.ფოსტა ამ მისამართზე უკვე არსებობს"
           this.status = "exist"
-          this.Message = "ელ.ფოსტა უკვე არსებობს"
-
         } else {
+          this.Message = "დაფიქსირდა შეცდომა"
           this.status = "error"
-          this.Message = "ელ.ფოსტა დამატებისას მოხდა შეცდომა"
-
-
         }
       } finally {
         this.loading = false;
@@ -198,26 +198,60 @@ export default {
 </script>
 
 <style scoped>
-.div {
+.footer {
+  background: #ffffff;
+  color: #0b193a;
+  font-family: "Noto Sans Georgian", sans-serif;
+  border-top: 1px solid #eaeaea;
+}
+
+.footer-container {
+  margin: 20px;
+}
+
+.footer-title {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.2;
+  margin-bottom: 14px;
+  width: fit-content;
+  color: #0b193a;
+}
+
+.footer-desc {
+  font-size: 14px;
+  color: #4b5563;
+  width: fit-content;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.footer-subscribe {
   display: flex;
-  justify-content: center;
   align-items: center;
-  cursor: pointer;
+  background: #f7f7f8;
+  border-radius: 40px;
+  width: 100%;
+  max-width: 480px;
+  transition: box-shadow 0.2s ease;
+}
+
+.message {
+  position: relative;
 }
 
 .popup-message {
   position: absolute;
-  bottom: 100%;
+  bottom: 130%;
   left: 50%;
   transform: translateX(-50%);
   background-color: #fff;
   color: #333;
   border: 1px solid #d1d1d1;
   border-radius: 6px;
-  width: 160px;
-  padding: 8px 10px !important;
-  font-size: 12px;
-  white-space: wrap;
+  padding: 8px 10px;
+  font-size: 13px;
+  white-space: nowrap;
   z-index: 9;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
@@ -234,232 +268,169 @@ export default {
   border-top: 5px solid #d1d1d1;
 }
 
+
+.footer-subscribe:focus-within {
+  box-shadow: 0 0 0 2px rgba(25, 60, 110, 0.15);
+}
+
+.footer-subscribe input {
+  position: relative;
+
+  flex: 1;
+  padding: 15px 22px;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  outline: none;
+  color: #111827;
+}
+
+.footer-subscribe button {
+  background: transparent;
+  border: none;
+  padding: 0 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1c284d;
+  cursor: pointer;
+  transition: color 0.25s;
+}
+
+.footer-subscribe button:hover {
+  color: #334173;
+}
+
+.footer-terms {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 18px;
+  width: fit-content;
+}
+
+.pay-term {
+  display: flex;
+  justify-content: space-between;
+}
+
+.footer-terms a {
+  color: #1c284d;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.25s;
+}
+
+.footer-terms a:hover {
+  color: #334173;
+}
+
 .spinner {
   width: 20px;
   height: 20px;
-  border: 2px solid transparent;
-  border-top-color: currentColor;
-  border-right-color: currentColor;
-  border-radius: 50%;
-  animation: spin 0.6s linear infinite;
+  border: none;
+  border-top: 2px solid #3498db;
+  border-radius: 70%;
+  animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-  to {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
     transform: rotate(360deg);
   }
 }
 
-.footer,
-.footer * {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-.footer {
-  background-color: #f9f9f9;
-  font-family: 'Inter', sans-serif;
-  color: #6b6b6b;
-  width: 100vw;
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
-}
-
-.contact-container {
-  background-color: #7c317c;
-}
-
-.contact {
-  max-width: 1350px;
-  margin: 0 auto;
-  padding: 20px;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-}
-
-.input {
-  width: 40%;
-  position: relative;
-}
-
-.input input {
-  width: 100%;
-  font-size: 13px;
-  text-indent: 45px;
-  height: 50px;
-  border: 1px solid #dbdbdb;
-  border-radius: 10px;
-  outline: none;
-  transition: border-color 0.3s, box-shadow 0.3s;
-}
-
-.logo {
-  display: flex;
-  align-items: center;
-  font-size: 14px;
-  color: white;
-}
-
-.logo span {
-  font-size: 16px;
-}
-
-.mail-icon,
-.btn,
-.button {
-  width: 40px;
-  height: 50px;
-  position: absolute;
-  bottom: 0;
-}
-
-.mail-icon {
-  left: 15px;
-}
-
-.button {
-  display: flex;
-  border: none;
-  right: 0;
-  cursor: pointer;
-  background-color: transparent;
-  align-items: center;
-  justify-content: center;
-}
-
-.btn {
-  display: flex;
-  align-items: center;
-  border: none;
-  right: 0;
-  font-size: 14px;
-  padding: 8px;
-  background-color: transparent;
-  color: gray;
-}
-
-.button:hover {
-  background-color: aliceblue;
-  border-top-right-radius: 10px;
-  border-bottom-right-radius: 10px;
-
-}
-
-.container {
-  max-width: 1350px;
-  margin: 0 auto;
-  padding: 0 20px 20px;
-}
-
-.footer-columns {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 40px;
-  margin-top: 40px;
-  justify-content: space-between;
-}
-
-.column {
-  flex: 1 1 180px;
-}
-
-.column h4 {
-  font-size: 1rem;
-  margin-bottom: 10px;
-  font-weight: 600;
-  color: #2d2d2d;
-}
-
-.column ul {
-  list-style: none;
-  line-height: 2;
-  padding: 0;
-  margin: 0;
-}
-
-.column ul li {
-  margin: 6px 0;
-  font-size: 13px;
-}
-
-.column ul li a {
-  color: #6b6b6b;
-  text-decoration: none;
-  transition: color 0.3s;
-}
-
-.column ul li a:hover {
-  color: #000;
-}
-
-.socials .icons {
-  margin-top: 10px;
-}
-
-.socials .icons a {
-  margin-right: 10px;
-  font-size: 1.2rem;
-  color: #6b6b6b;
-  transition: color 0.3s;
-}
-
-.socials .icons a:hover {
-  color: #000;
-}
 
 .footer-bottom {
-  border-top: 1px solid #ddd;
-  margin-top: 30px;
-  padding: 20px 0;
-  width: 95%;
-  margin: auto;
   display: flex;
-  justify-content: space-between;
+  justify-content: end;
+  align-items: center;
+  margin-top: 70px;
   flex-wrap: wrap;
-  font-size: 0.9rem;
-}
-
-.footer-bottom .links {
-  display: flex;
   gap: 20px;
-  margin-left: 0;
 }
 
-/* responsive */
+
+
+
+.footer-social a {
+  margin-left: 18px;
+  font-size: 20px;
+  color: #1c284d;
+  transition: color 0.25s, transform 0.25s;
+}
+
+.footer-social a:hover {
+  color: #3b5998;
+  transform: translateY(-2px);
+}
+
+.footer-payments {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.footer-payments img {
+  height: 26px;
+  filter: grayscale(100%) brightness(90%);
+  transition: filter 0.3s ease;
+}
+
+.footer-payments img:hover {
+  filter: grayscale(0%) brightness(100%);
+}
+
+
+.footer-copy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+  gap: 20px;
+  color: #9ca3af;
+  border-top: 1px solid #f1f1f3;
+  position: relative;
+  padding: 20px;
+}
+
+.footer-social {
+  position: absolute;
+  left: 20px;
+}
+
+.footer-copy div:last-child {
+  text-align: center;
+  font-size: 14px;
+  flex: 1;
+}
+
 @media (max-width: 768px) {
-  .footer-columns {
-    flex-direction: column;
-    gap: 20px;
+  .footer {
+    padding: 60px 7% 30px;
+  }
+
+  .footer-title {
+    font-size: 32px;
   }
 
   .footer-bottom {
     flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    text-align: center;
+    align-items: flex-start;
+    gap: 30px;
   }
 
-  .footer-bottom .links {
-    gap: 15px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-}
-
-@media(max-width:767px) {
-  .contact {
+  .footer-right {
     flex-direction: column;
-    gap: 20px;
+    align-items: flex-start;
+    gap: 15px;
   }
 
-  .logo {
-    justify-content: center;
-  }
-
-  .input {
-    width: 100%;
+  .footer-payments img {
+    height: 22px;
   }
 }
 </style>

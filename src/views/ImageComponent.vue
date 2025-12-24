@@ -423,6 +423,7 @@ export default {
 .controls {
     position: absolute;
     left: 38%;
+    width: fit-content;
     bottom: 20px;
     transform: translateX(-50%);
     display: flex;

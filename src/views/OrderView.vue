@@ -12,25 +12,40 @@
     <div v-if="apiLoaded && showPending" class="order-section">
 
       <div v-if="OrderProducts.length > 0" class="order-box">
-        <div v-for="order in OrderProducts" :key="order.order_id" class="order-card">
+        <div v-for="order in OrderProducts" :key="order.order_id" class="order-card"
+          @mouseenter="showinfo(order.order_id)" @mouseleave="popshowinfo(order.order_id)">
+          <div class="info" v-if="showinfoId[order.order_id] || orderinfo[order.order_id]"
+            @pointerdown="openinfo(order.order_id)">
+            ინფორმაცია შეკვეთის შესახებ
+            <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px"
+              fill="currentcolor">
+              <path
+                d="M480-160q-33 0-56.5-23.5T400-240q0-33 23.5-56.5T480-320q33 0 56.5 23.5T560-240q0 33-23.5 56.5T480-160Zm0-240q-33 0-56.5-23.5T400-480q0-33 23.5-56.5T480-560q33 0 56.5 23.5T560-480q0 33-23.5 56.5T480-400Zm0-240q-33 0-56.5-23.5T400-720q0-33 23.5-56.5T480-800q33 0 56.5 23.5T560-720q0 33-23.5 56.5T480-640Z" />
+            </svg>
+
+            <div v-if="orderinfo[order.order_id]" class="order-modal">
+              <div class="arrow-up"></div>
+
+              <div class="order-desc">
+                <div class="order-id">შეკვეთის ნომერი: #{{ order.order_id }}</div>
+                <div class="order-amount">გადახდილი თანხა: {{ order.order_amount }} <i
+                    class="fa-solid fa-lari-sign"></i>
+                </div>
+                <div class="order-amount">მიმღები: {{ order.order_fullname }}</div>
+                <div class="order-amount">მისამართი : {{ order.address.town }}, {{ order.address.address }}</div>
+              </div>
+            </div>
+          </div>
+
           <div class="left-section">
             <OrderComponent v-for="product in order.products" :key="product.id" :product="product"
               :order_status="order.order_status" />
-          </div>
-          <div class="right-section">
-            <div class="order-desc">
-              <h3 class="order-id">შეკვეთის ნომერი: #{{ order.order_id }}</h3>
-              <h3 class="order-amount">გადახდილი თანხა: {{ order.order_amount }} <i class="fa-solid fa-lari-sign"></i>
-              </h3>
-              <h3 class="order-amount">მიმღები: {{ order.order_fullname }}</h3>
-              <h3 class="order-amount">მისამართი : {{ order.address.town }}, {{ order.address.address }}</h3>
-            </div>
           </div>
         </div>
       </div>
 
       <div v-else class="no-order-message">
-        <i class="fas fa-box-open"></i>
+        <img src="../assets/image copy.png">
         <p>თქვენ არ გაქვთ შეკვეთა</p>
         <a href="/shop" class="shop-link">მთავარი გვერდი</a>
       </div>
@@ -46,17 +61,17 @@
           </div>
           <div class="right-section">
             <div class="order-desc">
-              <h3 class="order-id">შეკვეთის ნომერი: #{{ order.order_id }}</h3>
-              <h3 class="order-amount">გადახდილი თანხა: {{ order.order_amount }} <i class="fa-solid fa-lari-sign"></i>
-              </h3>
-              <h3 class="order-amount">მიმღები: {{ order.order_fullname }}
-              </h3>
+              <div class="order-id">შეკვეთის ნომერი: #{{ order.order_id }}</div>
+              <div class="order-amount">გადახდილი თანხა: {{ order.order_amount }} <i class="fa-solid fa-lari-sign"></i>
+              </div>
+              <div class="order-amount">მიმღები: {{ order.order_fullname }}
+              </div>
             </div>
           </div>
         </div>
       </div>
       <div v-else class="no-order-message ">
-        <i class="fas fa-box-open"></i>
+        <img src="../assets/image copy.png">
         <p>თქვენ არ გაქვთ შეკვეთების ისტორია</p>
       </div>
     </div>
@@ -77,10 +92,32 @@ const apiLoaded = ref(false);
 // const loading = ref(true);
 const route = useRoute();
 const router = useRouter();
-
+const orderinfo = ref({});
+const showinfoId = ref({});
 const showPending = computed(() => {
   return route.query.section === 'pending';
 })
+
+const openinfo = (order_id) => {
+  const selectedOrder = OrderProducts.value.find(order => order.order_id === order_id).order_id;
+  if (selectedOrder) {
+    if (orderinfo.value[order_id]) {
+      orderinfo.value[order_id] = null;
+
+    } else {
+      orderinfo.value[order_id] = selectedOrder;
+    }
+  }
+};
+const showinfo = (order_id) => {
+  const selectedOrder = OrderProducts.value.find(order => order.order_id === order_id).order_id;
+  if (selectedOrder) {
+    showinfoId.value[order_id] = selectedOrder;
+  }
+};
+const popshowinfo = (order_id) => {
+  showinfoId.value[order_id] = null;
+}
 
 useHead({
   title: "შეკვეთები - თქვენი მიმდინარე და შესრულებული შეკვეთები",
@@ -163,7 +200,6 @@ watch(route.query.section, (newSection) => {
 
 <style scoped>
 .container {
-  margin: 20px auto;
   padding: 20px;
 }
 
@@ -187,7 +223,7 @@ watch(route.query.section, (newSection) => {
 }
 
 .toggle-buttons button.active {
-  color: #7c317c;
+  color: #162e63;
   ;
   font-weight: bold;
 }
@@ -197,7 +233,7 @@ watch(route.query.section, (newSection) => {
   display: block;
   width: 0;
   height: 2px;
-  background: #7c317c;
+  background: #162e63;
   transition: width 0.3s ease;
   position: absolute;
   left: 50%;
@@ -224,9 +260,27 @@ watch(route.query.section, (newSection) => {
 }
 
 .order-card {
+  position: relative;
   border-bottom: 1px solid #ddd;
   display: flex;
-  gap: 20px
+}
+
+.order-card .info {
+  position: absolute;
+  right: 0;
+  top: 5%;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: #888;
+}
+
+
+
+.order-card .info:hover {
+  color: #414141;
+
 }
 
 .order-card:last-child {
@@ -239,57 +293,42 @@ watch(route.query.section, (newSection) => {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  width: 80%;
-
-}
-
-.right-section {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 30%;
-  height: max-content;
+  width: 100%;
 
 }
 
 
-.order-desc {
-  background-color: #f8f8f8;
-  border-radius: 10px;
-  max-width: 100%;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-  padding: 30px 40px;
-  margin: 30px auto;
-  width: 300px;
-  color: #111;
-}
 
-.order-id {
-  color: #111;
-  margin-bottom: 12px;
-  border-bottom: 1px solid #ddd;
 
-}
-
-.order-amount {
-  font-size: 18px;
+.order-modal {
+  position: absolute;
+  top: 30px;
+  right: 0;
+  padding: 15px;
+  line-height: 2;
+  min-width: 250px;
+  color: #111111;
+  background-color: white;
+  gap: 5px;
+  border-radius: 5px;
+  font-size: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
 
+.order-modal .arrow-up {
+  position: absolute;
+  top: -5px;
+  right: 5px;
+  margin-left: -5px;
+  width: 0;
+  height: 0;
+  border-right: 5px solid transparent;
+  border-left: 5px solid transparent;
+  border-bottom: 5px solid white;
 
-.order-id,
-.order-amount {
-  margin-bottom: 12px;
-  font-size: 15px;
-  font-family: Arial, Helvetica, sans-serif;
-  padding-bottom: 8px;
 }
 
-.order-address {
-  font-weight: 400;
-  font-family: Arial, Helvetica, sans-serif;
-  margin-top: 15px;
-}
 
 
 
@@ -303,11 +342,8 @@ watch(route.query.section, (newSection) => {
   font-size: small;
 }
 
-.no-order-message i {
-  font-size: 2rem;
-  color: #7c317c;
-
-  margin-bottom: 10px;
+.no-order-message img {
+  width: 200px;
 }
 
 .full-empty-message {

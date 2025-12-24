@@ -1,14 +1,16 @@
 import api from "@/api";
 
 const state = {
+    id: localStorage.getItem('id') || "",
     name: localStorage.getItem('name') || "",
     email: localStorage.getItem('email') || "",
     token: localStorage.getItem('token') || "", 
     roles: localStorage.getItem('roles') || "", 
-    userId: localStorage.getItem('userid') || "",  
-    checkoutInfo:{
+    status: JSON.parse(localStorage.getItem('user.status') || '{}'),
+    dashboardInfo:{
       checkout_in_progress:false,
-      cart_items: 0
+      cart_items: 0,
+      unseenMessage: 0,
     },
    hasPassword: {
     password: localStorage.getItem('hasPassword') === "true",
@@ -17,8 +19,17 @@ const state = {
   };
   
   const mutations = {
-    SetCheckoutInfo(state,checkInfo){
-    state.checkoutInfo = checkInfo
+    SetDashboardInfo(state,dashboardInfo){
+    state.dashboardInfo = dashboardInfo
+    },
+    setStatus(state,status){
+      state.status = status
+      localStorage.setItem('user.status',JSON.stringify(status));
+
+    },
+    setId(state, id) {
+      state.id = id;
+      localStorage.setItem('id', id);
     },
     setName(state, name) {
       state.name = name;
@@ -36,10 +47,7 @@ const state = {
       state.roles = roles;
       localStorage.setItem('roles', roles);
     },
-    setUserId(state, userId) {  
-      state.userId = userId;  
-      localStorage.setItem('userid', userId); 
-    },
+
     setHasPassword(state, hasPasswordObj) {  
        const password = Boolean(hasPasswordObj?.password);
     const platform = hasPasswordObj?.platform || '';
@@ -55,13 +63,14 @@ const state = {
   };
   
   const getters = {
-    getCheckoutInfo:(state)=>state.checkoutInfo,
+    getDashboardInfo:(state)=>state.dashboardInfo,
     isAuthenticated: (state) => !!state.token,
+    getUserStatus:(state)=>state.status,
+    getId:(state)=>state.id,
     getUser: (state) => state.name, 
     getEmail: (state) => state.email, 
     getToken: (state) => state.token,
     getRoles: (state) => state.roles,
-    getUserId: (state) => state.userId,
     getHasPassword: (state) => state.hasPassword,
 
   };
@@ -93,10 +102,11 @@ const state = {
     if (meStatus >= 200 && meStatus < 300) {
       const user   = meRes?.data?.user || {};
 
+
+      if (user?.id)  commit('setId',  user.id);
       if (user?.name)  commit('setName',  user.name);
       if (user?.email) commit('setEmail', user.email);
-       commit('setRoles',meRes.data.role);
-      if (user?.id)    commit('setUserId', user.id);
+      commit('setRoles',meRes.data.role);
       commit('setHasPassword', meRes?.data?.hasPassword);
 
     }
@@ -104,8 +114,8 @@ const state = {
     if (status >= 200 && status < 300) {
       await dispatch('product/loadData', null, { root: true });
       commit('modals/closemodal', 'loginmodal', { root: true });
-      await dispatch('auth/checkoutInfo', null, { root: true })
-
+      await dispatch('auth/dashboardInfo', null, { root: true })
+      await dispatch('auth/getStatusInfo', null, { root: true })
     }
 
     return { ok: true, status: status };
@@ -147,7 +157,7 @@ const state = {
       if (user?.name)  commit('setName', user.name);
       if (user?.email) commit('setEmail', user.email);
       if (roles.length) commit('setRoles', roles[0]);
-      if (user?.id)    commit('setUserId', user.id);
+      if (user?.id)    commit('setId', user.id);
       commit('setHasPassword', meRes?.data?.hasPassword);
 
     } else {
@@ -179,30 +189,42 @@ const state = {
             commit('setEmail', null);
             commit('setToken', null);
             commit('setRoles', null);
-            commit('setUserId', null);
+            commit('setId', null);
       
             localStorage.removeItem('name');
             localStorage.removeItem('email');
             localStorage.removeItem('token');
             localStorage.removeItem('roles');
-            localStorage.removeItem('userid');
+            localStorage.removeItem('id');
             return true;
 
           } catch (error) {
             console.error('Logout failed', error);
           }    
         },
-
-        async checkoutInfo({commit}){
-          try{
-            const response = await api.get('/checkoutinfo',{
+        async getStatusInfo({commit}){
+           try{
+            const response = await api.get('/getStatus',{
               tokenRequired:true
             });
-            commit('SetCheckoutInfo',response.data)
+           commit('setStatus',response.data.status);
           }catch(error){
             console.error('checkInfo Error',error)
           }
-        }
+
+        },
+
+        async dashboardInfo({commit}){
+          try{
+            const response = await api.get('/dashboardInfo',{
+              tokenRequired:true
+            });
+            commit('SetDashboardInfo',response.data)
+          }catch(error){
+            console.error('checkInfo Error',error)
+          }
+        },
+
   };
   
   export default {

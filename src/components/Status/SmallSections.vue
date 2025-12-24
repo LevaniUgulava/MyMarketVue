@@ -1,175 +1,233 @@
 <template>
-    <div class="smallsection-container" v-if="categories.length > 0">
-        <div class="left">
-            <div class="address" @pointerdown="redirectaddress">
-                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
-                    fill="currentColor">
-                    <path
-                        d="M480-480q33 0 56.5-23.5T560-560q0-33-23.5-56.5T480-640q-33 0-56.5 23.5T400-560q0 33 23.5 56.5T480-480Zm0 294q122-112 181-203.5T720-552q0-109-69.5-178.5T480-800q-101 0-170.5 69.5T240-552q0 71 59 162.5T480-186Zm0 106Q319-217 239.5-334.5T160-552q0-150 96.5-239T480-880q127 0 223.5 89T800-552q0 100-79.5 217.5T480-80Zm0-480Z" />
-                </svg>
-                <p>მისამართები</p>
+    <teleport to="body">
+        <!-- Side Panel Overlay -->
+        <transition name="overlay-fade">
+            <div v-if="open" class="overlay" @click.self="close" role="dialog" aria-modal="true" aria-label="site menu">
+                <div class="side-panel" @keydown.esc.prevent="close" tabindex="0" ref="panel">
+                    <div class="menu-wrap">
+                        <!-- პირადი ჯგუფი -->
+                        <div class="menu-group">
+                            <p class="menu-title">პირადი</p>
+                            <div class="menu-item" :class="{
+                                inactive: activeCategoryId
+                            }" @click="redirectaddress">მისამართები
+                            </div>
+                            <div class="menu-item" :class="{
+                                inactive: activeCategoryId
+                            }">სტატუსი</div>
+                            <div class="menu-item" :class="{
+                                inactive: activeCategoryId
+                            }">პროფილი</div>
+                        </div>
+
+                        <!-- კატეგორიები ჯგუფი -->
+                        <div class="menu-group">
+                            <p class="menu-title">კატეგორიები</p>
+                            <div v-for="(item, index) in categories" :key="index" class="menu-item" :class="{
+                                active: activeCategoryId === item.id,
+                                inactive: activeCategoryId && activeCategoryId !== item.id
+                            }" @click="handle(item)">
+                                <span class="menu-text">{{ item.ka_name }}</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960"
+                                    width="24px" fill="currentcolor">
+                                    <path
+                                        d="m517.85-480-184-184L376-706.15 602.15-480 376-253.85 333.85-296l184-184Z" />
+                                </svg>
+                            </div>
+
+                        </div>
+
+                        <div class="menu-group">
+                            <p class="menu-title">კოლექციები</p>
+                            <div class="menu-item" :class="{
+                                inactive: activeCategoryId
+                            }" @click="redirectaddress">ყველა კოლექცია</div>
+                            <div class="menu-item" :class="{
+                                inactive: activeCategoryId
+                            }" @click="redirectaddress">ახალი კოლექცია</div>
+                        </div>
+                    </div>
+                </div>
             </div>
+        </transition>
+    </teleport>
 
-
-        </div>
-
-        <div class="center-strip">
-            <StatusButton class="statusbutton" />
-            <div v-for="(item, index) in categories" :key="index" class="section" @pointerdown="handle(item.id)">
-                {{ item.ka_name }}
-            </div>
-        </div>
-
-        <div class="right">
-
-        </div>
-    </div>
+    <SmallSectionModal :open="nestedModalOpen" :category="selectedCategory" @update:open="nestedModalOpen = $event" />
 </template>
 
-
-<script>
+<script setup>
+import { ref, onMounted, watch, defineEmits, defineProps } from 'vue';
+import { useRouter } from 'vue-router';
 import api from '@/api';
-import StatusButton from "@/components/Status/StatusButtomComponent.vue"
-export default {
-    name: "SmallSections",
-    components: {
-        StatusButton
-    },
-    data() {
-        return {
-            categories: [],
-        }
-    },
-    methods: {
-        redirectaddress() {
-            this.$router.push('/profile/address');
+import SmallSectionModal from '../SmallSectionModal.vue';
 
-        },
-        handle(item) {
+const props = defineProps({
+    open: Boolean
+});
 
-            this.$router.push({
-                path: `/product`,
-                query: {
-                    section: 'all',
-                    maincategory: item,
-                    page: 1,
-                },
-            });
-        },
-        async getMaincategories() {
-            const category = sessionStorage.getItem('maincategories');
+watch(() => props.open, (newVal) => {
+    console.log('props.open changed:', newVal)
+    if (!newVal) {
+        nestedModalOpen.value = false;
+        activeCategoryId.value = null;
+    }
+})
+const emit = defineEmits(['update:open']);
 
-            if (!category) {
-                try {
-                    const response = await api.get("/maincategory", {
-                        tokenRequired: false
-                    });
-                    this.categories = response.data;
+const router = useRouter();
+const categories = ref([]);
+const panel = ref(null);
+const activeCategoryId = ref(null);
 
-                    sessionStorage.setItem('maincategories', JSON.stringify(response.data));
-                } catch (error) {
-                    console.log(error);
-                }
-            } else {
-                this.categories = JSON.parse(category);
-            }
+const nestedModalOpen = ref(false);
+const selectedCategory = ref(null);
 
-        },
+function close() {
+    emit('update:open', false);
+}
 
-    },
-    mounted() {
-        this.getMaincategories();
-    },
+function redirectaddress() {
+    router.push('/profile/address');
+    close();
+}
+
+function handle(item) {
+    selectedCategory.value = item;
+    nestedModalOpen.value = true;
+    activeCategoryId.value = item.id;
 
 }
+function checkScroll() {
+    const maxTop = 120;
+    const scrollY = window.scrollY || 0;
+    const topValue = Math.max(80, maxTop - scrollY);
+
+    document.documentElement.style.setProperty('--modal-top', `${topValue}px`);
+}
+
+
+
+async function getMaincategories() {
+    const category = sessionStorage.getItem('maincategories');
+    if (!category) {
+        try {
+            const response = await api.get('/maincategory', { tokenRequired: false });
+            categories.value = response.data;
+            sessionStorage.setItem('maincategories', JSON.stringify(response.data));
+        } catch (error) {
+            console.error(error);
+        }
+    } else {
+        try {
+            categories.value = JSON.parse(category);
+        } catch (e) {
+            categories.value = [];
+        }
+    }
+}
+
+watch(() => props.open, (val) => {
+    if (val) setTimeout(() => panel.value?.focus(), 50);
+});
+
+onMounted(() => getMaincategories(), checkScroll(), window.addEventListener('scroll', checkScroll)
+);
 </script>
 
 <style scoped>
-.smallsection-container {
-    display: grid;
-    grid-template-columns: 1fr 2fr 1fr;
-    align-items: center;
-    gap: 15px;
-    height: 60px;
-    background-color: #7c317c;
-    white-space: nowrap;
-    font-size: 13px;
+.overlay {
+    position: fixed;
+    inset: 0;
+    top: var(--modal-top);
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: stretch;
+    border-top: 1px solid #eaeaea;
+    z-index: 9999;
+    backdrop-filter: blur(3px);
+    transition: all 10s ease-in-out;
+
 }
 
-.left {
-    justify-self: start;
-    color: #fff;
-    padding: 8px 12px;
+.side-panel {
+    width: 320px;
+    max-width: 80%;
+    background: #fff;
+    padding: 36px 28px;
+    padding-left: 60px;
+    outline: none;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+}
+
+.menu-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+.menu-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.menu-title {
+    font-size: 12px;
     font-weight: 600;
+    letter-spacing: 0.08em;
+    color: #999;
+    margin-bottom: 12px;
+    transition: all 0.2s ease;
+
 }
 
-.address {
-    display: flex;
-    align-items: center;
-    margin-left: 40px;
-    gap: 5px;
+.menu-item {
     cursor: pointer;
-    transition: color 0.2s ease;
-
-}
-
-.left:hover {
-    color: #7a1dff;
-}
-
-
-
-.center-strip {
-    grid-column: 2;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
-    max-width: 100%;
-    overflow-x: auto;
-}
-
-.center-strip::-webkit-scrollbar {
-    display: none;
-}
-
-.section {
-    cursor: pointer;
-    font-weight: 500;
-    padding: 8px 12px;
-    color: #fff;
-    transition: color 0.2s ease;
-}
-
-.section:hover {
-    color: #7a1dff;
-}
-
-.statusbutton {
+    padding: 12px 4px;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 150px;
-    padding: 5px 15px;
-    border-radius: 10px;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
-    font-size: 13px;
+    border-radius: 6px;
+    transition: all .18s ease;
+    font-family: "Georgia", "Times New Roman", serif !important;
+    font-size: 20px;
+    color: #111;
+    line-height: 1;
+    margin-bottom: 6px;
+    position: relative;
 }
 
-@media (max-width: 768px) {
-    .smallsection-container {
-        gap: 5px;
-        font-size: 10px;
-    }
+.menu-item::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -6px;
+    height: 2px;
+    width: 0;
+    background: #000;
+    transition: width .22s ease;
+}
 
-    .section {
-        padding: 3px 6px;
-    }
+.menu-item:hover::after {
+    width: 35%;
+}
 
-    .statusbutton {
-        padding: 0;
-    }
+.menu-item.active::after {
+    width: 35%;
+}
+
+.menu-item.inactive {
+    color: #757575;
+    filter: blur(1px);
+}
+
+
+.overlay-fade-enter-active,
+.overlay-fade-leave-active {
+    transition: opacity .22s ease;
+}
+
+.overlay-fade-enter-from,
+.overlay-fade-leave-to {
+    opacity: 0;
 }
 </style>

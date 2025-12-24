@@ -17,7 +17,7 @@
           </div>
         </div>
 
-        <div class="product-main-image" @pointerup.stop.prevent="openimagemodal" aria-label="სურათის გადიდება">
+        <div class="product-main-image" @pointerdown.stop.prevent="openimagemodal" aria-label="სურათის გადიდება">
           <img :src="selectedImage" alt="Product Image" class="product-image" />
         </div>
 
@@ -71,7 +71,7 @@
               <div>
                 <div class="price">
                   <div class="discount"
-                    v-if="!seeOriginal && singleproduct.discountprice && singleproduct.discountprice < singleproduct.price">
+                    v-if="!isOriginal && singleproduct.discountprice && singleproduct.discountprice < singleproduct.price">
                     <span style="font-size: 20px; gap: 5px;">{{ singleproduct.discountprice }} <i
                         class="fa-solid fa-lari-sign"></i></span>
                     <span class="original-price">
@@ -84,8 +84,8 @@
                   </div>
 
                   <span
-                    v-if="!seeOriginal && singleproduct.discountprice && singleproduct.discountprice < singleproduct.price"
-                    class="discount-square status-discount">
+                    v-if="!isOriginal && singleproduct.discountprice && singleproduct.discountprice < singleproduct.price"
+                    :class="['discount-square', singleproduct.discountstatus ? 'status-discount' : 'default-discount']">
                     -{{ Math.round(((singleproduct.price - singleproduct.discountprice) / singleproduct.price) * 100)
                     }}%
                   </span>
@@ -116,7 +116,7 @@
                     ორიგინალი ფასით შეძენა :
                   </span>
                   <label class="toggle-switch">
-                    <input type="checkbox" v-model="seeOriginal" />
+                    <input type="checkbox" v-model="isOriginal" />
                     <span class="slider"></span>
                   </label>
                 </div>
@@ -243,6 +243,7 @@ import { useRouter } from 'vue-router';
 import { useHead } from '@vueuse/head';
 import store from '@/store';
 import { useAuth } from '@/mixin/reuse'
+
 const router = useRouter();
 const props = defineProps({
   id: {
@@ -258,7 +259,7 @@ const openImage = ref(false);
 const additionalinfo = ref([]);
 const singleproduct = ref(null);
 const message = ref(null);
-const seeOriginal = ref(false);
+const isOriginal = ref(false);
 const errormessage = ref(null);
 const isOpen = ref(false);
 const selectedSize = ref(null);
@@ -303,7 +304,15 @@ function handleClickOutside(event) {
     seeMore.value = false;
   }
 }
+async function recentlyViewed() {
+  try {
+    await api.post(`/history/recentlyViewed/${props.id}`);
+  } catch (error) {
+    console.log(error);
+  }
+}
 onMounted(() => {
+  recentlyViewed();
   document.addEventListener('click', handleClickOutside);
 });
 
@@ -401,12 +410,16 @@ async function redirect() {
       size: selectedSize.value,
       type: "direct",
       color: selectedColor.value,
-      seeOriginal: seeOriginal.value,
+      seeOriginal: singleproduct.value.discountstatus ? isOriginal.value : true,
     }];
 
 
     await api.post("/temporder", { products: data }, { tokenRequired: true });
+    await store.dispatch('auth/dashboardInfo', null, { root: true });
+
     router.push({ name: "checkout" });
+
+
   } catch (error) {
     if (error?.response?.status === 403) {
       message.value = `ელფოსტა არ არის ვერიფიცირებული, ვეირიფიკაციისთვის დაჭირეთ <a href='/profile' style="color:white" target='_blank'>აქ</a>`;
@@ -549,7 +562,7 @@ async function addToCart() {
   try {
     const response = await api.post(
       `addcart/${props.id}`,
-      { type: singleproduct.value.size_type, size: selectedSize.value, color: selectedColor.value, isOriginal: seeOriginal.value },
+      { type: singleproduct.value.size_type, size: selectedSize.value, color: selectedColor.value, isOriginal: isOriginal.value },
       { tokenRequired: true }
     );
     if (response.status === 200) {
@@ -569,8 +582,8 @@ async function addToCart() {
 
 <style scoped>
 .product-page {
-  --brand: #5e14cc;
-  --brand-600: #5e14cc;
+  --brand: #162e63;
+  --brand-600: #2e477c;
   --text: #2b2731;
   --muted: #6b6b6b;
   --border: #e6e6e6;
@@ -704,7 +717,7 @@ async function addToCart() {
   display: flex;
   flex-direction: column;
   margin: auto;
-  padding: 30px;
+  padding: 10px 30px;
 }
 
 .bread {
@@ -862,11 +875,12 @@ span {
   align-items: center;
   justify-content: center;
   border: 2px solid var(--brand);
-  border-radius: 10px;
   font-size: 12px;
   font-weight: 500;
   color: var(--brand);
   cursor: pointer;
+  border-radius: 5px;
+
   background: transparent;
 }
 
@@ -884,8 +898,9 @@ span {
   width: 32px;
   align-items: center;
   justify-content: center;
-  border-radius: 10px;
   cursor: pointer;
+  border-radius: 5px;
+
   border: 1px solid #d9d9d9;
   transition: box-shadow .2s, transform .2s, outline-color .2s;
 }
@@ -1130,7 +1145,6 @@ span {
   gap: 6px;
   align-items: center;
   padding: 14px 20px;
-  border-radius: 10px;
   width: 50%;
   height: auto;
   height: 50px;
@@ -1150,10 +1164,12 @@ span {
   background-color: var(--brand);
   color: #fff;
   border: none;
+  border-radius: 5px;
 }
 
 .buy:hover {
   background-color: var(--brand-600);
+
 }
 
 

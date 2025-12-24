@@ -1,7 +1,7 @@
 <template>
   <div class="favorites-container">
     <div v-if="products.length > 0" class="products-grid-wrapper">
-      <div :class="{ 'products-grid': isSidebarCollapsed, 'products-grid-collapsed': !isSidebarCollapsed }">
+      <div class="products-grid">
         <ProductCardComponent v-for="item in products" :key="item.id" :initialproduct="item"
           @cart-updated="handleCartUpdated" @liked-message="handleUnauthorizedLike"
           @cart-message="handleUnauthorizedCart" />
@@ -9,7 +9,7 @@
     </div>
 
     <div v-if="apiLoaded && products.length === 0" class="empty-favorites">
-      <i class="fa-solid fa-heart"></i>
+      <img src="../assets/image copy 5.png">
       <p class="empty-text">თქვენ ჯერ არ მოგიწონებიათ პროდუქტი</p>
       <p class="empty-subtext">დამატეთ ყველა პროდუქტი, რაც თქვენ გაინტერესებთ</p>
       <div class="empty-actions">
@@ -78,6 +78,10 @@ export default {
   color: #333;
 }
 
+.empty-favorites img {
+  width: 100px;
+}
+
 
 
 .empty-text {
@@ -101,7 +105,8 @@ export default {
 .primary-btn {
   display: flex;
   text-decoration: none;
-  background-color: #7c317c;;
+  background-color: #7c317c;
+  ;
   align-items: center;
   color: white;
   padding: 10px 15px;
@@ -139,12 +144,7 @@ export default {
   width: 100%;
 }
 
-.products-grid-collapsed {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 15px;
-  width: 100%;
-}
+
 
 /* Pagination */
 .pagination {
@@ -189,10 +189,6 @@ export default {
     gap: 10px;
   }
 
-  .products-grid-collapsed {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-  }
 
   .empty-text {
     font-weight: 100;

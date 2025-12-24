@@ -1,21 +1,35 @@
 <template>
-    <h2>მისამართები</h2>
-
     <div class="input-group">
-        <button :class="['address-button', addresses.length == 0 && selectedAddressError ? 'radio-error' : null]"
-            @click.prevent="addressmodal = !addressmodal">
+        <div class="address-button">
+            <button @click.prevent="addressmodal = !addressmodal">
 
-            <div>
-                <i class="fa-solid fa-plus"></i> მისამართის დამატება
-            </div>
-        </button>
-        <div v-for="(option, index) in addresses" :key="index" class="radio-button">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                    fill="#162e63">
+                    <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z" />
+                </svg>
+            </button>
 
-            <label :for="'address-' + index">
-                {{ option.town }} {{ option.address }} {{ option.additionalInfo }}
-            </label>
-            <p @click="deleteAddress(option.id)" class="delete-button">წაშლა</p>
+            <button v-show="selectedAddress">
+                <svg xmlns="http://www.w3.org/2000/svg" height="22px" viewBox="0 -960 960 960" width="22px"
+                    fill="#162e63">
+                    <path
+                        d="m376-300 104-104 104 104 56-56-104-104 104-104-56-56-104 104-104-104-56 56 104 104-104 104 56 56Zm-96 180q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520Zm-400 0v520-520Z" />
+                </svg>
+            </button>
         </div>
+
+
+
+        <div class="radio-buttons">
+            <div v-for="(option, index) in addresses" :key="index" class="radio-button">
+                <input type="radio" class="radio" :id="'address-' + index" name="selectedAddress" :value="option.id"
+                    v-model="selectedAddress" />
+                <label :for="'address-' + index">
+                    {{ option.town }} {{ option.address }} {{ option.additionalInfo }}
+                </label>
+            </div>
+        </div>
+
         <AddressModal :open="addressmodal" @save="getAddresses()" @close="addressmodal = false" />
 
     </div>
@@ -28,7 +42,8 @@ export default {
     data() {
         return {
             addresses: [],
-            addressmodal: false
+            addressmodal: false,
+            selectedAddress: null
 
         }
     },
@@ -91,71 +106,81 @@ export default {
 </script>
 <style scoped>
 .input-group {
-    margin-bottom: 15px;
+    margin-bottom: 10px;
 }
 
+
 .address-button {
-    width: 100%;
     background-color: white;
-    color: #916ac7;
-    padding: 12px;
+    padding: 5px 0;
     justify-content: center;
-    border: 2px solid #966bd3;
-    height: 50px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.address-button button {
+    border: none;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
+    background-color: transparent;
 }
+
+.address-button button:hover {
+    background-color: #ede9e93f;
+
+}
+
 
 .address-button,
 input {
     box-sizing: border-box;
 }
 
+.radio-buttons {
+    display: flex;
+    gap: 10px;
+    flex-direction: column;
+}
+
 .radio-button {
     display: flex;
     align-items: center;
     background-color: white;
-    border: 2px solid #916ac7;
-    border-radius: 8px;
-    padding: 0px 16px;
-    margin-top: 10px;
-    height: 50px;
-    font-size: 16px;
+    border: 1.5px solid #162e63;
+    border-radius: 5px;
+    padding: 0 5px;
+    height: 30px;
+    font-size: 12px;
     font-weight: 500;
     font-family: Arial;
     cursor: pointer;
     transition: border-color 0.3s ease, background-color 0.3s ease;
 }
 
-.radio-error {
-    border-color: #e74c3c;
 
-}
 
 .radio-button input[type="radio"] {
-    margin-right: 12px;
-    accent-color: #916ac7;
-    width: 18px;
-    height: 18px;
+    margin: 0 5px 0 0;
+    accent-color: #162e63;
+    width: 13px;
+    height: 13px;
     flex-shrink: 0;
     cursor: pointer;
+    vertical-align: middle;
 }
+
+
 
 .radio-button label {
     cursor: pointer;
     font-weight: 500;
-    color: #916ac7;
-    font-size: 14px;
+    color: #162e63;
+    font-size: 12px;
     flex: 1;
+    line-height: 14px;
+
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-.delete-button {
-    font-size: 12px;
-    color: rgb(221, 109, 109);
 }
 </style>
