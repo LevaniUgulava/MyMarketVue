@@ -368,6 +368,8 @@ function handleunauthorizedcart(cartmessage) {
 .head {
   display: flex;
   justify-content: space-between;
+  margin-top: 10px;
+  margin-bottom: 20px;
 }
 
 .page-container {

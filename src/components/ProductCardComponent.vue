@@ -423,7 +423,6 @@ export default {
   flex-wrap: wrap;
   gap: 15px;
   overflow: visible;
-  margin: 20px 0;
   text-decoration: none;
 }
 
