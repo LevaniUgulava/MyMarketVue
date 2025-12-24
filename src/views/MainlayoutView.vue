@@ -128,6 +128,7 @@ export default {
     },
 
 
+
     handleAttachment(emit) {
       this.RawAttachment = emit;
       this.openCamera = false
@@ -276,22 +277,16 @@ export default {
 
 
 .main-content {
-  flex-grow: 1;
+  flex: 1;
   width: 100%;
   box-sizing: border-box;
   min-height: calc(100vh - 60px);
   overflow: hidden;
-}
-
-.top-start {
   margin-top: 120px;
-
+  transition: all 0.3s ease-in-out;
 }
 
-.top {
-  margin-top: 30px;
 
-}
 
 .footer {
   text-align: center;

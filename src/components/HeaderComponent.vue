@@ -4,7 +4,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   </head>
   <div @mouseenter="mouseenter = true" @mouseleave="mouseenter = false" ref="stickyHeader"
-    :class="['sticky-header', isMobile ? 'mobile-header' : 'desktop-header', isShowed ? 'scrolled' : '']">
+    :class="['sticky-header', isMobile ? 'mobile-header' : 'desktop-header']">
 
     <nav :class="{ center: opensearch }">
       <div v-show="!opensearch" class="menu">
@@ -528,7 +528,7 @@ export default {
   display: flex;
   flex: 0 1 22%;
   justify-content: center;
-  color: white;
+  color: black;
   align-items: center;
   transition: all 0.3s ease-in-out;
 
@@ -667,7 +667,8 @@ body {
   position: relative;
   display: flex;
   align-items: center;
-  color: white;
+  color: black;
+
   background: transparent;
   border: none;
   justify-content: center;
@@ -682,13 +683,6 @@ body {
 .blur {
   color: #757575;
   filter: blur(1px);
-}
-
-
-.btn-scrolled {
-  color: black;
-  transition: all 0.3s ease-in-out;
-
 }
 
 
@@ -740,17 +734,11 @@ body {
   z-index: 1000;
   min-height: 60px;
   transition: all 0.3s ease-in-out;
-  background-color: transparent;
-}
-
-.scrolled {
   background-color: #ffffff;
   border-bottom: 1px solid #e9e9e9;
   transition: all 0.3s ease-in-out;
-
-
-
 }
+
 
 .sticky-header.header-scrolled {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
