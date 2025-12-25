@@ -443,8 +443,8 @@ export default {
 .image-wrapper {
   position: relative;
   width: 250px;
-  border-radius: 5px;
-  height: 250px;
+  border-radius: 15px;
+  height: 350px;
   overflow: hidden;
 }
 

@@ -89,7 +89,7 @@
 
 
         <div class="btnredirect">
-          <router-link :to="{ path: `/cart` }" :class="['redirect-button', isShowed ? 'btn-scrolled' : '']">
+          <div :class="['redirect-button', isShowed ? 'btn-scrolled' : '']" @click="cartmodal = !cartmodal">
 
             <svg class="icon" aria-hidden="true" focusable="false" width="24" height="24" viewBox="0 0 24 24"
               fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -97,7 +97,7 @@
                 d="M13.9984 5C13.9984 4.46957 13.7877 3.96086 13.4126 3.58579C13.0375 3.21071 12.5288 3 11.9984 3C11.4679 3 10.9592 3.21071 10.5842 3.58579C10.2091 3.96086 9.99836 4.46957 9.99836 5M19.2584 9.696L20.6434 18.696C20.6872 18.9808 20.6689 19.2718 20.5898 19.5489C20.5107 19.8261 20.3726 20.0828 20.1851 20.3016C19.9975 20.5204 19.7649 20.6961 19.5031 20.8167C19.2413 20.9372 18.9566 20.9997 18.6684 21H5.32836C5.04 21 4.75503 20.9377 4.49301 20.8173C4.23098 20.6969 3.99809 20.5212 3.81031 20.3024C3.62253 20.0836 3.48429 19.8267 3.40507 19.5494C3.32585 19.2721 3.30753 18.981 3.35136 18.696L4.73636 9.696C4.80901 9.22359 5.04844 8.79282 5.41129 8.4817C5.77413 8.17059 6.2364 7.9997 6.71436 8H17.2824C17.7602 7.99994 18.2222 8.17094 18.5848 8.48203C18.9475 8.79312 19.1857 9.22376 19.2584 9.696Z"
                 stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path>
             </svg>
-          </router-link>
+          </div>
         </div>
 
         <div class="btnredirect">
@@ -194,6 +194,9 @@
     <EmailConfirmation :open="confirmmodal" :data="data" @close="() => closemodal('confirmmodal')"
       @openresetmodal="() => openmodal('passwordmmodal')" />
     <PasswordComponent :open="passwordmmodal" :email="data.email" @close="() => closemodal('passwordmmodal')" />
+
+    <CartModal :open="cartmodal" @close="cartmodal = false" />
+
     <MobileSidebarModal :open="openMobile" @close="openMobile = false" />
   </div>
 </template>
@@ -210,6 +213,7 @@ import MobileSidebarModal from './MobileSidebarModal.vue';
 import SmallSections from './Status/SmallSections.vue';
 import SearchComponent from './SearchComponent.vue';
 import AddressComponent from './profile/Components/AddressComponent.vue';
+import CartModal from './Modal/CartModal.vue';
 
 
 export default {
@@ -225,6 +229,7 @@ export default {
     SmallSections,
     AddressComponent,
     SearchComponent,
+    CartModal
   },
   props: {
     isMobile: Boolean,
@@ -233,6 +238,7 @@ export default {
   data() {
     return {
       isOpen: false,
+      cartmodal: false,
       isOpendropdown: false,
       isInputVisible: false,
       searchname: '',
@@ -306,6 +312,7 @@ export default {
     searchname() {
       this.Suggestion();
     },
+
     loginmodal: 'handleScroll',
     opensection: 'handleScroll',
     opensearch: 'handleScroll',
