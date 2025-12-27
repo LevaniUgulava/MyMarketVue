@@ -442,9 +442,9 @@ export default {
 
 .image-wrapper {
   position: relative;
-  width: 250px;
+  width: 300px;
   border-radius: 15px;
-  height: 350px;
+  height: 400px;
   overflow: hidden;
 }
 

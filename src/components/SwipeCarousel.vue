@@ -121,7 +121,8 @@ onBeforeUnmount(() => {
 
 .skeleton-image {
     width: 100%;
-    height: 400px;
+    height: 450px;
+    border-radius: 15px;
     background-color: #ccc;
     animation: pulse 1.5s infinite ease-in-out;
 }
@@ -141,7 +142,9 @@ onBeforeUnmount(() => {
 }
 
 .carousel-container {
-    width: 100%;
+    width: 98%;
+    height: 450px;
+    margin: auto;
     padding-top: 10px;
     border-radius: 10px;
     overflow: hidden;
@@ -149,6 +152,9 @@ onBeforeUnmount(() => {
 
 .carousel-image {
     position: relative;
+    width: 98%;
+    height: 450px;
+
 }
 
 .overlay {
@@ -189,10 +195,10 @@ onBeforeUnmount(() => {
 
 
 .carousel-container img {
-    display: block;
-    width: 100%;
-    object-position: top;
 
+    display: block;
+    object-position: top;
+    border-radius: 15px;
     margin: auto;
     transition: opacity 1s ease-in-out;
     object-fit: cover;
