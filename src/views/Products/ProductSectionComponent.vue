@@ -73,7 +73,7 @@ function handleUnauthorizedCart(msg) {
         <div class="carousel-wrapper" style="overflow:hidden;width:100%">
             <div v-if="props.apiLoaded && props.products.length" class="product-grid" :style="slideStyle">
 
-                <div class="slide" v-for="(s, i) in slides" :key="i" :style="{ width: `100%`, display: `flex` }">
+                <div class="slide" v-for="(s, i) in slides" :key="i">
 
                     <ProductCardComponent class="product-card"
                         v-for="(item, x) in props.products.slice(i * 4, i * 4 + 4)" :key="x" :initialproduct="item"
@@ -98,6 +98,13 @@ function handleUnauthorizedCart(msg) {
 </template>
 
 <style scoped>
+.slide {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+}
+
 .main {
     position: relative;
     width: 100%;
@@ -140,7 +147,7 @@ function handleUnauthorizedCart(msg) {
     align-items: center;
     justify-content: center;
     gap: 6px;
-    padding: 12px 0;
+    padding: 20px 0;
     cursor: pointer;
 }
 

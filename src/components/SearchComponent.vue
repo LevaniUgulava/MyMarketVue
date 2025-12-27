@@ -1,17 +1,38 @@
 <template>
+    <div v-if="props.open" class="overlay" />
+
     <transition name="fade">
         <div class="search-container" v-if="props.open">
-            <div class="search-input">
-                <input v-model="searchname" @input="performLocalSearch" type="text" placeholder="რას ეძებ?">
-                <button @pointerdown="performSearch" class="search-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px"
-                        fill="currentcolor">
-                        <path
-                            d="M779.38-153.85 528.92-404.31q-30 25.54-69 39.54t-78.38 14q-96.1 0-162.67-66.53-66.56-66.53-66.56-162.57 0-96.05 66.53-162.71 66.53-66.65 162.57-66.65 96.05 0 162.71 66.56Q610.77-676.1 610.77-580q0 41.69-14.77 80.69t-38.77 66.69l250.46 250.47-28.31 28.3ZM381.54-390.77q79.61 0 134.42-54.81 54.81-54.8 54.81-134.42 0-79.62-54.81-134.42-54.81-54.81-134.42-54.81-79.62 0-134.42 54.81-54.81 54.8-54.81 134.42 0 79.62 54.81 134.42 54.8 54.81 134.42 54.81Z">
-                        </path>
-                    </svg> ძიება
-                </button>
+            <div class="search-header">
+                <div>
+                    ძიება
+                </div>
+                <div>
+                    <button @pointerdown="emit('close')" class="close-btn">
+
+                        <svg xmlns="http://www.w3.org/2000/svg" height="30px" viewBox="0 -960 960 960" width="30px"
+                            fill="currentcolor">
+                            <path
+                                d="M256-227.69 227.69-256l224-224-224-224L256-732.31l224 224 224-224L732.31-704l-224 224 224 224L704-227.69l-224-224-224 224Z" />
+                        </svg>
+
+                    </button>
+                </div>
             </div>
+            <div class="search-section">
+                <div class="search-input">
+                    <input v-model="searchname" @input="performLocalSearch" type="text" placeholder="რას ეძებ?">
+                    <button @pointerdown="performSearch" class="search-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                            fill="currentColor">
+                            <path
+                                d="M781.69-136.92 530.46-388.16q-30 24.77-69 38.77-39 14-80.69 14-102.55 0-173.58-71.01-71.03-71.01-71.03-173.54 0-102.52 71.01-173.6 71.01-71.07 173.54-71.07 102.52 0 173.6 71.03 71.07 71.03 71.07 173.58 0 42.85-14.38 81.85-14.39 39-38.39 67.84l251.23 251.23-42.15 42.16ZM380.77-395.38q77.31 0 130.96-53.66 53.66-53.65 53.66-130.96t-53.66-130.96q-53.65-53.66-130.96-53.66t-130.96 53.66Q196.15-657.31 196.15-580t53.66 130.96q53.65 53.66 130.96 53.66Z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+
 
             <TermSection v-if="!searchname" title="პოპულარული საძიებო ტერმინები" :items="popularterms"
                 @select="selectTerm" />
@@ -33,11 +54,13 @@
                     მოცემულ ტერმინზე პროდუქტი არ მოიძებნა
                 </div>
 
-                <button v-if="recentlyViewed.pagination.current < recentlyViewed.pagination.last"
-                    @click="loadMoreProducts" class="load-more-btn">
-                    <span>შედეგების ნახვა</span>
+            </div>
+            <div class="button" v-if="recentlyViewed.pagination.current < recentlyViewed.pagination.last">
+                <button @click="loadMoreProducts" class="load-more-btn">
+                    <span>მეტის ნახვა</span>
                 </button>
             </div>
+
         </div>
     </transition>
 </template>
@@ -205,19 +228,72 @@ onMounted(() => {
 })
 </script>
 <style scoped>
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(0.3px);
+    z-index: 10;
+    opacity: 1;
+    animation: fadeIn 0.25s ease forwards;
+
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+.search-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.search-header .close-btn {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
+}
+
 .search-container {
-    position: absolute;
-    top: 80px;
-    left: 0;
-    width: 100%;
-    height: 100vh;
+    position: fixed;
+    top: 20px;
+    bottom: 20px;
+    right: 20px;
+    width: 430px;
     display: flex;
     flex-direction: column;
-    background: white;
+    background: #fafafa;
     border-top: 1px solid #eaeaea;
     z-index: 999;
-    padding: 24px 64px 48px;
+    border-radius: 20px;
+    padding: 20px;
     animation: fadeIn 0.25s ease-in-out;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: transform 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    transform: translateX(calc(100% + 20px));
+}
+
+.fade-enter-to,
+.fade-leave-from {
+    transform: translateX(0);
+}
+
+.search-section {
+    border-bottom: 0.8px solid #102556;
 }
 
 .search-input {
@@ -228,11 +304,11 @@ onMounted(() => {
 
 .search-input input {
     width: 100%;
-    padding: 16px 24px;
+    padding: 10px;
     font-size: 15px;
     border-radius: 10px;
     background-color: transparent;
-    border: 1px solid #dcdcdc;
+    border: none;
 }
 
 .search-btn {
@@ -241,62 +317,26 @@ onMounted(() => {
     font-size: 14px;
     border-radius: 10px;
     border: none;
-    background-color: #102556;
-    color: white;
+    background-color: transparent;
+    color: black;
     gap: 5px;
     width: auto;
     justify-content: center;
-    min-width: 160px;
     cursor: pointer;
 
-    padding: 10px 20px;
 }
 
-.search-btn:hover {
-    background-color: #162E63;
 
-}
 
 .search-input input:focus {
-    columns: black;
-}
-
-.popular {
-    display: flex;
-    flex: 0 0 auto;
-    font-size: 13px;
-    padding-top: 10px;
-    gap: 5px;
-    flex-direction: column;
-}
-
-.popular .items {
-    display: flex;
-    gap: 10px;
-}
-
-
-.items .item {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    position: relative;
-    cursor: pointer;
-    border-radius: 5px;
-    background-color: #f2f2f2;
-    padding: 8px;
-
-}
-
-.items .item:hover {
-    background-color: #e8e7e7;
-
+    outline: none;
 }
 
 
 .cards-container {
-    flex: 1 1 auto;
+    /* flex: 1 1 auto; */
     display: flex;
+    height: 80%;
     flex-direction: column;
     font-size: 13px;
     overflow-y: auto;
@@ -328,12 +368,24 @@ onMounted(() => {
     background-color: #555;
 }
 
-.load-more-btn {
+.button {
     position: relative;
+    background-color: transparent;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.load-more-btn {
+    position: absolute;
+    bottom: 10px;
+    z-index: 10;
     padding: 10px 20px;
     background-color: transparent;
     border: 1px solid #eaeaea;
-    width: 200px;
+    width: 100%;
+    border-radius: 10px;
     border-left: 2px solid black;
     cursor: pointer;
     overflow: hidden;

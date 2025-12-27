@@ -4,11 +4,11 @@
             <img v-if="index === activeIndex" :src="item.media_desktop" class="carousel-image">
 
 
-            <div v-if="index === activeIndex" class="overlay">
+            <!-- <div v-if="index === activeIndex" class="overlay">
                 <div class="container">
                     <button class="overlay-button">გაგაგრძელე</button>
                 </div>
-            </div>
+            </div> -->
         </div>
 
         <div class="custom-pagination">
@@ -88,15 +88,7 @@ onBeforeUnmount(() => {
 }
 
 
-.custom-pagination {
-    display: flex;
-    margin-top: 15px;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    padding: 10px;
-    gap: 5px;
-}
+
 
 .bullet {
     height: 10px;

@@ -1,14 +1,11 @@
 <template>
     <div class="grid">
         <div v-for="(item, i) in items" :key="i" class="card" @click="$emit('open', item)">
-            <!-- IMAGE WRAPPER -->
             <div class="img-box">
                 <img v-if="item.images?.length" :src="item.images[0]" loading="lazy" :alt="item.name" />
 
-                <!-- FALLBACK -->
                 <div v-else class="img-placeholder">No image</div>
 
-                <!-- DISCOUNT BADGE -->
                 <div v-if="item.discount && item.discount > 0" class="badge">
                     -{{ item.discount }}%
                 </div>
@@ -38,32 +35,26 @@ defineEmits(["open"]);
 <style scoped>
 .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 14px;
 }
 
 /* CARD */
 .card {
-    background: white;
-    border-radius: 12px;
+    background: transparent;
     overflow: hidden;
     cursor: pointer;
-    border: 1px solid #eaeaea;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* HOVER */
-.card:hover {
-    transform: translateY(-4px) scale(1.01);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.13);
-}
 
 /* IMAGE BOX */
 .img-box {
     position: relative;
     width: 100%;
-    height: 210px;
+    height: 300px;
     overflow: hidden;
+    border-radius: 10px;
 }
 
 .img-box img {
@@ -100,15 +91,13 @@ defineEmits(["open"]);
 
 /* INFO */
 .info {
-    padding: 12px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
 }
 
 /* NAME */
 .name {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
     line-height: 1.3;
 
@@ -121,7 +110,7 @@ defineEmits(["open"]);
 
 /* PRICE */
 .price {
-    font-size: 15px;
+    font-size: 13px;
     font-weight: 700;
     display: flex;
     align-items: center;

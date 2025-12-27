@@ -1,12 +1,12 @@
 <template>
   <div class="layout-container">
     <SwiperContent class="banner" />
-    <HeaderComponentVue :isMobile="isMobile" />
+    <HeaderComponentVue :topPosition="topPosition" :isScrolled="isScrolled" :isMobile="isMobile" />
 
     <HomeSideBarVue class="sidebar" v-if="isMobile" />
 
 
-    <div :class="['main-content', isStart ? 'top-start' : 'top']">
+    <div :class="['main-content', isStart ? 'top-start' : 'top']" :style="{ top: `calc(80px + ${topPosition})` }">
       <router-view v-slot="{ Component }">
         <component :is="Component" />
       </router-view>
@@ -89,6 +89,9 @@ export default {
       openCamera: false,
       RawAttachment: null,
       cookieAllowed: true,
+      isScrolled: false,
+      topPosition: '40px',
+
     };
   },
   computed: {
@@ -105,6 +108,8 @@ export default {
 
   mounted() {
     this.checkCookie();
+    this.checkScroll();
+    window.addEventListener('scroll', this.checkScroll);
     this.checkPlatform();
     window.addEventListener('resize', this.checkScreenSize);
     if (this.isAuthenticated) {
@@ -114,6 +119,8 @@ export default {
   },
   beforeUnmount() {
     window.removeEventListener('resize', this.checkScreenSize);
+    window.removeEventListener('scroll', this.checkScroll);
+
   },
   methods: {
     async checkCookie() {
@@ -127,7 +134,19 @@ export default {
 
     },
 
+    checkScroll() {
+      const maxTop = 40;
+      const scrollY = window.scrollY || 0;
 
+      if (scrollY > 0) {
+        this.isScrolled = true;
+        this.topPosition = `0px`;
+      } else {
+        this.isScrolled = false;
+        this.topPosition = `${maxTop}px`;
+
+      }
+    },
 
     handleAttachment(emit) {
       this.RawAttachment = emit;
@@ -160,6 +179,8 @@ export default {
       this.isMobile = window.innerWidth <= 768;
     },
   },
+
+
 };
 </script>
 
@@ -278,11 +299,13 @@ export default {
 
 .main-content {
   flex: 1;
+  position: relative;
   width: 100%;
   box-sizing: border-box;
-  min-height: calc(100vh - 60px);
+  min-height: 100vh;
+  padding-bottom: 160px;
+
   overflow: hidden;
-  margin-top: 120px;
   transition: all 0.3s ease-in-out;
 }
 

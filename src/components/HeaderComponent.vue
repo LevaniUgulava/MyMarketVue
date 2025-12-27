@@ -4,10 +4,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   </head>
   <div @mouseenter="mouseenter = true" @mouseleave="mouseenter = false" ref="stickyHeader"
-    :class="['sticky-header', isMobile ? 'mobile-header' : 'desktop-header']">
+    :class="['sticky-header', isMobile ? 'mobile-header' : 'desktop-header']" :style="{ top: `${topPosition}` }">
 
-    <nav :class="{ center: opensearch }">
-      <div v-show="!opensearch" class="menu">
+    <nav>
+      <div class="menu">
         <div class="btnredirect">
           <button @pointerdown="opensection = !opensection"
             :class="['redirect-button', isShowed ? 'btn-scrolled' : '', activePopups.aboutus || activePopups.address ? 'blur' : '']">
@@ -53,19 +53,9 @@
         Afftelie
       </div>
 
-      <div class="closesearch" v-if="opensearch">
-        <button @pointerdown="opensearch = false" class="close-btn">
 
-          <svg xmlns="http://www.w3.org/2000/svg" height="30px" viewBox="0 -960 960 960" width="30px"
-            fill="currentcolor">
-            <path
-              d="M256-227.69 227.69-256l224-224-224-224L256-732.31l224 224 224-224L732.31-704l-224 224 224 224L704-227.69l-224-224-224 224Z" />
-          </svg>
 
-        </button>
-      </div>
-
-      <div class="utilities" v-show="!opensearch">
+      <div class="utilities">
         <div class="btnredirect">
           <button @pointerdown="opensearch = !opensearch" :class="['redirect-button', isShowed ? 'btn-scrolled' : '']">
 
@@ -120,7 +110,7 @@
     </nav>
 
     <SmallSections :open="opensection" />
-    <SearchComponent v-if="opensearch" :open="opensearch" @close="opensearch = false" />
+
 
 
 
@@ -196,6 +186,7 @@
     <PasswordComponent :open="passwordmmodal" :email="data.email" @close="() => closemodal('passwordmmodal')" />
 
     <CartModal :open="cartmodal" @close="cartmodal = false" />
+    <SearchComponent :open="opensearch" @close="opensearch = false" />
 
     <MobileSidebarModal :open="openMobile" @close="openMobile = false" />
   </div>
@@ -233,6 +224,8 @@ export default {
   },
   props: {
     isMobile: Boolean,
+    isScrolled: Boolean,
+    topPosition: String
 
   },
   data() {
@@ -246,7 +239,6 @@ export default {
       openMobile: false,
       selectedCategory: '',
       selectedsubCategory: '',
-      isScrolled: false,
       Searchnames: [],
       SuggestionNames: [],
       emitmin: '',
@@ -298,12 +290,8 @@ export default {
   },
   mounted() {
     this.PlatformCheck();
-    this.checkScroll();
     document.addEventListener('click', this.handleClickOutside);
     document.addEventListener('click', this.handleClickOutsideforDropdown);
-
-    window.addEventListener('scroll', this.checkScroll);
-
   },
 
 
@@ -361,18 +349,18 @@ export default {
 
     },
     ...mapMutations('modals', ['openmodal', 'closemodal', 'setdata']),
-    checkScroll() {
-      const maxTop = 40;
-      const scrollY = window.scrollY || 0;
+    // checkScroll() {
+    //   const maxTop = 40;
+    //   const scrollY = window.scrollY || 0;
 
-      if (scrollY > 0) {
-        this.isScrolled = true;
-        this.$refs.stickyHeader.style.setProperty('--header-top', `0px`);
-      } else {
-        this.isScrolled = false;
-        this.$refs.stickyHeader.style.setProperty('--header-top', `${maxTop}px`); // დაბრუნება
-      }
-    },
+    //   if (scrollY > 0) {
+    //     this.isScrolled = true;
+    //     this.$refs.stickyHeader.style.setProperty('--header-top', `0px`);
+    //   } else {
+    //     this.isScrolled = false;
+    //     this.$refs.stickyHeader.style.setProperty('--header-top', `${maxTop}px`); // დაბრუნება
+    //   }
+    // },
 
     handleClickOutsideforDropdown(event) {
       if (this.$refs.dropdown && !this.$refs.dropdown.contains(event.target)) {
@@ -447,7 +435,6 @@ export default {
   },
   beforeUnmount() {
     document.removeEventListener('click', this.handleClickOutside);
-    window.removeEventListener('scroll', this.checkScroll);
     document.removeEventListener('click', this.handleClickOutsideforDropdown);
 
 
@@ -735,7 +722,7 @@ body {
 
 .sticky-header {
   position: fixed;
-  top: var(--header-top);
+  /* top: var(--header-top); */
   left: 0;
   right: 0;
   z-index: 1000;
@@ -785,12 +772,7 @@ nav {
   flex: 1;
 }
 
-.center {
-  justify-content: center;
-  min-height: 80px;
 
-
-}
 
 nav ul.main-nav {
   display: flex;

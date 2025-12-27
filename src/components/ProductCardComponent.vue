@@ -1,5 +1,5 @@
 <template>
-  <div @pointerdown="redirectproduct" class="card-container">
+  <div @pointerdown="redirectproduct" class="card-container" :style="{ '--cols': layout }">
     <div class="card" @mouseover="isHovered = true" @mouseleave="isHovered = false">
       <div class="img-container">
         <div class="image-wrapper">
@@ -141,6 +141,10 @@ export default {
   props: {
     initialproduct: {
       type: Object,
+      required: true,
+    },
+    layout: {
+      type: Number,
       required: true,
     },
   },
@@ -427,10 +431,13 @@ export default {
 }
 
 .card {
-  width: 260px;
+  flex: 1 1 calc(100% / var(--cols) - 15px);
   border-radius: 12px;
   position: relative;
   overflow: visible;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
   transition: transform 0.2s ease-in-out;
 }
 
@@ -442,16 +449,20 @@ export default {
 
 .image-wrapper {
   position: relative;
-  width: 300px;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 3/4;
   border-radius: 15px;
-  height: 400px;
   overflow: hidden;
+  transition: transform 0.3s ease;
 }
+
 
 .image-wrapper img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   display: block;
   position: absolute;
   top: 0;
@@ -644,7 +655,7 @@ h3 {
   .image-wrapper {
     width: 100%;
     height: auto;
-    aspect-ratio: 1;
+    aspect-ratio: 3/4;
   }
 
   .button-group {

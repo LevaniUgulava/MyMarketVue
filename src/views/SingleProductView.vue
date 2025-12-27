@@ -740,7 +740,7 @@ span {
 .product-content {
   display: flex;
   width: 100%;
-  gap: 16px;
+  gap: 5px;
 }
 
 .thumbnail-container {
@@ -751,8 +751,7 @@ span {
 
 .product-main-image {
   flex: 0 0 350px;
-  height: 600px;
-  /* higher for better presentation */
+  max-height: 900px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -780,7 +779,8 @@ span {
 .thumbnail-item {
   width: 100px;
   height: 130px;
-  border: 1.5px solid transparent;
+  border: 1px solid transparent;
+  border-radius: 10px;
   cursor: pointer;
   overflow: hidden;
   background: #fff;
@@ -811,8 +811,8 @@ span {
 
 /* ============ MAIN IMAGE ============ */
 .product-image {
-  max-height: 600px;
-  width: 480px;
+  max-height: 900px;
+  max-width: 700px;
   object-fit: contain;
   cursor: zoom-in;
   border-radius: 12px;
