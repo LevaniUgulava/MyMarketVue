@@ -8,7 +8,7 @@
 
     <nav>
       <div class="menu">
-        <div class="btnredirect">
+        <!-- <div class="btnredirect">
           <button @pointerdown="opensection = !opensection"
             :class="['redirect-button', isShowed ? 'btn-scrolled' : '', activePopups.aboutus || activePopups.address ? 'blur' : '']">
             <svg v-if="!opensection" xmlns="http://www.w3.org/2000/svg" height="30px" viewBox="0 -960 960 960"
@@ -21,7 +21,7 @@
                 d="M256-227.69 227.69-256l224-224-224-224L256-732.31l224 224 224-224L732.31-704l-224 224 224 224L704-227.69l-224-224-224 224Z" />
             </svg>
           </button>
-        </div>
+        </div> -->
         <div class="modals" v-if="!opensection">
           <div v-for="item in buttons" :key="item.key" class="btnredirect" @mouseenter="showPopup(item.key)"
             @mouseleave="hidePopup(item.key)">

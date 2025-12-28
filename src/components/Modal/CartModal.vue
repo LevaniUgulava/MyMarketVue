@@ -103,7 +103,7 @@ function close() {
     padding: 20px 40px 20px 20px;
     border-top-left-radius: 20px;
     border-bottom-left-radius: 20px;
-    background: #faf8f4;
+    background: #fafafa;
 }
 
 /* CART: width + right(20px) => სრულად რომ გავიდეს */
@@ -220,7 +220,7 @@ function close() {
 }
 
 .collection {
-    background: #f1ede7;
+    background: #fafafa;
     padding: 14px 16px;
     border-radius: 12px;
     font-size: 15px;

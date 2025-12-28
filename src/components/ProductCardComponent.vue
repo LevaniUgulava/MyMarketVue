@@ -16,7 +16,7 @@
             initialproduct.discountstatus.discount : initialproduct.discount }}%
         </span>
         <span v-if="initialproduct.isNew" class="new-badge"
-          :style="{ top: (initialproduct.discount > 0 || (initialproduct.discountstatus && initialproduct.discountstatus.discount > 0)) ? '40px' : '10px' }">
+          :style="{ top: (initialproduct.discount > 0 || (initialproduct.discountstatus && initialproduct.discountstatus.discount > 0)) ? '45px' : '15px' }">
           ახალი
         </span>
 
