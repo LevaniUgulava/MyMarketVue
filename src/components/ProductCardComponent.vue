@@ -133,6 +133,7 @@
 import api from '@/api';
 import { authMixin } from '@/mixin/reuse';
 import store from '@/store';
+import { updateCartStatus } from '@/store/cart';
 
 export default {
 
@@ -208,6 +209,8 @@ export default {
 
       } catch (error) {
         console.log(error);
+      } finally {
+        updateCartStatus();
       }
 
     },
@@ -247,6 +250,8 @@ export default {
           store.commit('modals/openmodal', 'loginmodal', { root: true });
 
         }
+      } finally {
+        updateCartStatus();
       }
     },
     async toggleLike(id) {

@@ -6,7 +6,7 @@
     <HomeSideBarVue class="sidebar" v-if="isMobile" />
 
 
-    <div :class="['main-content', isStart ? 'top-start' : 'top']" :style="{ top: `calc(80px + ${topPosition})` }">
+    <div :class="['main-content', isStart ? 'top-start' : 'top']" :style="{ top: `calc(90px + ${topPosition})` }">
       <router-view v-slot="{ Component }">
         <component :is="Component" />
       </router-view>

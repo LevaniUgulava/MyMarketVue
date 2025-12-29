@@ -278,7 +278,8 @@ export default {
         this.registermodal ||
         this.forgetmodal ||
         this.confirmmodal ||
-        this.passwordmmodal
+        this.passwordmmodal ||
+        this.opensearch || this.cartmodal
       );
     },
     isShowed() {
@@ -292,6 +293,7 @@ export default {
     this.PlatformCheck();
     document.addEventListener('click', this.handleClickOutside);
     document.addEventListener('click', this.handleClickOutsideforDropdown);
+
   },
 
 
@@ -304,6 +306,7 @@ export default {
     loginmodal: 'handleScroll',
     opensection: 'handleScroll',
     opensearch: 'handleScroll',
+    cartmodal: 'handleScroll',
     passwordmmodal: 'handleScroll',
     registermodal: 'handleScroll',
     forgetmodal: 'handleScroll',
