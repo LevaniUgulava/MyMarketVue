@@ -183,6 +183,11 @@ const routes = [
       needsauth: true,
     },
     children: [
+       {
+        path: "ai",
+        name: "ai",
+        component: () => import("@/components/Admin/ai/AiComponent.vue"),
+      },  
       {
         path: "mail",
         name: "mail",

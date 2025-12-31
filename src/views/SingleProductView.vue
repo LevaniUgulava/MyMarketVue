@@ -304,15 +304,8 @@ function handleClickOutside(event) {
     seeMore.value = false;
   }
 }
-async function recentlyViewed() {
-  try {
-    await api.post(`/history/recentlyViewed/${props.id}`);
-  } catch (error) {
-    console.log(error);
-  }
-}
+
 onMounted(() => {
-  recentlyViewed();
   document.addEventListener('click', handleClickOutside);
 });
 

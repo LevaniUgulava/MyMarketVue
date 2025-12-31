@@ -50,7 +50,7 @@
 
 
       <div :class="['logo', isShowed ? 'btn-scrolled' : '']" @pointerdown="redirect">
-        Afftelie
+        Dresshub
       </div>
 
 
