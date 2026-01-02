@@ -349,6 +349,10 @@ const routes = [
     path: "/chat",
     component: () => import("@/components/ChatModal.vue")
   },
+  {
+    path: "/tryon",
+    component: () => import("@/components/Admin/ai/tryonComponent.vue")
+  }
 ];
 
 const router = createRouter({
