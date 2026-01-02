@@ -37,7 +37,7 @@ jobs:
 
       - name: Set up Node.js
 
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
 
         with:
 
@@ -87,7 +87,7 @@ jobs:
 
         run: |
 
-          aws s3 sync ./dist s3://mydressway/ --delete
+          aws s3 sync ./dist s3://mydressway --delete
 
 
 
@@ -97,6 +97,6 @@ jobs:
 
         run: |
 
-          aws cloudfront create-invalidation --distribution-id E230NIF1DMVO74 --paths "/*"
+          aws cloudfront create-invalidation --distribution-id E3F1KHZ9TFGDWO --paths "/*"
 
 
