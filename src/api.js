@@ -2,7 +2,7 @@ import axios from 'axios';
 
 
 const api = axios.create({
-  baseURL: '/api',         
+  baseURL: 'https://api.mydressway.ge/api',         
   timeout: 5000,
   withCredentials: true,     
 });
