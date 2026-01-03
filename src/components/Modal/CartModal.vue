@@ -1,9 +1,7 @@
 <template>
     <div v-if="props.open" class="overlay" @pointerdown="close" />
 
-
     <transition name="slide-like">
-        <!-- v-show="openLike"  -->
         <div v-show="openLike" class="drawer like-drawer">
             <h3 class="section-title">შენს გემოვნებაზე მორგებული</h3>
 
@@ -30,44 +28,43 @@
                     </svg>
                 </div>
             </div>
-
-
         </div>
     </transition>
 
     <transition name="slide-cart">
-
         <div v-show="openCart" class="drawer cart-drawer">
             <div>
                 <button @pointerdown="close" class="close-btn">
-
                     <svg xmlns="http://www.w3.org/2000/svg" height="30px" viewBox="0 -960 960 960" width="30px"
                         fill="currentcolor">
                         <path
                             d="M256-227.69 227.69-256l224-224-224-224L256-732.31l224 224 224-224L732.31-704l-224 224 224 224L704-227.69l-224-224-224 224Z" />
                     </svg>
-
                 </button>
             </div>
+
+            <!-- ✅ FIX: ერთი ჯაჭვი (v-if / v-else-if / v-else), რომ Loading და Empty ერთად აღარ გამოჩნდეს -->
             <div v-if="!apiLoaded" class="skeleton">
                 Loading carts...
             </div>
-            <!-- v-show="openCart" -->
-            <div v-if="apiLoaded && mycarts.length > 0" class="cart">
+
+            <div v-else-if="mycarts.length > 0" class="cart">
                 <div class="cart-container" v-for="(item, index) in mycarts" :key="item.id ?? index">
                     <div class="image">
-                        <img :src="item.image_urls[0]" alt="Product Image" class="img" />
+                        <img :src="item.image_urls?.[0]" alt="Product Image" class="img" />
                     </div>
 
                     <div class="cart-body">
                         <p class="title">{{ item.name }}</p>
-                        <p class="info">ზომა - {{ item.size[0].size }}</p>
-                        <p class="info">ფერი - {{ item.size[0].details[0].color }}</p>
+                        <p class="info">ზომა - {{ item.size?.[0]?.size }}</p>
+                        <p class="info">ფერი - {{ item.size?.[0]?.details?.[0]?.color }}</p>
+
                         <p class="price">
                             <span class="current">{{ item.price }} ₾</span>
                             <span v-if="item.old_price" class="old">{{ item.old_price }} ₾</span>
                             <span v-if="item.discount" class="discount">-{{ item.discount }}%</span>
                         </p>
+
                         <div class="quantity-control">
                             <div class="increment-wrapper">
                                 <div v-if="quantitydemessage[item.pivot.id]" class="popup-message">
@@ -75,24 +72,26 @@
                                     <div class="arrow-down"></div>
                                 </div>
                             </div>
+
                             <button class="quantitybtn"
                                 @pointerup.stop.prevent="updateQuantity(item.pivot.id, 'decrement')">-</button>
                             <span class="quantity">{{ item.pivot.quantity }}</span>
+
                             <div class="increment-wrapper">
                                 <div v-if="quantitymessage[item.pivot.id]" class="popup-message">
                                     {{ quantitymessage[item.pivot.id] }}
                                     <div class="arrow-down"></div>
                                 </div>
                             </div>
+
                             <button class="quantitybtn"
                                 @pointerup.stop.prevent="updateQuantity(item.pivot.id, 'increment')">+</button>
                         </div>
                     </div>
                 </div>
-                <div class="checkout">
-                    <!-- <h3 class="section-title">შეკვეთა</h3> -->
-                    <div class="details-row">
 
+                <div class="checkout">
+                    <div class="details-row">
                         <div class="detail">
                             <span>პროდუქტების რაოდენობა</span>
                             <span class="value">{{ cartQuantity }}</span>
@@ -108,10 +107,12 @@
                             fill="#e3e3e3">
                             <path
                                 d="m480-560-56-56 63-64H320v-80h167l-64-64 57-56 160 160-160 160ZM280-80q-33 0-56.5-23.5T200-160q0-33 23.5-56.5T280-240q33 0 56.5 23.5T360-160q0 33-23.5 56.5T280-80Zm400 0q-33 0-56.5-23.5T600-160q0-33 23.5-56.5T680-240q33 0 56.5 23.5T760-160q0 33-23.5 56.5T680-80ZM40-800v-80h131l170 360h280l156-280h91L692-482q-11 20-29.5 31T622-440H324l-44 80h480v80H280q-45 0-68.5-39t-1.5-79l54-98-144-304H40Z" />
-                        </svg> ყიდვის გაგრძელება
+                        </svg>
+                        ყიდვის გაგრძელება
                     </button>
                 </div>
             </div>
+
             <div v-else>
                 <div class="cart-header">
                     <h2>Your cart is empty</h2>
@@ -126,195 +127,228 @@
                     <div class="collection">New Arrivals</div>
                 </div>
             </div>
-
         </div>
     </transition>
 </template>
 
 <script setup>
-import api from '@/api';
-import { computed, onMounted, ref, watch } from 'vue';
-import { globalCartUpdateVariable } from '@/store/cart';
+import api from "@/api";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import { globalCartUpdateVariable } from "@/store/cart";
 
-import img1 from "@/assets/image-test/1.webp"
-import img2 from "@/assets/image-test/2.webp"
-import img3 from "@/assets/image-test/3.jpg"
-import img4 from "@/assets/image-test/4.jpg"
-import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
+import img1 from "@/assets/image-test/1.webp";
+import img2 from "@/assets/image-test/2.webp";
+import img3 from "@/assets/image-test/3.jpg";
+import img4 from "@/assets/image-test/4.jpg";
 
+import { useRouter } from "vue-router";
+import { useStore } from "vuex";
 
 const router = useRouter();
 const store = useStore();
-const props = defineProps({ open: Boolean })
-const emit = defineEmits(['close'])
+
+const props = defineProps({ open: Boolean });
+const emit = defineEmits(["close"]);
+
 const openLike = ref(false);
 const openCart = ref(false);
+
 const mycarts = ref([]);
 const apiLoaded = ref(false);
 const allprice = ref(0);
-const quantitymessage = ref({});
-const message = ref('');
-const quantitydemessage = ref({});
-const index = ref(0)
-function nextPage() {
 
-    if (index.value < products.value.length - 1) {
-        index.value++
-    } else {
-        index.value = 0;
-    }
-}
+const quantitymessage = ref({});
+const quantitydemessage = ref({});
+const message = ref("");
+
+const index = ref(0);
+
 const products = ref([
     { img: img1, name: "Samantha Activewear", price: "€65,00" },
     { img: img2, name: "Green Set", price: "€79,00" },
     { img: img3, name: "Black Hoodie", price: "€55,00" },
-    { img: img4, name: "Sport Pants", price: "€49,00" }
-])
-function prevPage() {
+    { img: img4, name: "Sport Pants", price: "€49,00" },
+]);
 
-    if (index.value > 0) {
-        index.value--
-    } else {
-        index.value = products.value.length - 1
-    }
+function nextPage() {
+    if (index.value < products.value.length - 1) index.value++;
+    else index.value = 0;
 }
-const buttonPervVisible = computed(() => {
-    return index.value !== 0
-})
 
-const buttonNextVisible = computed(() => {
-    return index.value < products.value.length - 1
-})
+function prevPage() {
+    if (index.value > 0) index.value--;
+    else index.value = products.value.length - 1;
+}
 
+const buttonPervVisible = computed(() => index.value !== 0);
+const buttonNextVisible = computed(() => index.value < products.value.length - 1);
 
 const visible = computed(() => {
     return [
         products.value[index.value],
-        products.value[(index.value + 1) % products.value.length]
-    ]
-})
-
-
-
-
-watch(() => props.open, (val) => {
-    if (val) {
-        openCart.value = true;
-        setTimeout(() => { openLike.value = true }, 300);
-    } else {
-        openCart.value = false;
-        openLike.value = false;
-    }
+        products.value[(index.value + 1) % products.value.length],
+    ];
 });
-let cursorTimer = null
 
-watch(() => props.open, (isOpen) => {
-    clearTimeout(cursorTimer)
-
-    if (!isOpen) {
-        document.querySelector('.overlay')?.style.removeProperty('cursor')
-        return
-    }
-
-    cursorTimer = setTimeout(() => {
-        const overlay = document.querySelector('.overlay')
-        if (!overlay) return
-
-        overlay.style.cursor =
-            `url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 -960 960 960'><path fill='white' d='m336-316 144-144 144 144 20-20-144-144 144-144-20-20-144 144-144-144-20 20 144 144-144 144 20 20Zm144.17 184q-72.17 0-135.73-27.39-63.56-27.39-110.57-74.35-47.02-46.96-74.44-110.43Q132-407.65 132-479.83q0-72.17 27.39-135.73 27.39-63.56 74.35-110.57 46.96-47.02 110.43-74.44Q407.65-828 479.83-828q72.17 0 135.73 27.39 63.56 27.39 110.57 74.35 47.02 46.96 74.44 110.43Q828-552.35 828-480.17q0 72.17-27.39 135.73-27.39 63.56-74.35 110.57-46.96 47.02-110.43 74.44Q552.35-132 480.17-132Z'/></svg>"), auto`
-    }, 180)
-})
 function close() {
-    emit('close');
+    emit("close");
 }
+
 async function getCart() {
+    apiLoaded.value = false;
+
     try {
         const response = await api.get('mycart', { tokenRequired: true });
-        mycarts.value = response.data.products;
-        allprice.value = response.data.totalPrice;
-    } catch (error) {
-        console.error("Error during getCart:", error);
+
+        const list = response?.data?.products;
+        mycarts.value = Array.isArray(list) ? list : [];   // ✅ აქაა მთავარი fix
+        allprice.value = Number(response?.data?.totalPrice ?? 0);
+    } catch (e) {
+        console.error(e);
+        mycarts.value = [];
+        allprice.value = 0;
     } finally {
         apiLoaded.value = true;
     }
 }
 
+
+function handleCheckoutError(error) {
+    console.log(error);
+    if (error.response?.status === 403) {
+        message.value =
+            `ელფოსტა არ არის ვერიფიცირებული, <a href='/profile' style="color:white" target='_blank'>დაადასტურეთ აქ</a>`;
+    }
+}
+
+function mapCartItem(item) {
+    return {
+        quantity: item?.pivot?.quantity || 1,
+        name: item?.name,
+        product_id: item?.id,
+        type: "cart",
+        seeOriginal: item?.pivot?.isOriginal,
+        color: item?.pivot?.color,
+        size: item?.pivot?.size,
+        retail_price: item?.pivot?.retail_price,
+        total_price: item?.pivot?.total_price,
+    };
+}
+
+function getMappedCart() {
+    return mycarts.value.map(mapCartItem).filter(Boolean);
+}
+
 async function checkout() {
     try {
         const mappedcart = getMappedCart();
-        console.log(mappedcart);
         await api.post("/temporder", { products: mappedcart }, { tokenRequired: true });
+
         router.push({ name: "checkout" });
-        await store.dispatch('auth/dashboardInfo', null, { root: true });
+        await store.dispatch("auth/dashboardInfo", null, { root: true });
+
         close();
     } catch (error) {
         handleCheckoutError(error);
     }
 }
-function handleCheckoutError(error) {
-    console.log(error);
-    if (error.response?.status === 403) {
-        message.value = `ელფოსტა არ არის ვერიფიცირებული, <a href='/profile' style="color:white" target='_blank'>დაადასტურეთ აქ</a>`;
-    }
-}
-function getMappedCart() {
-    return mycarts.value.map(item => mapCartItem(item)).filter(Boolean);
-}
-function mapCartItem(item) {
-    return {
-        quantity: item.pivot.quantity || 1,
-        name: item.name,
-        product_id: item.id,
-        type: "cart",
-        seeOriginal: item.pivot.isOriginal,
-        color: item.pivot.color,
-        size: item.pivot.size,
-        retail_price: item.pivot.retail_price,
-        total_price: item.pivot.total_price,
-    };
+
+async function showMessage(msg, field, id) {
+    field.value[id] = msg;
+    await new Promise((resolve) => setTimeout(resolve, 4000));
+    field.value[id] = "";
 }
 
-
-watch(globalCartUpdateVariable, () => {
-    getCart()
-})
-async function showMessage(message, field, id) {
-    field.value[id] = message;
-    await new Promise(resolve => setTimeout(resolve, 4000));
-    field.value[id] = '';
-}
 async function updateQuantity(id, action) {
-
-    const item = mycarts.value.find(i => i.pivot.id === id);
+    const item = mycarts.value.find((i) => i?.pivot?.id === id);
     if (!item) return;
+
     try {
-        if (action === 'increment') {
-            if (item.pivot.quantity >= item.size[0].details[0].quantity) {
+        if (action === "increment") {
+            const maxQty = item?.size?.[0]?.details?.[0]?.quantity;
+            if (maxQty != null && item.pivot.quantity >= maxQty) {
                 showMessage("მაქსიმალური რაოდენობა", quantitymessage, id);
                 return;
             }
-        } else if (action === 'decrement') {
+        } else if (action === "decrement") {
             if (item.pivot.quantity <= 1) {
                 showMessage("ნაკლები რაოდენობა არ შეიძლება", quantitydemessage, id);
                 return;
             }
         }
+
         const response = await api.post(`quantity/${id}/${action}`, {}, { tokenRequired: true });
+
         item.pivot.quantity = response.data.quantity;
         item.pivot.total_price = response.data.total_price;
-        allprice.value = response.data.cart_total_price
-
+        allprice.value = response.data.cart_total_price;
     } catch (error) {
         console.log(error);
     }
 }
 
+watch(globalCartUpdateVariable, () => {
+    getCart();
+});
+
+// ✅ FIX: გახსნისას refresh + apiLoaded reset
+watch(
+    () => props.open,
+    (val) => {
+        if (val) {
+            openCart.value = true;
+
+            // refresh cart on open
+            getCart();
+
+            setTimeout(() => {
+                openLike.value = true;
+            }, 300);
+        } else {
+            openCart.value = false;
+            openLike.value = false;
+        }
+    }
+);
+
+let cursorTimer = null;
+
+// შენი cursor watcher იგივე დავტოვე, უბრალოდ cleanup დავამატე
+watch(
+    () => props.open,
+    (isOpen) => {
+        clearTimeout(cursorTimer);
+
+        if (!isOpen) {
+            document.querySelector(".overlay")?.style.removeProperty("cursor");
+            return;
+        }
+
+        cursorTimer = setTimeout(() => {
+            const overlay = document.querySelector(".overlay");
+            if (!overlay) return;
+
+            overlay.style.cursor =
+                `url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 -960 960 960'><path fill='white' d='m336-316 144-144 144 144 20-20-144-144 144-144-20-20-144 144-144-144-20 20 144 144-144 144 20 20Zm144.17 184q-72.17 0-135.73-27.39-63.56-27.39-110.57-74.35-47.02-46.96-74.44-110.43Q132-407.65 132-479.83q0-72.17 27.39-135.73 27.39-63.56 74.35-110.57 46.96-47.02 110.43-74.44Q407.65-828 479.83-828q72.17 0 135.73 27.39 63.56 27.39 110.57 74.35 47.02 46.96 74.44 110.43Q828-552.35 828-480.17q0 72.17-27.39 135.73-27.39 63.56-74.35 110.57-46.96 47.02-110.43 74.44Q552.35-132 480.17-132Z'/></svg>"), auto`;
+        }, 180);
+    }
+);
+
+onUnmounted(() => {
+    clearTimeout(cursorTimer);
+});
+
 onMounted(() => {
     getCart();
-})
+});
 
+// (თუ გინდა გამოიყენე)
+// const cartQuantity = computed(() => mycarts.value.reduce((sum, p) => sum + (p?.pivot?.quantity ?? 0), 0))
+const cartQuantity = computed(() => {
+    return mycarts.value.reduce((sum, p) => sum + (p?.pivot?.quantity ?? 0), 0);
+});
 </script>
+
 
 <style scoped>
 .carousel {
