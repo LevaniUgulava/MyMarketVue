@@ -5,10 +5,8 @@
 </template>
 <script setup>
 import { onMounted } from 'vue';
-import { useAuth } from './mixin/reuse';
 import api from './api';
 
-const { isAuth } = useAuth();
 function getSource() {
   const source = new URLSearchParams(window.location.search).get('source');
   if (source) {
@@ -28,9 +26,7 @@ async function saveSource() {
   }
 }
 onMounted(async () => {
-  if (isAuth.value) {
-    window.Echo.join(`online-users`)
-  }
+
   getSource();
   setTimeout(() => {
     saveSource();
