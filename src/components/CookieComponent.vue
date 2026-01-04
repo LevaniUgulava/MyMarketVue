@@ -36,18 +36,9 @@ onMounted(() => {
 
 async function acceptAll() {
     try {
-        const response = await api.post('/cookie', { allowed_type: "all" });
+        await api.post('/cookie', { allowed_type: "all" });
+        showBanner.value = false;
 
-
-        const guestCookieHeader = response.headers['X-Guest-Cookie'];
-
-        console.log(guestCookieHeader);
-
-        if (guestCookieHeader === 'false') {
-            showBanner.value = true;
-        } else {
-            showBanner.value = false;
-        }
     } catch (error) {
         console.log(error);
         showBanner.value = true;
