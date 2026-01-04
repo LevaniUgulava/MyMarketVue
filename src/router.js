@@ -295,7 +295,7 @@ const routes = [
         component: () => import("@/components/Admin/banner/BannerComponent.vue"),
       },
       {
-        path: "banner/create",
+        path: "/banner/create",
         name: "bannercreate",
         component: () => import("@/components/Admin/banner/BannerCreateComponent.vue"),
       },
